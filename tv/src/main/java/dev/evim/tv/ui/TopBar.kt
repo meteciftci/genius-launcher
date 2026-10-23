@@ -171,7 +171,7 @@ private fun RamChip(vm: LauncherViewModel) {
             ),
         ) {
             Text(
-                "⚡ Boşalt",
+                vm.ramMessage ?: "⚡ Boşalt",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),

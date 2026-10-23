@@ -39,6 +39,7 @@ data class SystemStatus(val wifiLevel: Int?, val bluetoothOn: Boolean)
 class AppRepository(private val context: Context) {
     private val pm = context.packageManager
     private val am = context.getSystemService(ActivityManager::class.java)
+    private val adb = LocalAdb(context)
 
     /** TV (leanback) ve normal launcher'da görünen tüm uygulamalar, paket başına bir kez. */
     fun loadApps(): List<LauncherApp> {
@@ -103,12 +104,21 @@ class AppRepository(private val context: Context) {
     }
 
     /** Arka planda bekleyen uygulamaları kapatır; ön plandakilere dokunmaz. */
-    fun freeRam() {
-        pm.getInstalledPackages(0)
-            .map { it.packageName }
-            .filter { it != context.packageName }
-            .forEach(am::killBackgroundProcesses)
+    /**
+     * Arka plandaki tüm süreçleri kapatır ve boşalan RAM'i MB olarak döner.
+     * Android 14'te bunu yalnızca shell yapabildiği için TV'nin kendi ADB'si kullanılır.
+     */
+    fun freeRam(): Long {
+        val before = availableMb()
+        adb.shell("am kill-all")
+        // Süreçlerin belleği sisteme geri vermesi biraz sürüyor
+        Thread.sleep(1500)
+        return availableMb() - before
     }
+
+    fun keepAdbAuthorized() = adb.keepAlive()
+
+    private fun availableMb(): Long = ActivityManager.MemoryInfo().also(am::getMemoryInfo).availMem / (1024 * 1024)
 
     private fun accentFrom(bitmap: Bitmap): Color {
         val palette = Palette.from(bitmap).generate()

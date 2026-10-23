@@ -49,5 +49,6 @@ dependencies {
     implementation(libs.androidx.compose.material.icons)
     implementation(libs.androidx.palette)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.dadb)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

@@ -8,6 +8,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import dadb.AdbAuthException
+import dadb.AdbConnectException
 import dev.evim.tv.data.AppRepository
 import dev.evim.tv.data.City
 import dev.evim.tv.data.Forecast
@@ -36,6 +38,10 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
         private set
     var status by mutableStateOf(SystemStatus(wifiLevel = null, bluetoothOn = false))
         private set
+    /** Boşalt düğmesinde geçici olarak gösterilen durum ("+72 MB" gibi); null ise düğme normal. */
+    var ramMessage by mutableStateOf<String?>(null)
+        private set
+    private var freeRamJob: Job? = null
     var forecast by mutableStateOf<Forecast?>(null)
         private set
     val weather: Weather? get() = forecast?.current
@@ -51,6 +57,12 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         startWeatherUpdates()
+        viewModelScope.launch(Dispatchers.IO) {
+            while (true) {
+                runCatching { repo.keepAdbAuthorized() }
+                delay(ADB_KEEPALIVE_MS)
+            }
+        }
     }
 
     fun selectCity(selected: City) {
@@ -104,10 +116,29 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     fun openSettings(action: String) = repo.openSettings(action)
 
     fun freeRam() {
-        viewModelScope.launch {
-            withContext(Dispatchers.Default) { repo.freeRam() }
-            delay(500)
+        if (freeRamJob?.isActive == true) return
+        freeRamJob = viewModelScope.launch {
+            ramMessage = "Boşaltılıyor…"
+            // İlk seferde TV izin soruyor; birkaç saniyede bitmediyse kullanıcıyı uyar
+            val hint = launch {
+                delay(2500)
+                ramMessage = "TV'de izni onaylayın"
+            }
+            val result = runCatching { withContext(Dispatchers.IO) { repo.freeRam() } }
+            hint.cancel()
             refreshRam()
+            ramMessage = result.fold(
+                onSuccess = { freed -> if (freed > 0) "+$freed MB" else "Zaten boş" },
+                onFailure = { error ->
+                    when (error) {
+                        is AdbAuthException -> "İzin reddedildi"
+                        is AdbConnectException -> "ADB kapalı"
+                        else -> "Boşaltılamadı"
+                    }
+                },
+            )
+            delay(4000)
+            ramMessage = null
         }
     }
 
@@ -157,5 +188,7 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
 
     private companion object {
         const val WEATHER_REFRESH_MS = 30 * 60 * 1000L
+        // ADB izni 7 gün kullanılmazsa düşüyor; günde bir yenilemek yeterli
+        const val ADB_KEEPALIVE_MS = 24 * 60 * 60 * 1000L
     }
 }
