@@ -1,11 +1,12 @@
 package dev.evim.tv.data
 
+import androidx.annotation.StringRes
+import dev.evim.tv.R
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
-import java.text.SimpleDateFormat
-import java.util.Calendar
+import java.time.LocalDate
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -18,20 +19,22 @@ data class City(val name: String, val latitude: Double, val longitude: Double, v
 data class Weather(
     val temperature: Int,
     val symbol: String,
-    val description: String,
+    /** WMO hava durumu kodu; metne [weatherDescription] ile çevrilir. */
+    val code: Int,
     val feelsLike: Int,
     val humidity: Int,
     val windKmh: Int,
 )
 
-data class HourlyWeather(val hour: String, val temperature: Int, val symbol: String, val rainChance: Int)
+/** [hour] "HH:mm"; [isNow] ilk saat için "Şimdi" yazdırır. */
+data class HourlyWeather(val hour: String, val isNow: Boolean, val temperature: Int, val symbol: String, val rainChance: Int)
 
 data class DailyWeather(
-    val day: String,
+    val date: LocalDate,
     val min: Int,
     val max: Int,
     val symbol: String,
-    val description: String,
+    val code: Int,
     val rainChance: Int,
 )
 
@@ -45,8 +48,6 @@ data class Forecast(
 
 /** Open-Meteo: ücretsiz, API anahtarı gerektirmez. */
 object WeatherClient {
-    private val TR = Locale("tr", "TR")
-
     fun fetch(city: City): Forecast {
         val json = get(
             "https://api.open-meteo.com/v1/forecast" +
@@ -62,7 +63,7 @@ object WeatherClient {
         val weather = Weather(
             temperature = current.getDouble("temperature_2m").roundToInt(),
             symbol = symbolFor(currentCode, current.optInt("is_day", 1) == 1),
-            description = describe(currentCode),
+            code = currentCode,
             feelsLike = current.getDouble("apparent_temperature").roundToInt(),
             humidity = current.getInt("relative_humidity_2m"),
             windKmh = current.getDouble("wind_speed_10m").roundToInt(),
@@ -75,7 +76,8 @@ object WeatherClient {
         val start = (0 until times.length()).firstOrNull { times.getString(it).startsWith(nowHour) } ?: 0
         val hours = (start until minOf(start + 12, times.length())).map { i ->
             HourlyWeather(
-                hour = if (i == start) "Şimdi" else times.getString(i).substring(11, 16),
+                hour = times.getString(i).substring(11, 16),
+                isNow = i == start,
                 temperature = hourly.getJSONArray("temperature_2m").getDouble(i).roundToInt(),
                 symbol = symbolFor(hourly.getJSONArray("weather_code").getInt(i), hourly.getJSONArray("is_day").getInt(i) == 1),
                 rainChance = hourly.getJSONArray("precipitation_probability").optInt(i, 0),
@@ -87,11 +89,11 @@ object WeatherClient {
         val days = (0 until dates.length()).map { i ->
             val code = daily.getJSONArray("weather_code").getInt(i)
             DailyWeather(
-                day = dayLabel(dates.getString(i), i),
+                date = LocalDate.parse(dates.getString(i)),
                 min = daily.getJSONArray("temperature_2m_min").getDouble(i).roundToInt(),
                 max = daily.getJSONArray("temperature_2m_max").getDouble(i).roundToInt(),
                 symbol = symbolFor(code, isDay = true),
-                description = describe(code),
+                code = code,
                 rainChance = daily.getJSONArray("precipitation_probability_max").optInt(i, 0),
             )
         }
@@ -105,18 +107,20 @@ object WeatherClient {
         )
     }
 
-    /** Şehir adına göre arama; Türkiye sonuçları öne alınır. */
+    /** Şehir adına göre arama; sonuçlar sistem dilinde gelir, sistemin ülkesindekiler öne alınır. */
     fun searchCities(query: String): List<City> {
+        val locale = Locale.getDefault()
         val q = URLEncoder.encode(query.trim(), "UTF-8")
-        val json = get("https://geocoding-api.open-meteo.com/v1/search?name=$q&count=10&language=tr")
+        val json = get("https://geocoding-api.open-meteo.com/v1/search?name=$q&count=10&language=${locale.language}")
         val results = json.optJSONArray("results") ?: return emptyList()
         return (0 until results.length())
             .map { results.getJSONObject(it) }
             // Yalnızca yerleşim yerleri ve idari bölgeler; havalimanı, dağ vb. değil
             .filter { r -> r.optString("feature_code").let { it.startsWith("PPL") || it.startsWith("ADM") } }
-            .sortedByDescending { it.optString("country_code") == "TR" }
+            .sortedByDescending { it.optString("country_code").equals(locale.country, ignoreCase = true) }
             .map { r ->
-                val country = if (r.optString("country_code") == "TR") "Türkiye" else r.optString("country")
+                val code = r.optString("country_code")
+                val country = if (code.isNotBlank()) Locale("", code).getDisplayCountry(locale) else r.optString("country")
                 val region = listOf(r.optString("admin2"), r.optString("admin1"), country)
                     .map { it.removeSuffix(" İlçesi") }
                     .filter { it.isNotBlank() && it != r.getString("name") }
@@ -138,15 +142,6 @@ object WeatherClient {
         }
     }
 
-    private fun dayLabel(date: String, index: Int): String = when (index) {
-        0 -> "Bugün"
-        1 -> "Yarın"
-        else -> {
-            val parsed = SimpleDateFormat("yyyy-MM-dd", TR).parse(date) ?: return date
-            SimpleDateFormat("EEEE", TR).format(Calendar.getInstance().apply { time = parsed }.time)
-        }
-    }
-
     // WMO hava durumu kodları
     private fun symbolFor(code: Int, isDay: Boolean) = when (code) {
         0 -> if (isDay) "☀" else "☾"
@@ -157,19 +152,21 @@ object WeatherClient {
         in 95..99 -> "⚡"
         else -> "☁"
     }
+}
 
-    private fun describe(code: Int) = when (code) {
-        0 -> "Açık"
-        1 -> "Az bulutlu"
-        2 -> "Parçalı bulutlu"
-        3 -> "Bulutlu"
-        45, 48 -> "Sisli"
-        in 51..57 -> "Çiseleme"
-        in 61..67 -> "Yağmurlu"
-        in 71..77 -> "Karlı"
-        in 80..82 -> "Sağanak"
-        85, 86 -> "Kar sağanağı"
-        in 95..99 -> "Gök gürültülü"
-        else -> "—"
-    }
+/** Hava kodunun açıklama metni; bilinmeyen kodlarda null. */
+@StringRes
+fun weatherDescription(code: Int): Int? = when (code) {
+    0 -> R.string.weather_clear
+    1 -> R.string.weather_mainly_clear
+    2 -> R.string.weather_partly_cloudy
+    3 -> R.string.weather_cloudy
+    45, 48 -> R.string.weather_fog
+    in 51..57 -> R.string.weather_drizzle
+    in 61..67 -> R.string.weather_rain
+    in 71..77 -> R.string.weather_snow
+    in 80..82 -> R.string.weather_showers
+    85, 86 -> R.string.weather_snow_showers
+    in 95..99 -> R.string.weather_thunderstorm
+    else -> null
 }

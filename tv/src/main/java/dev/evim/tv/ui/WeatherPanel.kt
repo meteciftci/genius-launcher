@@ -1,5 +1,10 @@
 package dev.evim.tv.ui
 
+import java.util.Locale
+import java.time.LocalDate
+import dev.evim.tv.data.weatherDescription
+import dev.evim.tv.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -75,7 +80,7 @@ fun WeatherDialog(
                     ),
                 ) {
                     Text(
-                        "⌖  Şehri değiştir",
+                        stringResource(R.string.weather_change_city),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
@@ -85,7 +90,7 @@ fun WeatherDialog(
 
             if (forecast == null) {
                 Spacer(Modifier.height(30.dp))
-                Text("Hava durumu yükleniyor…", color = EvimColors.TextDim, fontSize = 13.sp)
+                Text(stringResource(R.string.weather_loading), color = EvimColors.TextDim, fontSize = 13.sp)
                 Spacer(Modifier.height(30.dp))
                 return@Panel
             }
@@ -93,10 +98,10 @@ fun WeatherDialog(
             Spacer(Modifier.height(16.dp))
             CurrentWeather(forecast)
             Spacer(Modifier.height(18.dp))
-            SectionTitle("Saatlik")
+            SectionTitle(stringResource(R.string.weather_hourly))
             HourlyRow(forecast)
             Spacer(Modifier.height(16.dp))
-            SectionTitle("7 gün")
+            SectionTitle(stringResource(R.string.weather_daily))
             DailyList(forecast.daily)
         }
     }
@@ -111,14 +116,14 @@ private fun CurrentWeather(forecast: Forecast) {
         Text("${now.temperature}°", color = Color.White, fontSize = 48.sp, fontWeight = FontWeight.Black)
         Spacer(Modifier.width(16.dp))
         Column {
-            Text(now.description, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-            Text("Hissedilen ${now.feelsLike}°", color = EvimColors.TextDim, fontSize = 11.sp)
+            Text(describe(now.code), color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.weather_feels_like, now.feelsLike), color = EvimColors.TextDim, fontSize = 11.sp)
         }
         Spacer(Modifier.weight(1f))
-        Detail("Nem", "%${now.humidity}")
-        Detail("Rüzgâr", "${now.windKmh} km/s")
-        Detail("Gün doğumu", forecast.sunrise)
-        Detail("Gün batımı", forecast.sunset)
+        Detail(stringResource(R.string.weather_humidity), stringResource(R.string.percent, now.humidity))
+        Detail(stringResource(R.string.weather_wind), stringResource(R.string.weather_wind_value, now.windKmh))
+        Detail(stringResource(R.string.weather_sunrise), forecast.sunrise)
+        Detail(stringResource(R.string.weather_sunset), forecast.sunset)
     }
 }
 
@@ -146,13 +151,13 @@ private fun HourlyRow(forecast: Forecast) {
     ) {
         forecast.hourly.forEach { h ->
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(h.hour, color = EvimColors.TextDim, fontSize = 10.sp)
+                Text(if (h.isNow) stringResource(R.string.weather_now) else h.hour, color = EvimColors.TextDim, fontSize = 10.sp)
                 Spacer(Modifier.height(4.dp))
                 Text(h.symbol, color = Color.White, fontSize = 15.sp)
                 Spacer(Modifier.height(4.dp))
                 Text("${h.temperature}°", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                 Text(
-                    if (h.rainChance >= 10) "%${h.rainChance}" else " ",
+                    if (h.rainChance >= 10) stringResource(R.string.percent, h.rainChance) else " ",
                     color = RainBlue,
                     fontSize = 9.sp,
                 )
@@ -167,13 +172,13 @@ private fun DailyList(days: List<DailyWeather>) {
     val weekMin = days.minOf { it.min }
     val weekMax = days.maxOf { it.max }.coerceAtLeast(weekMin + 1)
     Column(Modifier.fillMaxWidth()) {
-        days.forEach { d ->
+        days.forEachIndexed { i, d ->
             Row(Modifier.height(24.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(d.day, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.width(90.dp))
+                Text(dayLabel(d.date, i), color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.width(90.dp))
                 Text(d.symbol, color = Color.White, fontSize = 14.sp, modifier = Modifier.width(28.dp))
-                Text(d.description, color = EvimColors.TextDim, fontSize = 11.sp, modifier = Modifier.width(120.dp))
+                Text(describe(d.code), color = EvimColors.TextDim, fontSize = 11.sp, modifier = Modifier.width(120.dp))
                 Text(
-                    if (d.rainChance >= 10) "☂ %${d.rainChance}" else "",
+                    if (d.rainChance >= 10) "☂ " + stringResource(R.string.percent, d.rainChance) else "",
                     color = RainBlue,
                     fontSize = 10.sp,
                     modifier = Modifier.width(56.dp),
@@ -226,8 +231,8 @@ fun CityPickerDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Panel(width = 420.dp) {
-            Text("Şehir seç", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Text("Şehir ya da ilçe adını yazın, sonra aşağı inip seçin", color = EvimColors.TextDim, fontSize = 11.sp)
+            Text(stringResource(R.string.city_title), color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.city_subtitle), color = EvimColors.TextDim, fontSize = 11.sp)
             Spacer(Modifier.height(12.dp))
             BasicTextField(
                 value = query,
@@ -248,15 +253,15 @@ fun CityPickerDialog(
                             .background(Color(0x1FFFFFFF), RoundedCornerShape(10.dp))
                             .padding(horizontal = 12.dp, vertical = 10.dp),
                     ) {
-                        if (query.isEmpty()) Text("örn. Bodrum", color = EvimColors.TextFaint, fontSize = 15.sp)
+                        if (query.isEmpty()) Text(stringResource(R.string.city_hint), color = EvimColors.TextFaint, fontSize = 15.sp)
                         inner()
                     }
                 },
             )
             Spacer(Modifier.height(10.dp))
             when {
-                searching -> Text("Aranıyor…", color = EvimColors.TextDim, fontSize = 12.sp)
-                query.trim().length >= 2 && results.isEmpty() -> Text("Sonuç bulunamadı", color = EvimColors.TextDim, fontSize = 12.sp)
+                searching -> Text(stringResource(R.string.city_searching), color = EvimColors.TextDim, fontSize = 12.sp)
+                query.trim().length >= 2 && results.isEmpty() -> Text(stringResource(R.string.city_no_results), color = EvimColors.TextDim, fontSize = 12.sp)
             }
             Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
                 results.take(6).forEach { city ->
@@ -267,6 +272,20 @@ fun CityPickerDialog(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun describe(code: Int): String = weatherDescription(code)?.let { stringResource(it) } ?: "—"
+
+/** Bugün ve yarın için kelime, sonraki günler için sistem dilinde gün adı. */
+@Composable
+private fun dayLabel(date: LocalDate, index: Int): String = when (index) {
+    0 -> stringResource(R.string.weather_today)
+    1 -> stringResource(R.string.weather_tomorrow)
+    else -> {
+        val locale = Locale.getDefault()
+        date.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, locale).replaceFirstChar { it.titlecase(locale) }
     }
 }
 

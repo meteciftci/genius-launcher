@@ -1,5 +1,8 @@
 package dev.evim.tv.ui
 
+import androidx.annotation.StringRes
+import dev.evim.tv.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,22 +26,22 @@ import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 
-private data class HomeDevice(val symbol: String, val name: String)
+private data class HomeDevice(val symbol: String, @StringRes val name: Int)
 
 // Anahtarlar alınınca gerçek durum bilgisiyle değişecek
 private val Devices = listOf(
-    HomeDevice("❋", "Dyson"),
-    HomeDevice("◍", "Mama kabı 1"),
-    HomeDevice("◍", "Mama kabı 2"),
-    HomeDevice("▣", "Kedi tuvaleti"),
-    HomeDevice("◐", "Röle"),
-    HomeDevice("◉", "Kamera"),
+    HomeDevice("❋", R.string.device_dyson),
+    HomeDevice("◍", R.string.device_feeder_1),
+    HomeDevice("◍", R.string.device_feeder_2),
+    HomeDevice("▣", R.string.device_litter_box),
+    HomeDevice("◐", R.string.device_relay),
+    HomeDevice("◉", R.string.device_camera),
 )
 
 @Composable
 fun HomeDevicesRow() {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text("Evim", color = EvimColors.TextFaint, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+        Text(stringResource(R.string.home_title), color = EvimColors.TextFaint, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.width(14.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Devices.forEach { DeviceChip(it) }
@@ -74,7 +77,7 @@ private fun DeviceChip(device: HomeDevice) {
                 Text(device.symbol, fontSize = 9.sp)
             }
             Spacer(Modifier.width(7.dp))
-            Text(device.name, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(device.name), fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.width(6.dp))
             Box(Modifier.size(4.dp).background(EvimColors.TextFaint, CircleShape))
         }

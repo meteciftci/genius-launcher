@@ -1,5 +1,7 @@
 package dev.evim.tv.ui
 
+import dev.evim.tv.R
+import androidx.compose.ui.res.stringResource
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
@@ -92,7 +94,7 @@ fun HomeScreen(vm: LauncherViewModel) {
             Spacer(Modifier.height(34.dp))
 
             Row(verticalAlignment = Alignment.Bottom) {
-                Text("Uygulamalar", color = EvimColors.TextFaint, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.apps_title), color = EvimColors.TextFaint, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 Text("  ${vm.apps.size}", color = EvimColors.TextFaint, fontSize = 9.sp)
             }
             LazyRow(
@@ -196,8 +198,8 @@ private fun Hero(app: LauncherApp?, accent: () -> Color) {
 private fun MoveHint(moving: Boolean, modifier: Modifier = Modifier) {
     Row(modifier.height(14.dp), verticalAlignment = Alignment.CenterVertically) {
         if (moving) {
-            Text("◀ ▶ ile taşı", color = EvimColors.Warning, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-            Text("  ·  OK ile bitir", color = EvimColors.TextFaint, fontSize = 10.sp)
+            Text(stringResource(R.string.move_hint), color = EvimColors.Warning, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.move_hint_done), color = EvimColors.TextFaint, fontSize = 10.sp)
         }
     }
 }
@@ -302,9 +304,12 @@ private fun glowMask(): ImageBitmap {
     return bitmap.asImageBitmap()
 }
 
-private fun greeting(): String = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
-    in 5..11 -> "Günaydın"
-    in 12..17 -> "İyi günler"
-    in 18..22 -> "İyi akşamlar"
-    else -> "İyi geceler"
-}
+@Composable
+private fun greeting(): String = stringResource(
+    when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
+        in 5..11 -> R.string.greeting_morning
+        in 12..17 -> R.string.greeting_afternoon
+        in 18..22 -> R.string.greeting_evening
+        else -> R.string.greeting_night
+    },
+)

@@ -1,5 +1,7 @@
 package dev.evim.tv.ui
 
+import dev.evim.tv.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -69,14 +71,14 @@ fun AppMenu(
             }
             Spacer(Modifier.height(14.dp))
             if (!pickingColor) {
-                MenuItem("Aç", Modifier.focusRequester(first), onOpen)
-                MenuItem("Taşı", onClick = onMove)
-                MenuItem("Renk seç", onClick = { pickingColor = true })
-                MenuItem("Gizle", onClick = onHide)
-                MenuItem("Uygulama bilgisi", onClick = onInfo)
-                if (hiddenCount > 0) MenuItem("Gizli uygulamalar ($hiddenCount)", onClick = onShowHidden)
+                MenuItem(stringResource(R.string.menu_open), Modifier.focusRequester(first), onOpen)
+                MenuItem(stringResource(R.string.menu_move), onClick = onMove)
+                MenuItem(stringResource(R.string.menu_pick_color), onClick = { pickingColor = true })
+                MenuItem(stringResource(R.string.menu_hide), onClick = onHide)
+                MenuItem(stringResource(R.string.menu_app_info), onClick = onInfo)
+                if (hiddenCount > 0) MenuItem(stringResource(R.string.menu_hidden_apps, hiddenCount), onClick = onShowHidden)
             } else {
-                Text("Kart ve vitrin rengi", color = EvimColors.TextDim, fontSize = 11.sp)
+                Text(stringResource(R.string.color_title), color = EvimColors.TextDim, fontSize = 11.sp)
                 Spacer(Modifier.height(10.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     EvimColors.Picks.forEachIndexed { i, color ->
@@ -88,8 +90,8 @@ fun AppMenu(
                     }
                 }
                 Spacer(Modifier.height(12.dp))
-                MenuItem("Otomatik renk (simgeden)", onClick = { onColor(null) })
-                MenuItem("Tamam", onClick = onDismiss)
+                MenuItem(stringResource(R.string.color_auto), onClick = { onColor(null) })
+                MenuItem(stringResource(R.string.done), onClick = onDismiss)
             }
         }
     }
@@ -106,15 +108,15 @@ fun HiddenAppsDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Panel {
-            Text("Gizli uygulamalar", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Text("Seçtiğiniz uygulama listeye geri döner", color = EvimColors.TextDim, fontSize = 11.sp)
+            Text(stringResource(R.string.hidden_apps_title), color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.hidden_apps_subtitle), color = EvimColors.TextDim, fontSize = 11.sp)
             Spacer(Modifier.height(14.dp))
             if (apps.isEmpty()) {
-                MenuItem("Gizli uygulama yok", Modifier.focusRequester(first), onDismiss)
+                MenuItem(stringResource(R.string.hidden_apps_empty), Modifier.focusRequester(first), onDismiss)
             }
             apps.forEachIndexed { i, app ->
                 MenuItem(
-                    "Göster: ${app.label}",
+                    stringResource(R.string.hidden_apps_show, app.label),
                     if (i == 0) Modifier.focusRequester(first) else Modifier,
                 ) { onUnhide(app) }
             }

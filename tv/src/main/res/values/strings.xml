@@ -1,5 +1,88 @@
 <resources>
-    <string name="app_name">Genius Launcher</string>
-    <!-- Bluetooth kısayolunun açtığı TV ayar sayfasının başlığı -->
-    <string name="accessories_title">Uzaktan Kumandalar ve Aksesuarlar</string>
+    <string name="app_name" translatable="false">Genius Launcher</string>
+    <!-- Title of the TV settings page opened by the Bluetooth shortcut; must match the system's own title -->
+    <string name="accessories_title">Remotes &amp; Accessories</string>
+
+    <!-- Home -->
+    <string name="greeting_morning">Good morning</string>
+    <string name="greeting_afternoon">Good afternoon</string>
+    <string name="greeting_evening">Good evening</string>
+    <string name="greeting_night">Good night</string>
+    <string name="apps_title">Apps</string>
+    <string name="move_hint">◀ ▶ to move</string>
+    <string name="move_hint_done">  ·  OK to finish</string>
+
+    <!-- Top bar -->
+    <string name="home_title">Home</string>
+    <string name="home_setup_pending">  ·  setup pending</string>
+    <string name="shortcut_wifi">Wi-Fi</string>
+    <string name="shortcut_bluetooth">Bluetooth accessories</string>
+    <string name="shortcut_display_sound">Display &amp; sound</string>
+    <string name="shortcut_settings">Settings</string>
+    <string name="ram_label">RAM</string>
+    <string name="percent">%d%%</string>
+    <string name="ram_free">⚡ Free up</string>
+    <string name="ram_freeing">Freeing…</string>
+    <string name="ram_approve_on_tv">Approve on the TV</string>
+    <string name="ram_freed">+%d MB</string>
+    <string name="ram_already_free">Already free</string>
+    <string name="ram_denied">Permission denied</string>
+    <string name="ram_adb_off">ADB is off</string>
+    <string name="ram_failed">Couldn\'t free</string>
+
+    <!-- Home devices -->
+    <string name="device_dyson">Dyson</string>
+    <string name="device_feeder_1">Food bowl 1</string>
+    <string name="device_feeder_2">Food bowl 2</string>
+    <string name="device_litter_box">Litter box</string>
+    <string name="device_relay">Relay</string>
+    <string name="device_camera">Camera</string>
+
+    <!-- App menu -->
+    <string name="menu_open">Open</string>
+    <string name="menu_move">Move</string>
+    <string name="menu_pick_color">Pick color</string>
+    <string name="menu_hide">Hide</string>
+    <string name="menu_app_info">App info</string>
+    <string name="menu_hidden_apps">Hidden apps (%d)</string>
+    <string name="color_title">Card and showcase color</string>
+    <string name="color_auto">Automatic color (from icon)</string>
+    <string name="done">Done</string>
+    <string name="hidden_apps_title">Hidden apps</string>
+    <string name="hidden_apps_subtitle">The app you pick returns to the list</string>
+    <string name="hidden_apps_empty">No hidden apps</string>
+    <string name="hidden_apps_show">Show: %s</string>
+
+    <!-- Weather -->
+    <string name="weather_change_city">⌖  Change city</string>
+    <string name="weather_loading">Loading weather…</string>
+    <string name="weather_hourly">Hourly</string>
+    <string name="weather_daily">7 days</string>
+    <string name="weather_feels_like">Feels like %d°</string>
+    <string name="weather_humidity">Humidity</string>
+    <string name="weather_wind">Wind</string>
+    <string name="weather_wind_value">%d km/h</string>
+    <string name="weather_sunrise">Sunrise</string>
+    <string name="weather_sunset">Sunset</string>
+    <string name="weather_now">Now</string>
+    <string name="weather_today">Today</string>
+    <string name="weather_tomorrow">Tomorrow</string>
+    <string name="weather_clear">Clear</string>
+    <string name="weather_mainly_clear">Mainly clear</string>
+    <string name="weather_partly_cloudy">Partly cloudy</string>
+    <string name="weather_cloudy">Cloudy</string>
+    <string name="weather_fog">Fog</string>
+    <string name="weather_drizzle">Drizzle</string>
+    <string name="weather_rain">Rain</string>
+    <string name="weather_snow">Snow</string>
+    <string name="weather_showers">Showers</string>
+    <string name="weather_snow_showers">Snow showers</string>
+    <string name="weather_thunderstorm">Thunderstorm</string>
+
+    <!-- City picker -->
+    <string name="city_title">Choose city</string>
+    <string name="city_subtitle">Type a city or district name, then go down and pick it</string>
+    <string name="city_hint">e.g. Bodrum</string>
+    <string name="city_searching">Searching…</string>
+    <string name="city_no_results">No results</string>
 </resources>

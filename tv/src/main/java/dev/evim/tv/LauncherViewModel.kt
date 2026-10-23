@@ -1,6 +1,7 @@
 package dev.evim.tv
 
 import android.app.Application
+import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -25,6 +26,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/** Dil değişince de doğru görünsün diye metin değil kaynak kimliği tutulur. */
+class RamMessage(@StringRes val text: Int, vararg val args: Any)
+
 class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     private val repo = AppRepository(app)
     private val prefs = LauncherPrefs(app)
@@ -39,7 +43,7 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     var status by mutableStateOf(SystemStatus(wifiLevel = null, bluetoothOn = false))
         private set
     /** Boşalt düğmesinde geçici olarak gösterilen durum ("+72 MB" gibi); null ise düğme normal. */
-    var ramMessage by mutableStateOf<String?>(null)
+    var ramMessage by mutableStateOf<RamMessage?>(null)
         private set
     private var freeRamJob: Job? = null
     var forecast by mutableStateOf<Forecast?>(null)
@@ -122,22 +126,22 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     fun freeRam() {
         if (freeRamJob?.isActive == true) return
         freeRamJob = viewModelScope.launch {
-            ramMessage = "Boşaltılıyor…"
+            ramMessage = RamMessage(R.string.ram_freeing)
             // İlk seferde TV izin soruyor; birkaç saniyede bitmediyse kullanıcıyı uyar
             val hint = launch {
                 delay(2500)
-                ramMessage = "TV'de izni onaylayın"
+                ramMessage = RamMessage(R.string.ram_approve_on_tv)
             }
             val result = runCatching { withContext(Dispatchers.IO) { repo.freeRam() } }
             hint.cancel()
             refreshRam()
             ramMessage = result.fold(
-                onSuccess = { freed -> if (freed > 0) "+$freed MB" else "Zaten boş" },
+                onSuccess = { freed -> if (freed > 0) RamMessage(R.string.ram_freed, freed) else RamMessage(R.string.ram_already_free) },
                 onFailure = { error ->
                     when (error) {
-                        is AdbAuthException -> "İzin reddedildi"
-                        is AdbConnectException -> "ADB kapalı"
-                        else -> "Boşaltılamadı"
+                        is AdbAuthException -> RamMessage(R.string.ram_denied)
+                        is AdbConnectException -> RamMessage(R.string.ram_adb_off)
+                        else -> RamMessage(R.string.ram_failed)
                     }
                 },
             )

@@ -1,5 +1,9 @@
 package dev.evim.tv.ui
 
+import android.text.format.DateFormat
+import androidx.compose.ui.platform.LocalContext
+import dev.evim.tv.R
+import androidx.compose.ui.res.stringResource
 import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -50,8 +54,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-private val TR = Locale("tr", "TR")
-
 @Composable
 fun TopBar(vm: LauncherViewModel, onWeatherClick: () -> Unit) {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -63,11 +65,19 @@ fun TopBar(vm: LauncherViewModel, onWeatherClick: () -> Unit) {
         }
     }
 
+    // Saat biçimi ve tarih sistemin dil ve 12/24 saat ayarına uyar
+    val context = LocalContext.current
+    val locale = Locale.getDefault()
+    val timeFormat = remember(locale) {
+        SimpleDateFormat(if (DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm", locale)
+    }
+    val dateFormat = remember(locale) { SimpleDateFormat(DateFormat.getBestDateTimePattern(locale, "EEEdMMM"), locale) }
+
     Row(verticalAlignment = Alignment.CenterVertically) {
         Chip(endPadding = 4.dp) {
-            Text(SimpleDateFormat("HH:mm", TR).format(Date(now)), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(timeFormat.format(Date(now)), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.width(8.dp))
-            Text(SimpleDateFormat("EEE d MMM", TR).format(Date(now)), color = EvimColors.TextDim, fontSize = 11.sp)
+            Text(dateFormat.format(Date(now)), color = EvimColors.TextDim, fontSize = 11.sp)
             Spacer(Modifier.width(8.dp))
             val weather = vm.weather
             ChipButton(
@@ -79,8 +89,8 @@ fun TopBar(vm: LauncherViewModel, onWeatherClick: () -> Unit) {
         Chip {
             Text("⌂", color = Color.White, fontSize = 13.sp)
             Spacer(Modifier.width(6.dp))
-            Text("Evim", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
-            Text("  ·  kurulum bekliyor", color = EvimColors.TextDim, fontSize = 11.sp)
+            Text(stringResource(R.string.home_title), color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.home_setup_pending), color = EvimColors.TextDim, fontSize = 11.sp)
             Spacer(Modifier.width(6.dp))
             Box(Modifier.size(5.dp).background(EvimColors.Warning, CircleShape))
         }
@@ -104,13 +114,13 @@ private fun ShortcutsChip(vm: LauncherViewModel) {
     }
     Chip(startPadding = 4.dp, endPadding = 4.dp) {
         Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-            IconButton(wifiIcon, "Wi-Fi") { vm.openSettings(Settings.ACTION_WIFI_SETTINGS) }
+            IconButton(wifiIcon, stringResource(R.string.shortcut_wifi)) { vm.openSettings(Settings.ACTION_WIFI_SETTINGS) }
             IconButton(
                 if (status.bluetoothOn) Icons.Rounded.Bluetooth else Icons.Rounded.BluetoothDisabled,
-                "Bluetooth aksesuarları",
+                stringResource(R.string.shortcut_bluetooth),
             ) { vm.openAccessorySettings() }
-            IconButton(Icons.Rounded.Tv, "Görüntü ve ses") { vm.openSettings(Settings.ACTION_SOUND_SETTINGS) }
-            IconButton(Icons.Rounded.Settings, "Ayarlar") { vm.openSettings(Settings.ACTION_SETTINGS) }
+            IconButton(Icons.Rounded.Tv, stringResource(R.string.shortcut_display_sound)) { vm.openSettings(Settings.ACTION_SOUND_SETTINGS) }
+            IconButton(Icons.Rounded.Settings, stringResource(R.string.shortcut_settings)) { vm.openSettings(Settings.ACTION_SETTINGS) }
         }
     }
 }
@@ -140,8 +150,8 @@ private fun IconButton(icon: ImageVector, description: String, onClick: () -> Un
 private fun RamChip(vm: LauncherViewModel) {
     val used = vm.ram.usedFraction
     Chip(endPadding = 4.dp) {
-        Text("RAM", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
-        Text("  %${(used * 100).toInt()}", color = EvimColors.TextDim, fontSize = 11.sp)
+        Text(stringResource(R.string.ram_label), color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+        Text("  " + stringResource(R.string.percent, (used * 100).toInt()), color = EvimColors.TextDim, fontSize = 11.sp)
         Spacer(Modifier.width(8.dp))
         Box(
             Modifier
@@ -169,7 +179,7 @@ private fun RamChip(vm: LauncherViewModel) {
             ),
         ) {
             Text(
-                vm.ramMessage ?: "⚡ Boşalt",
+                vm.ramMessage?.let { stringResource(it.text, *it.args) } ?: stringResource(R.string.ram_free),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),

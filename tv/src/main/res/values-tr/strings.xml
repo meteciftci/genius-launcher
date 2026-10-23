@@ -1,0 +1,80 @@
+<resources>
+    <string name="accessories_title">Uzaktan Kumandalar ve Aksesuarlar</string>
+
+    <string name="greeting_morning">Günaydın</string>
+    <string name="greeting_afternoon">İyi günler</string>
+    <string name="greeting_evening">İyi akşamlar</string>
+    <string name="greeting_night">İyi geceler</string>
+    <string name="apps_title">Uygulamalar</string>
+    <string name="move_hint">◀ ▶ ile taşı</string>
+    <string name="move_hint_done">  ·  OK ile bitir</string>
+
+    <string name="home_title">Evim</string>
+    <string name="home_setup_pending">  ·  kurulum bekliyor</string>
+    <string name="shortcut_wifi">Wi-Fi</string>
+    <string name="shortcut_bluetooth">Bluetooth aksesuarları</string>
+    <string name="shortcut_display_sound">Görüntü ve ses</string>
+    <string name="shortcut_settings">Ayarlar</string>
+    <string name="ram_label">RAM</string>
+    <string name="percent">%%%d</string>
+    <string name="ram_free">⚡ Boşalt</string>
+    <string name="ram_freeing">Boşaltılıyor…</string>
+    <string name="ram_approve_on_tv">TV\'de izni onaylayın</string>
+    <string name="ram_freed">+%d MB</string>
+    <string name="ram_already_free">Zaten boş</string>
+    <string name="ram_denied">İzin reddedildi</string>
+    <string name="ram_adb_off">ADB kapalı</string>
+    <string name="ram_failed">Boşaltılamadı</string>
+
+    <string name="device_dyson">Dyson</string>
+    <string name="device_feeder_1">Mama kabı 1</string>
+    <string name="device_feeder_2">Mama kabı 2</string>
+    <string name="device_litter_box">Kedi tuvaleti</string>
+    <string name="device_relay">Röle</string>
+    <string name="device_camera">Kamera</string>
+
+    <string name="menu_open">Aç</string>
+    <string name="menu_move">Taşı</string>
+    <string name="menu_pick_color">Renk seç</string>
+    <string name="menu_hide">Gizle</string>
+    <string name="menu_app_info">Uygulama bilgisi</string>
+    <string name="menu_hidden_apps">Gizli uygulamalar (%d)</string>
+    <string name="color_title">Kart ve vitrin rengi</string>
+    <string name="color_auto">Otomatik renk (simgeden)</string>
+    <string name="done">Tamam</string>
+    <string name="hidden_apps_title">Gizli uygulamalar</string>
+    <string name="hidden_apps_subtitle">Seçtiğiniz uygulama listeye geri döner</string>
+    <string name="hidden_apps_empty">Gizli uygulama yok</string>
+    <string name="hidden_apps_show">Göster: %s</string>
+
+    <string name="weather_change_city">⌖  Şehri değiştir</string>
+    <string name="weather_loading">Hava durumu yükleniyor…</string>
+    <string name="weather_hourly">Saatlik</string>
+    <string name="weather_daily">7 gün</string>
+    <string name="weather_feels_like">Hissedilen %d°</string>
+    <string name="weather_humidity">Nem</string>
+    <string name="weather_wind">Rüzgâr</string>
+    <string name="weather_wind_value">%d km/s</string>
+    <string name="weather_sunrise">Gün doğumu</string>
+    <string name="weather_sunset">Gün batımı</string>
+    <string name="weather_now">Şimdi</string>
+    <string name="weather_today">Bugün</string>
+    <string name="weather_tomorrow">Yarın</string>
+    <string name="weather_clear">Açık</string>
+    <string name="weather_mainly_clear">Az bulutlu</string>
+    <string name="weather_partly_cloudy">Parçalı bulutlu</string>
+    <string name="weather_cloudy">Bulutlu</string>
+    <string name="weather_fog">Sisli</string>
+    <string name="weather_drizzle">Çiseleme</string>
+    <string name="weather_rain">Yağmurlu</string>
+    <string name="weather_snow">Karlı</string>
+    <string name="weather_showers">Sağanak</string>
+    <string name="weather_snow_showers">Kar sağanağı</string>
+    <string name="weather_thunderstorm">Gök gürültülü</string>
+
+    <string name="city_title">Şehir seç</string>
+    <string name="city_subtitle">Şehir ya da ilçe adını yazın, sonra aşağı inip seçin</string>
+    <string name="city_hint">örn. Bodrum</string>
+    <string name="city_searching">Aranıyor…</string>
+    <string name="city_no_results">Sonuç bulunamadı</string>
+</resources>
