@@ -119,7 +119,7 @@ fun HomeScreen(vm: LauncherViewModel) {
             }
             MoveHint(moving = movingPackage != null, modifier = Modifier.offset(y = (-16).dp))
             Spacer(Modifier.height(10.dp))
-            HomeDevicesRow()
+            HomeDevicesRow(vm)
         }
 
         menuFor?.let { app ->

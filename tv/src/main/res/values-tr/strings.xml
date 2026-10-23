@@ -33,6 +33,33 @@
     <string name="device_relay">Röle</string>
     <string name="device_camera">Kamera</string>
 
+    <string name="home_device_count">  ·  %d cihaz</string>
+    <string name="home_unreachable">ulaşılamıyor</string>
+    <string name="relay_on">Açık</string>
+    <string name="relay_off">Kapalı</string>
+    <string name="feeder_next">sonraki %s</string>
+    <string name="feeder_next_meal">Sonraki öğün %1$s · %2$d porsiyon</string>
+    <string name="feed_one">1 porsiyon ver</string>
+    <string name="feed_two">2 porsiyon ver</string>
+    <string name="feed_started">Mama veriliyor…</string>
+    <string name="cancel">Vazgeç</string>
+    <string name="purifier_humidity">%%%d nem</string>
+    <string name="purifier_turn_on">Aç</string>
+    <string name="purifier_turn_off">Kapat</string>
+    <string name="purifier_auto">Otomatik mod</string>
+    <string name="purifier_fan_down">Fanı yavaşlat (şu an %d)</string>
+    <string name="purifier_fan_up">Fanı hızlandır (şu an %d)</string>
+    <string name="purifier_heating">Isıtma</string>
+    <string name="purifier_temp_down">Hedefi düşür (şu an %d°)</string>
+    <string name="purifier_temp_up">Hedefi artır (şu an %d°)</string>
+    <string name="purifier_air">Hava: %s</string>
+    <string name="air_good">İyi</string>
+    <string name="air_fair">Orta</string>
+    <string name="air_poor">Kötü</string>
+    <string name="air_very_poor">Çok kötü</string>
+    <string name="air_severe">Ciddi</string>
+    <string name="air_extreme">Aşırı</string>
+
     <string name="menu_open">Aç</string>
     <string name="menu_move">Taşı</string>
     <string name="menu_pick_color">Renk seç</string>

@@ -19,6 +19,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        viewModel.startHomeUpdates()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        viewModel.stopHomeUpdates()
+    }
+
     override fun onResume() {
         super.onResume()
         // Uygulama yüklenip kaldırılmış olabilir, RAM değişmiştir

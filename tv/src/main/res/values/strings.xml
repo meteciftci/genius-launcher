@@ -38,6 +38,33 @@
     <string name="device_relay">Relay</string>
     <string name="device_camera">Camera</string>
 
+    <string name="home_device_count">  ·  %d devices</string>
+    <string name="home_unreachable">unreachable</string>
+    <string name="relay_on">On</string>
+    <string name="relay_off">Off</string>
+    <string name="feeder_next">next %s</string>
+    <string name="feeder_next_meal">Next meal %1$s · %2$d portion(s)</string>
+    <string name="feed_one">Feed 1 portion</string>
+    <string name="feed_two">Feed 2 portions</string>
+    <string name="feed_started">Feeding…</string>
+    <string name="cancel">Cancel</string>
+    <string name="purifier_humidity">%d%% humidity</string>
+    <string name="purifier_turn_on">Turn on</string>
+    <string name="purifier_turn_off">Turn off</string>
+    <string name="purifier_auto">Auto mode</string>
+    <string name="purifier_fan_down">Fan slower (now %d)</string>
+    <string name="purifier_fan_up">Fan faster (now %d)</string>
+    <string name="purifier_heating">Heating</string>
+    <string name="purifier_temp_down">Lower target (now %d°)</string>
+    <string name="purifier_temp_up">Raise target (now %d°)</string>
+    <string name="purifier_air">Air: %s</string>
+    <string name="air_good">Good</string>
+    <string name="air_fair">Fair</string>
+    <string name="air_poor">Poor</string>
+    <string name="air_very_poor">Very poor</string>
+    <string name="air_severe">Severe</string>
+    <string name="air_extreme">Extreme</string>
+
     <!-- App menu -->
     <string name="menu_open">Open</string>
     <string name="menu_move">Move</string>

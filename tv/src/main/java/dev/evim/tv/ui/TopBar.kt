@@ -90,9 +90,13 @@ fun TopBar(vm: LauncherViewModel, onWeatherClick: () -> Unit) {
             Text("⌂", color = Color.White, fontSize = 13.sp)
             Spacer(Modifier.width(6.dp))
             Text(stringResource(R.string.home_title), color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
-            Text(stringResource(R.string.home_setup_pending), color = EvimColors.TextDim, fontSize = 11.sp)
+            val devices = vm.homeDevices
+            val status = if (vm.homeConfigured) stringResource(R.string.home_device_count, devices.size) else stringResource(R.string.home_setup_pending)
+            Text(status, color = EvimColors.TextDim, fontSize = 11.sp)
             Spacer(Modifier.width(6.dp))
-            Box(Modifier.size(5.dp).background(EvimColors.Warning, CircleShape))
+            // Yeşil: tüm cihazlar cevap veriyor; sarı: kurulmadı ya da biri ulaşılamıyor
+            val healthy = vm.homeConfigured && devices.isNotEmpty() && devices.all { it.reachable }
+            Box(Modifier.size(5.dp).background(if (healthy) EvimColors.Online else EvimColors.Warning, CircleShape))
         }
         Spacer(Modifier.width(8.dp))
         ShortcutsChip(vm = vm)

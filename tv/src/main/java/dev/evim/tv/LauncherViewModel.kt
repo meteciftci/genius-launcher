@@ -20,10 +20,15 @@ import dev.evim.tv.data.RamInfo
 import dev.evim.tv.data.SystemStatus
 import dev.evim.tv.data.Weather
 import dev.evim.tv.data.WeatherClient
+import dev.evim.tv.data.home.HomeDevice
+import dev.evim.tv.data.home.SmartHome
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /** Dil değişince de doğru görünsün diye metin değil kaynak kimliği tutulur. */
@@ -32,6 +37,9 @@ class RamMessage(@StringRes val text: Int, vararg val args: Any)
 class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     private val repo = AppRepository(app)
     private val prefs = LauncherPrefs(app)
+    private val home = SmartHome(app)
+    // Tuya cihazları aynı anda tek yerel bağlantı kabul edebiliyor; sorgu ve komutlar sırayla gider
+    private val homeLock = Mutex()
     private var installed: List<LauncherApp> = emptyList()
 
     var apps by mutableStateOf<List<LauncherApp>>(emptyList())
@@ -55,6 +63,12 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
         private set
     var citySearching by mutableStateOf(false)
         private set
+
+    var homeDevices by mutableStateOf<List<HomeDevice>>(emptyList())
+        private set
+    var homeConfigured by mutableStateOf(false)
+        private set
+    private var homeJob: Job? = null
 
     private var weatherJob: Job? = null
     private var searchJob: Job? = null
@@ -103,6 +117,40 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
             }
         }
     }
+
+    /** Ekran görünürken cihaz durumlarını düzenli yeniler; [stopHomeUpdates] ile durur. */
+    fun startHomeUpdates() {
+        homeJob?.cancel()
+        homeJob = viewModelScope.launch {
+            withContext(Dispatchers.IO) { runCatching { home.load() } }
+            homeConfigured = home.isConfigured
+            while (isActive && home.isConfigured) {
+                homeDevices = homeIo { home.poll() }
+                delay(HOME_REFRESH_MS)
+            }
+        }
+    }
+
+    fun stopHomeUpdates() {
+        homeJob?.cancel()
+    }
+
+    fun toggleRelay(device: HomeDevice.Relay) = updateDevice { home.toggleRelay(device) }
+
+    fun setPurifier(device: HomeDevice.Purifier, values: Map<String, String>) = updateDevice { home.setPurifier(device, values) }
+
+    fun feed(device: HomeDevice.Feeder, portions: Int) {
+        viewModelScope.launch { runCatching { homeIo { home.feed(device, portions) } } }
+    }
+
+    private fun updateDevice(action: () -> HomeDevice) {
+        viewModelScope.launch {
+            val updated = homeIo(action)
+            homeDevices = homeDevices.map { if (it.key == updated.key) updated else it }
+        }
+    }
+
+    private suspend fun <T> homeIo(block: () -> T): T = withContext(Dispatchers.IO) { homeLock.withLock { block() } }
 
     fun refresh() {
         viewModelScope.launch {
@@ -196,6 +244,7 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
 
     private companion object {
         const val WEATHER_REFRESH_MS = 30 * 60 * 1000L
+        const val HOME_REFRESH_MS = 15_000L
         // ADB izni 7 gün kullanılmazsa düşüyor; günde bir yenilemek yeterli
         const val ADB_KEEPALIVE_MS = 24 * 60 * 60 * 1000L
     }
