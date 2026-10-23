@@ -188,8 +188,6 @@ private fun Hero(app: LauncherApp?, accent: () -> Color) {
                 maxLines = 1,
             )
         }
-        Spacer(Modifier.height(6.dp))
-        Text("Kaldığın yerden devam et", color = EvimColors.TextDim, fontSize = 16.sp)
     }
 }
 

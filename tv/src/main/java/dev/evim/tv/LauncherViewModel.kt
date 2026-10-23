@@ -14,6 +14,7 @@ import dev.evim.tv.data.Forecast
 import dev.evim.tv.data.LauncherApp
 import dev.evim.tv.data.LauncherPrefs
 import dev.evim.tv.data.RamInfo
+import dev.evim.tv.data.SystemStatus
 import dev.evim.tv.data.Weather
 import dev.evim.tv.data.WeatherClient
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +33,8 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     var hiddenApps by mutableStateOf<List<LauncherApp>>(emptyList())
         private set
     var ram by mutableStateOf(RamInfo(0f, 0))
+        private set
+    var status by mutableStateOf(SystemStatus(wifiLevel = null, bluetoothOn = false))
         private set
     var forecast by mutableStateOf<Forecast?>(null)
         private set
@@ -95,7 +98,10 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
 
     fun refreshRam() {
         ram = repo.ramInfo()
+        status = repo.systemStatus()
     }
+
+    fun openSettings(action: String) = repo.openSettings(action)
 
     fun freeRam() {
         viewModelScope.launch {

@@ -1,7 +1,12 @@
 package dev.evim.tv.data
 
 import android.app.ActivityManager
+import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.wifi.WifiManager
+import android.os.Build
 import android.content.Intent
 import android.content.pm.ResolveInfo
 import android.graphics.Bitmap
@@ -27,6 +32,9 @@ data class LauncherApp(
 )
 
 data class RamInfo(val usedFraction: Float, val totalMb: Long)
+
+/** Wi-Fi sinyali 0-4 arası; null ise Wi-Fi'ye bağlı değil. */
+data class SystemStatus(val wifiLevel: Int?, val bluetoothOn: Boolean)
 
 class AppRepository(private val context: Context) {
     private val pm = context.packageManager
@@ -61,6 +69,32 @@ class AppRepository(private val context: Context) {
     fun openAppInfo(packageName: String) {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null))
         context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    }
+
+    fun systemStatus(): SystemStatus {
+        val connectivity = context.getSystemService(ConnectivityManager::class.java)
+        val caps = connectivity.getNetworkCapabilities(connectivity.activeNetwork)
+        val wifiLevel = caps?.takeIf { it.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) }?.let {
+            val level = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                context.getSystemService(WifiManager::class.java).calculateSignalLevel(it.signalStrength)
+            } else {
+                @Suppress("DEPRECATION")
+                WifiManager.calculateSignalLevel(it.signalStrength, 5)
+            }
+            level.coerceIn(0, 4)
+        }
+        val bluetoothOn = runCatching {
+            context.getSystemService(BluetoothManager::class.java).adapter?.isEnabled == true
+        }.getOrDefault(false)
+        return SystemStatus(wifiLevel, bluetoothOn)
+    }
+
+    /** TV ayarlarının bir sayfasını açar; sayfa bu cihazda yoksa ana ayarlara düşer. */
+    fun openSettings(action: String) {
+        val intent = Intent(action).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val target = if (intent.resolveActivity(pm) != null) intent
+        else Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(target)
     }
 
     fun ramInfo(): RamInfo {

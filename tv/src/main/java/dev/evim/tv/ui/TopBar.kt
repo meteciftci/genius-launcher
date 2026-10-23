@@ -1,8 +1,23 @@
 package dev.evim.tv.ui
 
+import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Bluetooth
+import androidx.compose.material.icons.rounded.BluetoothDisabled
+import androidx.compose.material.icons.rounded.NetworkWifi1Bar
+import androidx.compose.material.icons.rounded.NetworkWifi2Bar
+import androidx.compose.material.icons.rounded.NetworkWifi3Bar
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Tv
+import androidx.compose.material.icons.rounded.Wifi
+import androidx.compose.material.icons.rounded.WifiOff
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.tv.material3.Icon
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -70,9 +85,58 @@ fun TopBar(vm: LauncherViewModel, onWeatherClick: () -> Unit) {
             Box(Modifier.size(5.dp).background(EvimColors.Warning, CircleShape))
         }
         Spacer(Modifier.width(8.dp))
+        ShortcutsChip(vm = vm)
+        Spacer(Modifier.width(8.dp))
         RamChip(vm = vm)
     }
 }
+
+/** Google TV'deki gibi hızlı ayar kısayolları; Wi-Fi ve Bluetooth simgeleri durumu da gösterir. */
+@Composable
+private fun ShortcutsChip(vm: LauncherViewModel) {
+    val status = vm.status
+    val wifiIcon = when (status.wifiLevel) {
+        null -> Icons.Rounded.WifiOff
+        0, 1 -> Icons.Rounded.NetworkWifi1Bar
+        2 -> Icons.Rounded.NetworkWifi2Bar
+        3 -> Icons.Rounded.NetworkWifi3Bar
+        else -> Icons.Rounded.Wifi
+    }
+    Chip(startPadding = 4.dp, endPadding = 4.dp) {
+        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+            IconButton(wifiIcon, "Wi-Fi") { vm.openSettings(Settings.ACTION_WIFI_SETTINGS) }
+            IconButton(
+                if (status.bluetoothOn) Icons.Rounded.Bluetooth else Icons.Rounded.BluetoothDisabled,
+                "Bluetooth aksesuarları",
+            ) { vm.openSettings(ACTION_CONNECT_INPUT) }
+            IconButton(Icons.Rounded.Tv, "Görüntü ve ses") { vm.openSettings(Settings.ACTION_SOUND_SETTINGS) }
+            IconButton(Icons.Rounded.Settings, "Ayarlar") { vm.openSettings(Settings.ACTION_SETTINGS) }
+        }
+    }
+}
+
+@Composable
+private fun IconButton(icon: ImageVector, description: String, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.size(26.dp),
+        shape = ClickableSurfaceDefaults.shape(CircleShape),
+        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.1f),
+        colors = ClickableSurfaceDefaults.colors(
+            containerColor = Color.Transparent,
+            contentColor = EvimColors.TextDim,
+            focusedContainerColor = Color.White,
+            focusedContentColor = Color(0xFF111111),
+        ),
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Icon(icon, contentDescription = description, modifier = Modifier.size(15.dp))
+        }
+    }
+}
+
+// Google TV ayarlarında aksesuar (Bluetooth kumanda, kulaklık…) eşleme ekranı
+private const val ACTION_CONNECT_INPUT = "com.google.android.intent.action.CONNECT_INPUT"
 
 @Composable
 private fun RamChip(vm: LauncherViewModel) {
@@ -118,6 +182,7 @@ private fun RamChip(vm: LauncherViewModel) {
 
 @Composable
 private fun Chip(
+    startPadding: androidx.compose.ui.unit.Dp = 14.dp,
     endPadding: androidx.compose.ui.unit.Dp = 14.dp,
     content: @Composable RowScope.() -> Unit,
 ) {
@@ -128,7 +193,7 @@ private fun Chip(
             // Arkadaki renk sürekli değiştiği için koyu, sade bir zemin: yazı her renkte okunur
             .background(EvimColors.ChipSolid, RoundedCornerShape(50))
             .border(1.dp, EvimColors.ChipBorder, RoundedCornerShape(50))
-            .padding(start = 14.dp, end = endPadding),
+            .padding(start = startPadding, end = endPadding),
         content = content,
     )
 }
