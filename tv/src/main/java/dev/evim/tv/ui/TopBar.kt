@@ -108,7 +108,7 @@ private fun ShortcutsChip(vm: LauncherViewModel) {
             IconButton(
                 if (status.bluetoothOn) Icons.Rounded.Bluetooth else Icons.Rounded.BluetoothDisabled,
                 "Bluetooth aksesuarları",
-            ) { vm.openSettings(ACTION_CONNECT_INPUT) }
+            ) { vm.openAccessorySettings() }
             IconButton(Icons.Rounded.Tv, "Görüntü ve ses") { vm.openSettings(Settings.ACTION_SOUND_SETTINGS) }
             IconButton(Icons.Rounded.Settings, "Ayarlar") { vm.openSettings(Settings.ACTION_SETTINGS) }
         }
@@ -135,8 +135,6 @@ private fun IconButton(icon: ImageVector, description: String, onClick: () -> Un
     }
 }
 
-// Google TV ayarlarında aksesuar (Bluetooth kumanda, kulaklık…) eşleme ekranı
-private const val ACTION_CONNECT_INPUT = "com.google.android.intent.action.CONNECT_INPUT"
 
 @Composable
 private fun RamChip(vm: LauncherViewModel) {

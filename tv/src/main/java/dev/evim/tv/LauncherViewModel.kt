@@ -115,6 +115,10 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
 
     fun openSettings(action: String) = repo.openSettings(action)
 
+    fun openAccessorySettings() {
+        viewModelScope.launch(Dispatchers.IO) { repo.openAccessorySettings() }
+    }
+
     fun freeRam() {
         if (freeRamJob?.isActive == true) return
         freeRamJob = viewModelScope.launch {

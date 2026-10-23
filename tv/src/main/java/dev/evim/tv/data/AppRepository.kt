@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.luminance
 import androidx.core.graphics.drawable.toBitmap
 import androidx.palette.graphics.Palette
+import dev.evim.tv.R
 
 @Immutable
 data class LauncherApp(
@@ -64,12 +65,13 @@ class AppRepository(private val context: Context) {
         val intent = pm.getLeanbackLaunchIntentForPackage(packageName)
             ?: pm.getLaunchIntentForPackage(packageName)
             ?: return
-        context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        // Uygulama kaldırılmış ya da devre dışı olabilir; launcher çökmemeli
+        runCatching { context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
     }
 
     fun openAppInfo(packageName: String) {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null))
-        context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        runCatching { context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
     }
 
     fun systemStatus(): SystemStatus {
@@ -90,12 +92,35 @@ class AppRepository(private val context: Context) {
         return SystemStatus(wifiLevel, bluetoothOn)
     }
 
-    /** TV ayarlarının bir sayfasını açar; sayfa bu cihazda yoksa ana ayarlara düşer. */
+    /**
+     * TV ayarlarının bir sayfasını açar. Sayfa yoksa ya da açılamazsa ana ayarlara düşer;
+     * hiçbir durumda launcher'ı çökertmez.
+     */
     fun openSettings(action: String) {
         val intent = Intent(action).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        val target = if (intent.resolveActivity(pm) != null) intent
-        else Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(target)
+        val opened = intent.resolveActivity(pm) != null && runCatching { context.startActivity(intent) }.isSuccess
+        if (!opened) openMainSettings()
+    }
+
+    /**
+     * "Uzaktan Kumandalar ve Aksesuarlar" sayfası. Google TV bu sayfayı izinle korunan
+     * SliceActivity içinde gösteriyor; normal uygulama açamadığı için shell yetkisiyle açılır.
+     * Arka plan iş parçacığından çağrılmalı; ADB'ye ulaşılamazsa ana ayarlara düşer.
+     */
+    fun openAccessorySettings() {
+        val title = context.getString(R.string.accessories_title).replace("'", "")
+        val command = "am start -a android.settings.SLICE_SETTINGS" +
+            " -n com.android.tv.settings/.slice.SliceActivity" +
+            " --es slice_uri content://com.android.tv.settings.accessories.sliceprovider/general" +
+            " --es screen_title '$title'"
+        val opened = runCatching { adb.shell(command) }.isSuccess
+        if (!opened) openMainSettings()
+    }
+
+    private fun openMainSettings() {
+        runCatching {
+            context.startActivity(Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        }
     }
 
     fun ramInfo(): RamInfo {

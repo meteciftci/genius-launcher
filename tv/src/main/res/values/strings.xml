@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Genius Launcher</string>
+    <!-- Bluetooth kısayolunun açtığı TV ayar sayfasının başlığı -->
+    <string name="accessories_title">Uzaktan Kumandalar ve Aksesuarlar</string>
 </resources>
