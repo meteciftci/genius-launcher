@@ -63,6 +63,8 @@ fun HomeScreen(vm: LauncherViewModel) {
     var menuFor by remember { mutableStateOf<LauncherApp?>(null) }
     var showHidden by remember { mutableStateOf(false) }
     var movingPackage by remember { mutableStateOf<String?>(null) }
+    var showWeather by remember { mutableStateOf(false) }
+    var pickingCity by remember { mutableStateOf(false) }
     val firstCard = remember { FocusRequester() }
 
     // Odaktaki uygulama listede değiştiyse (renk, sıra) güncel halini kullan
@@ -83,7 +85,7 @@ fun HomeScreen(vm: LauncherViewModel) {
         HeroBackground(accent = accent, letter = current?.label?.firstOrNull()?.uppercase())
 
         Column(Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 30.dp)) {
-            TopBar(vm = vm)
+            TopBar(vm = vm, onWeatherClick = { showWeather = true })
             Spacer(Modifier.weight(1f))
             Hero(app = current, accent = accent)
 
@@ -129,6 +131,28 @@ fun HomeScreen(vm: LauncherViewModel) {
                 onColor = { vm.setColor(app, it) },
                 onInfo = { menuFor = null; vm.openAppInfo(app) },
                 onShowHidden = { menuFor = null; showHidden = true },
+            )
+        }
+        if (showWeather) {
+            WeatherDialog(
+                city = vm.city,
+                forecast = vm.forecast,
+                onChangeCity = { showWeather = false; pickingCity = true },
+                onDismiss = { showWeather = false },
+            )
+        }
+        if (pickingCity) {
+            CityPickerDialog(
+                results = vm.citySearchResults,
+                searching = vm.citySearching,
+                onQueryChange = vm::searchCity,
+                onSelect = { city ->
+                    vm.selectCity(city)
+                    pickingCity = false
+                    showWeather = true
+                },
+                // Vazgeçilirse hava paneline geri dön
+                onDismiss = { pickingCity = false; showWeather = true },
             )
         }
         if (showHidden) {

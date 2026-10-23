@@ -27,11 +27,13 @@ class LauncherPrefs(context: Context) {
             name = sp.getString(KEY_CITY, null) ?: City.DEFAULT.name,
             latitude = sp.getFloat(KEY_LAT, City.DEFAULT.latitude.toFloat()).toDouble(),
             longitude = sp.getFloat(KEY_LON, City.DEFAULT.longitude.toFloat()).toDouble(),
+            region = sp.getString(KEY_REGION, null) ?: City.DEFAULT.region,
         )
         set(value) = sp.edit {
             putString(KEY_CITY, value.name)
             putFloat(KEY_LAT, value.latitude.toFloat())
             putFloat(KEY_LON, value.longitude.toFloat())
+            putString(KEY_REGION, value.region)
         }
 
     private fun colorKey(packageName: String) = "color_$packageName"
@@ -42,5 +44,6 @@ class LauncherPrefs(context: Context) {
         const val KEY_CITY = "city"
         const val KEY_LAT = "lat"
         const val KEY_LON = "lon"
+        const val KEY_REGION = "region"
     }
 }

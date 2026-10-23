@@ -33,6 +33,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -122,8 +123,8 @@ fun HiddenAppsDialog(
 }
 
 @Composable
-private fun Panel(content: @Composable () -> Unit) {
-    // Menü OK'a basılı tutulurken açılır; o basışın bırakılması menüde tıklama sayılmasın.
+internal fun Panel(width: Dp = 320.dp, content: @Composable () -> Unit) {
+    // Paneli açan OK basışının bırakılması panelde tıklama sayılmasın.
     // Yeni bir tuşa basılana kadar OK/Enter olaylarını yut.
     var armed by remember { mutableStateOf(false) }
     Column(
@@ -137,7 +138,7 @@ private fun Panel(content: @Composable () -> Unit) {
                     event.key == Key.DirectionCenter || event.key == Key.Enter || event.key == Key.NumPadEnter
                 }
             }
-            .width(320.dp)
+            .width(width)
             .background(Color(0xF2141419), RoundedCornerShape(18.dp))
             .border(1.dp, EvimColors.ChipBorder, RoundedCornerShape(18.dp))
             .padding(20.dp),
@@ -145,7 +146,7 @@ private fun Panel(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun MenuItem(text: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+internal fun MenuItem(text: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         modifier = modifier.fillMaxWidth().padding(vertical = 2.dp),

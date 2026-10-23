@@ -9,12 +9,15 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dev.evim.tv.data.AppRepository
+import dev.evim.tv.data.City
+import dev.evim.tv.data.Forecast
 import dev.evim.tv.data.LauncherApp
 import dev.evim.tv.data.LauncherPrefs
 import dev.evim.tv.data.RamInfo
 import dev.evim.tv.data.Weather
 import dev.evim.tv.data.WeatherClient
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -30,15 +33,53 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
         private set
     var ram by mutableStateOf(RamInfo(0f, 0))
         private set
-    var weather by mutableStateOf<Weather?>(null)
+    var forecast by mutableStateOf<Forecast?>(null)
         private set
-    val cityName: String get() = prefs.city.name
+    val weather: Weather? get() = forecast?.current
+    var city by mutableStateOf(prefs.city)
+        private set
+    var citySearchResults by mutableStateOf<List<City>>(emptyList())
+        private set
+    var citySearching by mutableStateOf(false)
+        private set
+
+    private var weatherJob: Job? = null
+    private var searchJob: Job? = null
 
     init {
-        viewModelScope.launch {
+        startWeatherUpdates()
+    }
+
+    fun selectCity(selected: City) {
+        prefs.city = selected
+        city = selected
+        forecast = null
+        startWeatherUpdates()
+    }
+
+    /** Kumandayla yazarken her harfte istek atmamak için kısa bir bekleme ile arar. */
+    fun searchCity(query: String) {
+        searchJob?.cancel()
+        if (query.trim().length < 2) {
+            citySearchResults = emptyList()
+            citySearching = false
+            return
+        }
+        searchJob = viewModelScope.launch {
+            delay(400)
+            citySearching = true
+            citySearchResults = runCatching { withContext(Dispatchers.IO) { WeatherClient.searchCities(query) } }
+                .getOrDefault(emptyList())
+            citySearching = false
+        }
+    }
+
+    private fun startWeatherUpdates() {
+        weatherJob?.cancel()
+        weatherJob = viewModelScope.launch {
             while (true) {
-                weather = runCatching { withContext(Dispatchers.IO) { WeatherClient.fetch(prefs.city) } }
-                    .getOrDefault(weather)
+                forecast = runCatching { withContext(Dispatchers.IO) { WeatherClient.fetch(city) } }
+                    .getOrDefault(forecast)
                 delay(WEATHER_REFRESH_MS)
             }
         }

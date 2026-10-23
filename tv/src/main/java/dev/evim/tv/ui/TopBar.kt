@@ -38,7 +38,7 @@ import java.util.Locale
 private val TR = Locale("tr", "TR")
 
 @Composable
-fun TopBar(vm: LauncherViewModel) {
+fun TopBar(vm: LauncherViewModel, onWeatherClick: () -> Unit) {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -49,16 +49,15 @@ fun TopBar(vm: LauncherViewModel) {
     }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Chip {
+        Chip(endPadding = 4.dp) {
             Text(SimpleDateFormat("HH:mm", TR).format(Date(now)), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.width(8.dp))
             Text(SimpleDateFormat("EEE d MMM", TR).format(Date(now)), color = EvimColors.TextDim, fontSize = 11.sp)
-            Divider()
+            Spacer(Modifier.width(8.dp))
             val weather = vm.weather
-            Text(
-                if (weather != null) "${weather.symbol}  ${weather.temperature}°  ·  ${vm.cityName}" else vm.cityName,
-                color = EvimColors.TextDim,
-                fontSize = 11.sp,
+            ChipButton(
+                text = if (weather != null) "${weather.symbol}  ${weather.temperature}°  ·  ${vm.city.name}" else vm.city.name,
+                onClick = onWeatherClick,
             )
         }
         Spacer(Modifier.weight(1f))
@@ -134,9 +133,25 @@ private fun Chip(
     )
 }
 
+/** Kutucuğun içinde kumandayla seçilebilen küçük düğme; odakta beyazlaşır. */
 @Composable
-private fun Divider() {
-    Spacer(Modifier.width(10.dp))
-    Box(Modifier.width(1.dp).height(14.dp).background(EvimColors.ChipBorder))
-    Spacer(Modifier.width(10.dp))
+private fun ChipButton(text: String, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(50)),
+        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.05f),
+        colors = ClickableSurfaceDefaults.colors(
+            containerColor = Color(0x1AFFFFFF),
+            contentColor = EvimColors.TextDim,
+            focusedContainerColor = Color.White,
+            focusedContentColor = Color(0xFF111111),
+        ),
+    ) {
+        Text(
+            text,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+        )
+    }
 }
