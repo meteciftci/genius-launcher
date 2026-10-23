@@ -15,8 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,10 +40,7 @@ fun HomeDevicesRow() {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text("Evim", color = EvimColors.TextFaint, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.width(14.dp))
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen),
-        ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Devices.forEach { DeviceChip(it) }
         }
     }

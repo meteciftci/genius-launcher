@@ -23,8 +23,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,11 +48,7 @@ fun TopBar(vm: LauncherViewModel) {
         }
     }
 
-    // Önbellekli katman: cam kutucuklar yalnızca saat/RAM değişince yeniden çizilir
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen),
-    ) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         Chip {
             Text(SimpleDateFormat("HH:mm", TR).format(Date(now)), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.width(8.dp))
