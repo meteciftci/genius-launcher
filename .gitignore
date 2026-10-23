@@ -1,0 +1,27 @@
+# Gradle / Android Studio
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+.kotlin/
+
+# macOS
+.DS_Store
+
+# İmzalama anahtarları
+*.jks
+*.keystore
+keystore.properties
+
+# Cihaz anahtarları ve hesap bilgileri: ASLA commit edilmez
+secrets/
+*.secrets.json
+devices.json
+**/*_yedek.txt
+
+# Yerel TV adresi
+tools/.tv

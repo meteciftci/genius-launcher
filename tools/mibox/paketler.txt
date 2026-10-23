@@ -1,0 +1,7 @@
+com.google.android.youtube.tvmusic
+com.amazon.amazonvideo.livingroom
+com.xiaomi.statistic
+com.xm.webcontent
+com.mitv.tvhome.oemtab
+com.xiaomi.mitv.smartshare
+com.xiaomo.tv.milegal
