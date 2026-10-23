@@ -84,7 +84,7 @@ fun HomeScreen(vm: LauncherViewModel) {
 
     // Zemin rengini pencere teması çiziyor (themes.xml); burada ikinci kez boyamıyoruz
     Box(Modifier.fillMaxSize()) {
-        HeroBackground(accent = accent, letter = current?.label?.firstOrNull()?.uppercase())
+        HeroBackground(accent = accent)
 
         Column(Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 30.dp)) {
             TopBar(vm = vm, onWeatherClick = { showWeather = true })
@@ -118,9 +118,16 @@ fun HomeScreen(vm: LauncherViewModel) {
                 }
             }
             MoveHint(moving = movingPackage != null, modifier = Modifier.offset(y = (-16).dp))
-            Spacer(Modifier.height(10.dp))
-            HomeDevicesRow(vm)
         }
+
+        // Sağ üstte, büyük harfin eski yerinde
+        HomeWidget(
+            vm = vm,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 86.dp, end = 48.dp)
+                .width(300.dp),
+        )
 
         menuFor?.let { app ->
             AppMenu(
@@ -204,9 +211,9 @@ private fun MoveHint(moving: Boolean, modifier: Modifier = Modifier) {
     }
 }
 
-/** Sağ tarafa yayılan renk, ince eğri çizgiler ve büyük silik harf. */
+/** Sağ tarafa yayılan renk ve ince eğri çizgiler. */
 @Composable
-private fun HeroBackground(accent: () -> Color, letter: String?) {
+private fun HeroBackground(accent: () -> Color) {
     // Tam ekran radyal degradeyi her karede hesaplamak Mi Box'ta ~18 ms sürüyor.
     // Bunun yerine degradenin gri tonlu halini bir kez küçük bir resme çizip ekrana geriyoruz;
     // renk geçişi yalnızca resmin renk filtresini değiştiriyor.
@@ -259,25 +266,6 @@ private fun HeroBackground(accent: () -> Color, letter: String?) {
                 }
             },
     )
-    if (letter != null) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopEnd) {
-            AnimatedContent(
-                targetState = letter,
-                transitionSpec = { fadeIn(tween(300)) togetherWith fadeOut(tween(200)) },
-                label = "letter",
-                modifier = Modifier.padding(top = 70.dp, end = 150.dp),
-            ) { l ->
-                // Bu boyuttaki harf GPU'nun yazı önbelleğine sığmaz; dokuya bir kez çizilip saklanır
-                Text(
-                    l,
-                    color = Color.White.copy(alpha = 0.10f),
-                    fontSize = 240.sp,
-                    fontWeight = FontWeight.Black,
-                    modifier = Modifier.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen),
-                )
-            }
-        }
-    }
 }
 
 /**

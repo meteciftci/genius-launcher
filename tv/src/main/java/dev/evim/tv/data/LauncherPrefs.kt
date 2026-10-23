@@ -11,6 +11,11 @@ class LauncherPrefs(context: Context) {
         get() = sp.getString(KEY_ORDER, "").orEmpty().split(',').filter { it.isNotBlank() }
         set(value) = sp.edit { putString(KEY_ORDER, value.joinToString(",")) }
 
+    /** Evim widget'ındaki cihazların sırası (cihaz anahtarları). */
+    var deviceOrder: List<String>
+        get() = sp.getString(KEY_DEVICE_ORDER, "").orEmpty().split(',').filter { it.isNotBlank() }
+        set(value) = sp.edit { putString(KEY_DEVICE_ORDER, value.joinToString(",")) }
+
     var hidden: Set<String>
         get() = sp.getStringSet(KEY_HIDDEN, emptySet()).orEmpty().toSet()
         set(value) = sp.edit { putStringSet(KEY_HIDDEN, value) }
@@ -41,6 +46,7 @@ class LauncherPrefs(context: Context) {
     private companion object {
         const val KEY_ORDER = "order"
         const val KEY_HIDDEN = "hidden"
+        const val KEY_DEVICE_ORDER = "device_order"
         const val KEY_CITY = "city"
         const val KEY_LAT = "lat"
         const val KEY_LON = "lon"

@@ -31,18 +31,17 @@
     <string name="ram_failed">Couldn\'t free</string>
 
     <!-- Home devices -->
-    <string name="device_dyson">Dyson</string>
-    <string name="device_feeder_1">Food bowl 1</string>
-    <string name="device_feeder_2">Food bowl 2</string>
-    <string name="device_litter_box">Litter box</string>
-    <string name="device_relay">Relay</string>
-    <string name="device_camera">Camera</string>
 
     <string name="home_device_count">  ·  %d devices</string>
+    <string name="all_devices_title">All devices</string>
+    <string name="home_other">Other</string>
+    <string name="home_other_count">%d more</string>
+    <string name="device_move_hint">▲ ▼ to move  ·  OK to finish</string>
+    <string name="feeder_meal">%1$s · %2$d portion(s)</string>
+    <string name="purifier_target">target %d°</string>
     <string name="home_unreachable">unreachable</string>
     <string name="relay_on">On</string>
     <string name="relay_off">Off</string>
-    <string name="feeder_next">next %s</string>
     <string name="feeder_next_meal">Next meal %1$s · %2$d portion(s)</string>
     <string name="feed_one">Feed 1 portion</string>
     <string name="feed_two">Feed 2 portions</string>

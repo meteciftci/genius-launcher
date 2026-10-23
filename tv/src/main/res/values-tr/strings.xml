@@ -26,18 +26,17 @@
     <string name="ram_adb_off">ADB kapalı</string>
     <string name="ram_failed">Boşaltılamadı</string>
 
-    <string name="device_dyson">Dyson</string>
-    <string name="device_feeder_1">Mama kabı 1</string>
-    <string name="device_feeder_2">Mama kabı 2</string>
-    <string name="device_litter_box">Kedi tuvaleti</string>
-    <string name="device_relay">Röle</string>
-    <string name="device_camera">Kamera</string>
 
     <string name="home_device_count">  ·  %d cihaz</string>
+    <string name="all_devices_title">Tüm cihazlar</string>
+    <string name="home_other">Diğer</string>
+    <string name="home_other_count">%d cihaz daha</string>
+    <string name="device_move_hint">▲ ▼ ile taşı  ·  OK ile bitir</string>
+    <string name="feeder_meal">%1$s · %2$d porsiyon</string>
+    <string name="purifier_target">hedef %d°</string>
     <string name="home_unreachable">ulaşılamıyor</string>
     <string name="relay_on">Açık</string>
     <string name="relay_off">Kapalı</string>
-    <string name="feeder_next">sonraki %s</string>
     <string name="feeder_next_meal">Sonraki öğün %1$s · %2$d porsiyon</string>
     <string name="feed_one">1 porsiyon ver</string>
     <string name="feed_two">2 porsiyon ver</string>

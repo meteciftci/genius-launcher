@@ -125,7 +125,7 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
             withContext(Dispatchers.IO) { runCatching { home.load() } }
             homeConfigured = home.isConfigured
             while (isActive && home.isConfigured) {
-                homeDevices = homeIo { home.poll() }
+                homeDevices = sortDevices(homeIo { home.poll() })
                 delay(HOME_REFRESH_MS)
             }
         }
@@ -148,6 +148,23 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
             val updated = homeIo(action)
             homeDevices = homeDevices.map { if (it.key == updated.key) updated else it }
         }
+    }
+
+    /** Cihazı widget sırasında [delta] kadar kaydırır (-1 yukarı, +1 aşağı). */
+    fun moveDevice(device: HomeDevice, delta: Int) {
+        val keys = homeDevices.map { it.key }.toMutableList()
+        val from = keys.indexOf(device.key)
+        val to = (from + delta).coerceIn(0, keys.lastIndex)
+        if (from < 0 || from == to) return
+        keys.add(to, keys.removeAt(from))
+        prefs.deviceOrder = keys
+        homeDevices = sortDevices(homeDevices)
+    }
+
+    private fun sortDevices(devices: List<HomeDevice>): List<HomeDevice> {
+        val order = prefs.deviceOrder
+        // Sıralanmamış yeni cihazlar sona, geldikleri sırayla eklenir
+        return devices.sortedBy { order.indexOf(it.key).let { i -> if (i < 0) Int.MAX_VALUE else i } }
     }
 
     private suspend fun <T> homeIo(block: () -> T): T = withContext(Dispatchers.IO) { homeLock.withLock { block() } }

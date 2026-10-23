@@ -50,6 +50,8 @@ class AppRepository(private val context: Context) {
             pm.queryIntentActivities(intent, 0).forEach { found.putIfAbsent(it.activityInfo.packageName, it) }
         }
         found.remove(context.packageName)
+        // Ayarlar üst çubuktaki simgeden açılıyor; kartlar arasında yer kaplamasın
+        found.remove(TV_SETTINGS_PACKAGE)
         return found.values.map { info ->
             val bitmap = info.loadIcon(pm).toBitmap(ICON_PX, ICON_PX, Bitmap.Config.ARGB_8888)
             LauncherApp(
@@ -161,6 +163,7 @@ class AppRepository(private val context: Context) {
 
     private companion object {
         const val ICON_PX = 192
+        const val TV_SETTINGS_PACKAGE = "com.android.tv.settings"
         val FALLBACK = Color(0xFF4A5060)
     }
 }
