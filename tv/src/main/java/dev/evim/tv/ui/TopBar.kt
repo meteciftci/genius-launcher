@@ -55,7 +55,7 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun TopBar(vm: LauncherViewModel, onWeatherClick: () -> Unit) {
+fun TopBar(vm: LauncherViewModel) {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -74,16 +74,10 @@ fun TopBar(vm: LauncherViewModel, onWeatherClick: () -> Unit) {
     val dateFormat = remember(locale) { SimpleDateFormat(DateFormat.getBestDateTimePattern(locale, "EEEdMMM"), locale) }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Chip(endPadding = 4.dp) {
+        Chip {
             Text(timeFormat.format(Date(now)), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.width(8.dp))
             Text(dateFormat.format(Date(now)), color = EvimColors.TextDim, fontSize = 11.sp)
-            Spacer(Modifier.width(8.dp))
-            val weather = vm.weather
-            ChipButton(
-                text = if (weather != null) "${weather.symbol}  ${weather.temperature}°  ·  ${vm.city.name}" else vm.city.name,
-                onClick = onWeatherClick,
-            )
         }
         Spacer(Modifier.weight(1f))
         Chip {
@@ -208,27 +202,4 @@ private fun Chip(
             .padding(start = startPadding, end = endPadding),
         content = content,
     )
-}
-
-/** Kutucuğun içinde kumandayla seçilebilen küçük düğme; odakta beyazlaşır. */
-@Composable
-private fun ChipButton(text: String, onClick: () -> Unit) {
-    Surface(
-        onClick = onClick,
-        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(50)),
-        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.05f),
-        colors = ClickableSurfaceDefaults.colors(
-            containerColor = Color(0x1AFFFFFF),
-            contentColor = EvimColors.TextDim,
-            focusedContainerColor = Color.White,
-            focusedContentColor = Color(0xFF111111),
-        ),
-    ) {
-        Text(
-            text,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-        )
-    }
 }

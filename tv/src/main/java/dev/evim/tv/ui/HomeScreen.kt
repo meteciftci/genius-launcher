@@ -57,6 +57,10 @@ import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
 import dev.evim.tv.LauncherViewModel
 import dev.evim.tv.data.LauncherApp
+import dev.evim.tv.data.Weather
+import dev.evim.tv.data.weatherDescription
+import androidx.tv.material3.ClickableSurfaceDefaults
+import androidx.tv.material3.Surface
 import java.util.Calendar
 
 @Composable
@@ -86,16 +90,19 @@ fun HomeScreen(vm: LauncherViewModel) {
     Box(Modifier.fillMaxSize()) {
         HeroBackground(accent = accent)
 
-        Column(Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 30.dp)) {
-            TopBar(vm = vm, onWeatherClick = { showWeather = true })
+        // Alt boşluk dar: uygulama kartları ekranın altına yakın dursun
+        Column(Modifier.fillMaxSize().padding(start = 48.dp, end = 48.dp, top = 30.dp, bottom = 14.dp)) {
+            TopBar(vm = vm)
             Spacer(Modifier.weight(1f))
-            Hero(app = current, accent = accent)
+            Hero(app = current, accent = accent, weather = vm.weather, city = vm.city.name, onWeatherClick = { showWeather = true })
 
             Spacer(Modifier.height(34.dp))
 
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(stringResource(R.string.apps_title), color = EvimColors.TextFaint, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 Text("  ${vm.apps.size}", color = EvimColors.TextFaint, fontSize = 9.sp)
+                Spacer(Modifier.width(14.dp))
+                MoveHint(moving = movingPackage != null)
             }
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -117,7 +124,6 @@ fun HomeScreen(vm: LauncherViewModel) {
                     )
                 }
             }
-            MoveHint(moving = movingPackage != null, modifier = Modifier.offset(y = (-16).dp))
         }
 
         // Sağ üstte, büyük harfin eski yerinde
@@ -175,12 +181,14 @@ fun HomeScreen(vm: LauncherViewModel) {
 }
 
 @Composable
-private fun Hero(app: LauncherApp?, accent: () -> Color) {
+private fun Hero(app: LauncherApp?, accent: () -> Color, weather: Weather?, city: String, onWeatherClick: () -> Unit) {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.width(20.dp).height(2.dp).drawBehind { drawRect(accent().lighter(0.15f)) })
             Spacer(Modifier.width(8.dp))
             Text(greeting(), color = EvimColors.TextDim, fontSize = 14.sp)
+            Spacer(Modifier.width(12.dp))
+            WeatherPill(weather, city, onWeatherClick)
         }
         AnimatedContent(
             targetState = app?.label.orEmpty(),
@@ -200,7 +208,27 @@ private fun Hero(app: LauncherApp?, accent: () -> Color) {
     }
 }
 
-/** Yalnızca taşıma modunda görünür; yer kaplamaya devam eder ki düzen kaymasın. */
+/** Karşılamanın yanındaki hava durumu; basınca saatlik ve 7 günlük panel açılır. */
+@Composable
+private fun WeatherPill(weather: Weather?, city: String, onClick: () -> Unit) {
+    val description = weather?.let { w -> weatherDescription(w.code)?.let { stringResource(it) } }
+    val text = if (weather == null) city else listOfNotNull("${weather.symbol}  ${weather.temperature}°", description, city).joinToString("  ·  ")
+    Surface(
+        onClick = onClick,
+        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(50)),
+        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.05f),
+        colors = ClickableSurfaceDefaults.colors(
+            containerColor = Color(0x1AFFFFFF),
+            contentColor = Color.White,
+            focusedContainerColor = Color.White,
+            focusedContentColor = Color(0xFF111111),
+        ),
+    ) {
+        Text(text, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp))
+    }
+}
+
+/** Yalnızca taşıma modunda görünür. */
 @Composable
 private fun MoveHint(moving: Boolean, modifier: Modifier = Modifier) {
     Row(modifier.height(14.dp), verticalAlignment = Alignment.CenterVertically) {
