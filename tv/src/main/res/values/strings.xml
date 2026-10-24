@@ -63,7 +63,7 @@
     <string name="dyson_sticker_password_body">The Wi-Fi password on the same sticker</string>
     <string name="dyson_loading">Signing in and searching the home network…</string>
     <string name="dyson_no_account">No active MyDyson account was found for this email.</string>
-    <string name="dyson_too_frequent">Too many codes were requested. Wait a few minutes and try again.</string>
+    <string name="dyson_too_frequent">Dyson isn\'t accepting sign-ins for now because of too many attempts. Wait a few minutes and try again.</string>
     <string name="dyson_wrong_login">The code or password is wrong.</string>
     <string name="dyson_network">Couldn\'t reach Dyson. Check the internet connection and try again.</string>
     <string name="dyson_bad_ssid">That doesn\'t look like a Dyson Wi-Fi name. It starts with DYSON- and ends with the model, like -527K.</string>

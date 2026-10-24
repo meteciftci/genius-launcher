@@ -56,7 +56,7 @@
     <string name="dyson_sticker_password_body">Aynı etiketteki Wi-Fi parolası</string>
     <string name="dyson_loading">Giriş yapılıyor ve ev ağı taranıyor…</string>
     <string name="dyson_no_account">Bu e-postayla etkin bir MyDyson hesabı bulunamadı.</string>
-    <string name="dyson_too_frequent">Çok fazla kod istendi. Birkaç dakika bekleyip tekrar deneyin.</string>
+    <string name="dyson_too_frequent">Dyson çok sık denendiği için girişi şimdilik kabul etmiyor. Birkaç dakika bekleyip yeniden deneyin.</string>
     <string name="dyson_wrong_login">Kod ya da şifre yanlış.</string>
     <string name="dyson_network">Dyson\'a ulaşılamadı. İnternet bağlantısını kontrol edip tekrar deneyin.</string>
     <string name="dyson_bad_ssid">Bu bir Dyson Wi-Fi adına benzemiyor. DYSON- ile başlar ve -527K gibi modelle biter.</string>

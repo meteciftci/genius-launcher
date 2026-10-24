@@ -49,9 +49,10 @@ object DysonCloud {
             .put("challengeId", challenge.id).put("otpCode", code)
         val (status, login) = call("POST", "/v3/userregistration/email/verify", body)
         val token = login.optString("token")
-        if (status == 400 || status == 401 || status == 403 || token.isEmpty()) {
-            throw DysonCloudException(DysonCloudException.Reason.WRONG_LOGIN)
-        }
+        // Arka arkaya denemelerde sunucunun önündeki Cloudflare 429 döner; bu yanlış şifre değildir
+        if (status == 429) throw DysonCloudException(DysonCloudException.Reason.TOO_FREQUENT)
+        if (status == 400 || status == 401 || status == 403) throw DysonCloudException(DysonCloudException.Reason.WRONG_LOGIN)
+        if (token.isEmpty()) throw DysonCloudException(DysonCloudException.Reason.NETWORK)
         provision()
         val manifest = JSONArray(raw("GET", "/v2/provisioningservice/manifest", null, token).second)
         return (0 until manifest.length()).mapNotNull { manifest.optJSONObject(it) }.mapNotNull { device ->
