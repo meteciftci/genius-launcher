@@ -292,4 +292,18 @@
     <string name="update_network">GitHub\'a ulaşılamadı. İnternet bağlantısını kontrol edip yeniden deneyin.</string>
     <string name="update_corrupt">İndirilen dosya doğrulanamadı ya da kurulamadı; hiçbir şey değiştirilmedi.</string>
     <string name="update_failed">Güncelleme kurulamadı.</string>
+
+    <!-- Dosya al -->
+    <string name="receive_title">Telefondan dosya al</string>
+    <string name="receive_button_hint">QR kodla, uygulama kurmadan</string>
+    <string name="receive_subtitle">Telefon ya da bilgisayardan, uygulama kurmadan</string>
+    <string name="receive_step_scan">Telefonun kamerasıyla QR kodu okutun</string>
+    <string name="receive_step_pick">Açılan sayfada dosyaları seçin</string>
+    <string name="receive_step_done">Dosyalar İndirilenler klasörüne gelir</string>
+    <string name="receive_same_wifi">Telefon TV ile aynı Wi-Fi ağında olmalı. Bilgisayardan bu adres de açılabilir:</string>
+    <string name="receive_no_network">TV ev ağına bağlı değil.</string>
+    <string name="receive_progress">%1$s / %2$s</string>
+    <string name="receive_failed">Yarıda kaldı, dosya kaydedilmedi.</string>
+    <string name="receive_no_space">TV\'de yer yok, dosya kaydedilmedi.</string>
+    <string name="receive_more">+%d dosya daha, İndirilenler\'de</string>
 </resources>

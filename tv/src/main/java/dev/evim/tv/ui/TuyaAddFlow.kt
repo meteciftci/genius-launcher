@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
@@ -188,11 +189,11 @@ private val TuyaKind.label: Int
 
 /** Kumandayla değil telefonla okutulacağı için büyük ve beyaz zeminli. */
 @Composable
-private fun QrCode(content: String) {
+internal fun QrCode(content: String, side: Dp = 200.dp) {
     val matrix: BitMatrix = remember(content) { QRCodeWriter().encode(content, BarcodeFormat.QR_CODE, 0, 0) }
     Canvas(
         Modifier
-            .size(200.dp)
+            .size(side)
             .background(Color.White, RoundedCornerShape(10.dp))
             .padding(12.dp),
     ) {

@@ -307,4 +307,18 @@
     <string name="update_network">Couldn\'t reach GitHub. Check the internet connection and try again.</string>
     <string name="update_corrupt">The downloaded file couldn\'t be verified or installed; nothing was changed.</string>
     <string name="update_failed">The update couldn\'t be installed.</string>
+
+    <!-- Dosya al -->
+    <string name="receive_title">Receive files</string>
+    <string name="receive_button_hint">With a QR code, no app needed</string>
+    <string name="receive_subtitle">From a phone or computer, no app needed</string>
+    <string name="receive_step_scan">Scan the QR code with your phone\'s camera</string>
+    <string name="receive_step_pick">Choose files on the page that opens</string>
+    <string name="receive_step_done">Files arrive in the Downloads folder</string>
+    <string name="receive_same_wifi">The phone must be on the same Wi-Fi as the TV. You can also open this address on a computer:</string>
+    <string name="receive_no_network">The TV isn\'t connected to your home network.</string>
+    <string name="receive_progress">%1$s of %2$s</string>
+    <string name="receive_failed">Interrupted; the file wasn\'t saved.</string>
+    <string name="receive_no_space">Not enough space on the TV; the file wasn\'t saved.</string>
+    <string name="receive_more">+%d more in Downloads</string>
 </resources>

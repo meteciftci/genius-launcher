@@ -1,5 +1,6 @@
 package dev.evim.tv.ui
 
+import android.os.Environment
 import android.text.format.DateFormat
 import android.text.format.Formatter
 import androidx.compose.foundation.background
@@ -29,6 +30,7 @@ import androidx.compose.material.icons.rounded.FolderOpen
 import androidx.compose.material.icons.rounded.Image
 import androidx.compose.material.icons.rounded.Movie
 import androidx.compose.material.icons.rounded.OpenInNew
+import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.SdStorage
 import androidx.compose.material.icons.rounded.Usb
@@ -75,6 +77,7 @@ private sealed interface FilesOverlay {
     data class Install(val entry: FileEntry) : FilesOverlay
     data class Play(val file: File) : FilesOverlay
     data class Images(val files: List<File>, val start: Int) : FilesOverlay
+    data object Receive : FilesOverlay
 }
 
 /**
@@ -128,8 +131,9 @@ fun FilesDialog(onInstalled: () -> Unit, onDismiss: () -> Unit) {
             FileKind.FOLDER -> { focusName = null; entries = null; dir = entry.file }
             FileKind.VIDEO, FileKind.AUDIO -> overlay = FilesOverlay.Play(entry.file)
             FileKind.IMAGE -> {
-                val images = list.filter { it.kind == FileKind.IMAGE }.map { it.file }
-                overlay = FilesOverlay.Images(images, images.indexOf(entry.file).coerceAtLeast(0))
+                // Klasör listesi henüz yüklenmemişse (Dosya al'dan açılınca) yalnızca bu resim
+                val images = list.filter { it.kind == FileKind.IMAGE }.map { it.file }.takeIf { entry.file in it } ?: listOf(entry.file)
+                overlay = FilesOverlay.Images(images, images.indexOf(entry.file))
             }
             FileKind.APK -> overlay = FilesOverlay.Install(entry)
             FileKind.OTHER -> {
@@ -176,6 +180,16 @@ fun FilesDialog(onInstalled: () -> Unit, onDismiss: () -> Unit) {
                             icon = if (r.removable) Icons.Rounded.Usb else Icons.Rounded.SdStorage,
                             trailing = if (r == root) Trailing.Check(true) else Trailing.None,
                             onClick = { focusName = null; entries = null; root = r; dir = r.dir },
+                        )
+                    }
+                    if (access == true) {
+                        Spacer(Modifier.height(14.dp))
+                        ListRow(
+                            title = stringResource(R.string.receive_title),
+                            subtitle = stringResource(R.string.receive_button_hint),
+                            icon = Icons.Rounded.PhoneAndroid,
+                            tint = EvimColors.Online,
+                            onClick = { overlay = FilesOverlay.Receive },
                         )
                     }
                     Spacer(Modifier.weight(1f))
@@ -273,6 +287,26 @@ fun FilesDialog(onInstalled: () -> Unit, onDismiss: () -> Unit) {
         )
         is FilesOverlay.Play -> MediaPlayerDialog(o.file, onDismiss = { overlay = null })
         is FilesOverlay.Images -> ImageViewerDialog(o.files, o.start, onDismiss = { overlay = null })
+        FilesOverlay.Receive -> {
+            val downloads = remember { Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) }
+            // Kapanınca gelen dosyalar görünsün diye İndirilenler açılır
+            fun showDownloads(focus: String?) {
+                root = roots.firstOrNull { !it.removable } ?: root
+                focusName = focus
+                entries = null
+                dir = downloads
+                reload++
+            }
+            ReceiveDialog(
+                folder = downloads,
+                onOpen = { file ->
+                    overlay = null
+                    showDownloads(file.name)
+                    open(FileEntry(file, FileStore.kindOf(file), file.length(), file.lastModified()))
+                },
+                onDismiss = { overlay = null; showDownloads(null) },
+            )
+        }
     }
 }
 

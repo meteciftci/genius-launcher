@@ -12,7 +12,7 @@ A clean, ad-free home screen for Android TV and Google TV. It also controls the 
 
 - **Showcase**: The focused app's name is written in large letters; the background takes a color picked from the app's icon.
 - **Apps**: Hold OK on the remote to move, hide or recolor a card. New apps get a card on their own; hidden ones come back from Genius settings.
-- **Files**: Browse, rename and delete files on internal storage and USB sticks. Videos, music and pictures open inside the launcher (even when the TV has no player app). APKs are installed after you confirm. Files is a card like the apps, so you can hide it.
+- **Files**: Browse, rename and delete files on internal storage and USB sticks. Videos, music and pictures open inside the launcher (even when the TV has no player app). APKs are installed after you confirm. **Receive files** shows a QR code: scan it with your phone's camera and pick files on the page that opens; they arrive in Downloads over your home network, no app needed. Files is a card like the apps, so you can hide it.
 - **Weather**: Current weather next to the clock; press it for an hourly and 7-day forecast. Data comes from [Open-Meteo](https://open-meteo.com) and the city can be changed.
 - **Smart home**: Tuya (plugs, relays, pet feeders), Dyson air purifiers and Eufy cameras appear as cards at the top right. Cards can be reordered and renamed; you choose how many are shown (3–6) and the rest go to an "Other" panel.
 - **Camera**: Press an Eufy camera's card for a full-screen live view with sound (RTSP). Pan & Tilt cameras turn with the remote's arrow keys.
