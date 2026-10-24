@@ -74,6 +74,7 @@ fun HomeScreen(vm: LauncherViewModel) {
     var showWeather by remember { mutableStateOf(false) }
     var pickingCity by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
+    var showSmartHome by remember { mutableStateOf(false) }
     // Şehir ayarlardan seçildiyse sonunda hava paneline değil ayarlara dönülür
     var cityFromSettings by remember { mutableStateOf(false) }
     val firstCard = remember { FocusRequester() }
@@ -111,7 +112,7 @@ fun HomeScreen(vm: LauncherViewModel) {
 
         // Alt boşluk dar: uygulama kartları ekranın altına yakın dursun
         Column(Modifier.fillMaxSize().padding(start = 48.dp, end = 48.dp, top = 30.dp, bottom = 14.dp)) {
-            TopBar(vm = vm, onGeniusSettings = { showSettings = true })
+            TopBar(vm = vm, onSmartHome = { showSmartHome = true }, onGeniusSettings = { showSettings = true })
             Spacer(Modifier.weight(1f))
             Hero(app = current, accent = accent, weather = vm.weather, city = vm.city.name, onWeatherClick = { showWeather = true })
 
@@ -164,6 +165,11 @@ fun HomeScreen(vm: LauncherViewModel) {
                 onColor = { vm.setColor(app, it) },
                 onInfo = { menuFor = null; vm.openAppInfo(app) },
             )
+        }
+        if (showSmartHome) {
+            // Cihaz yokken panel doğrudan eklemeyle açılır
+            val empty = remember { vm.homeDevices.isEmpty() }
+            SmartHomeDialog(vm = vm, startAtAdd = empty, onDismiss = { showSmartHome = false })
         }
         // Gizli uygulamalar ve şehir seçimi bu panelin üstünde açılır; kapanınca panele dönülür
         if (showSettings) {

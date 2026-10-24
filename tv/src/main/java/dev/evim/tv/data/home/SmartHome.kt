@@ -47,6 +47,8 @@ class SmartHome(private val context: Context) {
             incoming.copyTo(stored, overwrite = true)
             incoming.delete()
         }
+        tuya = emptyMap()
+        dyson = emptyMap()
         if (!stored.exists()) return
         val json = JSONObject(stored.readText())
         tuya = json.optJSONArray("tuya").objects().associate { t ->
@@ -63,6 +65,18 @@ class SmartHome(private val context: Context) {
                 device = DysonDevice(d.getString("serial"), d.getString("credential"), d.getString("product_type"), d.getString("ip")),
             )
         }
+    }
+
+    /** Cihazı ayar dosyasından siler; anahtarı da onunla gider. */
+    fun remove(key: String) {
+        if (!stored.exists()) return
+        val json = JSONObject(stored.readText())
+        for ((list, id) in listOf("tuya" to "id", "dyson" to "serial")) {
+            val kept = json.optJSONArray(list).objects().filter { it.optString(id) != key }
+            json.put(list, org.json.JSONArray(kept))
+        }
+        stored.writeText(json.toString())
+        load()
     }
 
     /** Tüm cihazları sorar; cevap vermeyenler [HomeDevice.reachable] = false olarak döner. */

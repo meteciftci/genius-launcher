@@ -6,7 +6,10 @@ import dev.evim.tv.R
 import androidx.compose.ui.res.stringResource
 import android.provider.Settings
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.ui.draw.alpha
+import androidx.tv.material3.Border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,7 +59,7 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun TopBar(vm: LauncherViewModel, onGeniusSettings: () -> Unit) {
+fun TopBar(vm: LauncherViewModel, onSmartHome: () -> Unit, onGeniusSettings: () -> Unit) {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -81,22 +84,44 @@ fun TopBar(vm: LauncherViewModel, onGeniusSettings: () -> Unit) {
             Text(dateFormat.format(Date(now)), color = EvimColors.TextDim, fontSize = 11.sp)
         }
         Spacer(Modifier.weight(1f))
-        Chip {
-            Text("⌂", color = Color.White, fontSize = 13.sp)
-            Spacer(Modifier.width(6.dp))
-            Text(stringResource(R.string.home_title), color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
-            val devices = vm.homeDevices
-            val status = if (vm.homeConfigured) stringResource(R.string.home_device_count, devices.size) else stringResource(R.string.home_setup_pending)
-            Text(status, color = EvimColors.TextDim, fontSize = 11.sp)
-            Spacer(Modifier.width(6.dp))
-            // Yeşil: tüm cihazlar cevap veriyor; sarı: kurulmadı ya da biri ulaşılamıyor
-            val healthy = vm.homeConfigured && devices.isNotEmpty() && devices.all { it.reachable }
-            Box(Modifier.size(5.dp).background(if (healthy) EvimColors.Online else EvimColors.Warning, CircleShape))
-        }
+        HomeChip(vm = vm, onClick = onSmartHome)
         Spacer(Modifier.width(8.dp))
         ShortcutsChip(vm = vm, onGeniusSettings = onGeniusSettings)
         Spacer(Modifier.width(8.dp))
         RamChip(vm = vm)
+    }
+}
+
+/** Evim kutusu: akıllı ev panelini açar; cihaz yokken eklemeye çağırır. */
+@Composable
+private fun HomeChip(vm: LauncherViewModel, onClick: () -> Unit) {
+    val devices = vm.homeDevices
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.height(32.dp),
+        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(50)),
+        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.05f),
+        border = ClickableSurfaceDefaults.border(border = Border(BorderStroke(1.dp, EvimColors.ChipBorder))),
+        colors = ClickableSurfaceDefaults.colors(
+            containerColor = EvimColors.ChipSolid,
+            contentColor = Color.White,
+            focusedContainerColor = Color.White,
+            focusedContentColor = Color(0xFF111111),
+        ),
+    ) {
+        Row(Modifier.fillMaxHeight().padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("⌂", fontSize = 13.sp)
+            Spacer(Modifier.width(6.dp))
+            Text(stringResource(R.string.home_title), fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+            val status = if (devices.isEmpty()) stringResource(R.string.home_add_device) else stringResource(R.string.home_device_count, devices.size)
+            Text(status, fontSize = 11.sp, modifier = Modifier.alpha(0.7f))
+            if (devices.isNotEmpty()) {
+                Spacer(Modifier.width(6.dp))
+                // Yeşil: tüm cihazlar cevap veriyor; sarı: biri ulaşılamıyor
+                val healthy = devices.all { it.reachable }
+                Box(Modifier.size(5.dp).background(if (healthy) EvimColors.Online else EvimColors.Warning, CircleShape))
+            }
+        }
     }
 }
 

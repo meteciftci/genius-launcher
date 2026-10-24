@@ -14,7 +14,18 @@
 
     <!-- Top bar -->
     <string name="home_title">Home</string>
-    <string name="home_setup_pending">  ·  setup pending</string>
+    <string name="home_add_device">  ·  add device</string>
+    <string name="smart_home_title">Smart home</string>
+    <string name="smart_home_subtitle">Devices are controlled over your home network, not the cloud.</string>
+    <string name="smart_home_add">Add device</string>
+    <string name="smart_home_add_subtitle">Choose the app your device uses</string>
+    <string name="brand_tuya" translatable="false">Tuya · Smart Life</string>
+    <string name="brand_dyson" translatable="false">Dyson</string>
+    <string name="smart_home_coming">Adding devices from the TV is coming in the next version.</string>
+    <string name="menu_remove">Remove</string>
+    <string name="remove_device_title">Remove %s?</string>
+    <string name="remove_device_body">The device and its key are deleted from this TV. It stays in your %s account; you can add it again.</string>
+    <string name="remove_confirm">Remove</string>
     <string name="shortcut_wifi">Wi-Fi</string>
     <string name="shortcut_bluetooth">Bluetooth accessories</string>
     <string name="shortcut_display_sound">Display &amp; sound</string>

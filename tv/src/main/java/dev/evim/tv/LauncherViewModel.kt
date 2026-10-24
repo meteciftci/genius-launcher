@@ -169,6 +169,15 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
         homeDevices = present(homeDevices)
     }
 
+    fun removeDevice(device: HomeDevice) {
+        viewModelScope.launch {
+            homeIo { home.remove(device.key) }
+            prefs.forgetDevice(device.key)
+            homeDevices = homeDevices.filter { it.key != device.key }
+            homeConfigured = home.isConfigured
+        }
+    }
+
     /** Boş ad verilirse cihazın kendi adına döner. */
     fun renameDevice(device: HomeDevice, name: String?) {
         prefs.setDeviceName(device.key, name)

@@ -48,6 +48,12 @@ class LauncherPrefs(context: Context) {
         if (name.isNullOrBlank()) remove(nameKey(key)) else putString(nameKey(key), name.trim())
     }
 
+    /** Kaldırılan cihazın adı ve sıradaki yeri unutulur. */
+    fun forgetDevice(key: String) {
+        setDeviceName(key, null)
+        deviceOrder = deviceOrder - key
+    }
+
     private fun colorKey(packageName: String) = "color_$packageName"
 
     private fun nameKey(key: String) = "device_name_$key"

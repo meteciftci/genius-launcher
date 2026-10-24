@@ -10,7 +10,16 @@
     <string name="move_hint_done">  ·  OK ile bitir</string>
 
     <string name="home_title">Evim</string>
-    <string name="home_setup_pending">  ·  kurulum bekliyor</string>
+    <string name="home_add_device">  ·  cihaz ekle</string>
+    <string name="smart_home_title">Akıllı ev</string>
+    <string name="smart_home_subtitle">Cihazlar buluttan değil, ev ağınızdan yönetilir.</string>
+    <string name="smart_home_add">Cihaz ekle</string>
+    <string name="smart_home_add_subtitle">Cihazınızın kullandığı uygulamayı seçin</string>
+    <string name="smart_home_coming">TV\'den cihaz ekleme bir sonraki sürümde geliyor.</string>
+    <string name="menu_remove">Kaldır</string>
+    <string name="remove_device_title">%s kaldırılsın mı?</string>
+    <string name="remove_device_body">Cihaz ve anahtarı bu TV\'den silinir. %s hesabınızda kalır; yeniden ekleyebilirsiniz.</string>
+    <string name="remove_confirm">Kaldır</string>
     <string name="shortcut_wifi">Wi-Fi</string>
     <string name="shortcut_bluetooth">Bluetooth aksesuarları</string>
     <string name="shortcut_display_sound">Görüntü ve ses</string>

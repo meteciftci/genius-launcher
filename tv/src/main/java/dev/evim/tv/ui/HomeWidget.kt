@@ -93,10 +93,8 @@ fun HomeWidget(vm: LauncherViewModel, modifier: Modifier = Modifier) {
     BackHandler(enabled = movingKey != null && !showAll) { movingKey = null }
 
     Column(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        // Cihaz yoksa widget hiç görünmez; ekleme Evim kutusundan
         val devices = vm.homeDevices
-        if (!vm.homeConfigured) {
-            SetupCard()
-        }
         val visible = if (devices.size > WIDGET_LIMIT) devices.take(WIDGET_LIMIT - 1) else devices
         visible.forEach { device ->
             key(device.key) {
@@ -221,7 +219,7 @@ private fun DeviceMenu(
 
 /** Kumandanın ekran klavyesiyle yeni ad yazılır; boş bırakılırsa cihazın kendi adına döner. */
 @Composable
-private fun RenameDialog(current: String, onSave: (String) -> Unit, onDismiss: () -> Unit) {
+internal fun RenameDialog(current: String, onSave: (String) -> Unit, onDismiss: () -> Unit) {
     var name by remember { mutableStateOf(TextFieldValue(current, TextRange(current.length))) }
     val field = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
@@ -333,16 +331,6 @@ private fun CompactContent(device: HomeDevice) {
     }
 }
 
-@Composable
-private fun SetupCard() {
-    WidgetSurface(moving = false, onClick = {}, onLongClick = {}) {
-        Row(Modifier.padding(horizontal = 14.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.home_title), fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
-            Text(stringResource(R.string.home_setup_pending), color = EvimColors.TextDim, fontSize = 11.sp, modifier = Modifier.weight(1f))
-            StatusDot(active = false)
-        }
-    }
-}
 
 @Composable
 private fun OtherCard(count: Int, onClick: () -> Unit) {
