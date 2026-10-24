@@ -1,27 +1,78 @@
 # Genius Launcher
 
-Android TV / Google TV için reklamsız, sade bir ana ekran (launcher) ve evdeki akıllı cihazları tek yerden yöneten bir hub.
+**Türkçe** | [English](README.en.md)
 
-> Durum: erken geliştirme. İlk hedef Xiaomi Mi Box S (2. nesil, Android 14).
+Android TV ve Google TV için reklamsız, sade bir ana ekran. Evdeki akıllı cihazları da buluta gitmeden, ev ağından yönetir.
 
-## Neler var
+![Ana ekran](docs/screenshots/tr/home.png)
 
-- **Vitrin:** Odaktaki uygulamanın simgesinden çıkarılan renkle boyanan büyük bir karşılama alanı.
-- **Uygulamalar:** Kumandada OK'a basılı tutunca açılan menüden sıralama, gizleme ve renk seçme. Yeni yüklenen uygulamaların kartı kendiliğinden gelir.
-- **Evim widget'ı:** Tuya (priz, röle, mama kabı), Dyson hava temizleyiciler ve Eufy kameralar, buluta gitmeden yerel ağdan. Kartlar sıralanabilir ve yeniden adlandırılabilir; kaç kart görüneceği ayarlardan seçilir (3–6), fazlası "Diğer" panelinde.
-- **Kamera:** Eufy kameranın karta basınca tam ekran canlı görüntüsü (RTSP, 1080p, sesli). Pan & Tilt kameralar yön tuşlarıyla döndürülür (yerel P2P, hesap gerekmez).
-- **Kurulum sihirbazı:** Tam ekran, görselli adımlarla ADB izni, Home tuşu, gereksiz uygulama temizliği ve "uyanık tut"; hepsi geri alınabilir.
-- **Üst şerit:** Saat ve hava durumu (Open-Meteo, şehir seçilebilir, saatlik ve 7 günlük panel), Evim kutusu, Wi-Fi/Bluetooth/ayar kısayolları, Genius ayarları, RAM kullanımı ve "Boşalt" düğmesi (TV'nin kendi ADB'siyle).
-- **Dil:** Sistem dilini izler; İngilizce ve Türkçe.
+> İlk hedef cihaz Xiaomi Mi Box S (2. nesil, Android 14). Diğer Android TV cihazlarında da çalışması beklenir, ama denenmedi.
 
-## Derleme
+## Özellikler
 
-Gerekenler: JDK 17 ve Android SDK (platform 35, build-tools 35).
+- **Vitrin**: Odaktaki uygulamanın adı büyük harflerle yazılır; arka plan uygulamanın simgesinden çıkarılan renge boyanır.
+- **Uygulamalar**: Kumandada OK'e basılı tutunca açılan menüden kartlar taşınır, gizlenir ya da rengi değiştirilir. Yeni kurulan uygulamaların kartı kendiliğinden gelir; gizlenenler Genius ayarlarından geri getirilir.
+- **Dosyalar**: Dahili hafıza ve USB bellekteki dosyalar gezilir, yeniden adlandırılır ve silinir. Video, müzik ve resimler launcher'ın içinde açılır (TV'de oynatıcı uygulaması olmasa da). APK'lar onay sorulduktan sonra kurulur. Dosyalar da uygulamalar gibi bir karttır, istenirse gizlenir.
+- **Hava durumu**: Saatin yanında anlık hava durumu; basınca saatlik ve 7 günlük tahmin açılır. Veriler [Open-Meteo](https://open-meteo.com)'dan gelir, şehir seçilebilir.
+- **Akıllı ev**: Tuya (priz, röle, mama kabı), Dyson hava temizleyiciler ve Eufy kameralar sağ üstteki kartlarda görünür. Kartlar sıralanır ve yeniden adlandırılır; kaç kartın görüneceği seçilir (3–6), fazlası "Diğer" panelinde.
+- **Kamera**: Eufy kameranın karta basınca tam ekran, sesli canlı görüntüsü (RTSP). Pan & Tilt kameralar kumandanın yön tuşlarıyla döndürülür.
+- **Kurulum sihirbazı**: Tam ekran, görselli adımlarla TV'nin ADB izni, Home tuşu, gereksiz uygulamaların temizliği ve "uyanık tut". Hepsi geri alınabilir.
+- **Bellek**: Üst şeritte RAM kullanımı; **Boşalt** arka plandaki uygulamaları kapatır.
+- **Ekran koruyucu**: Google TV'deki gibi ana ekranda Geri tuşuna art arda iki kez basınca başlar.
+- Türkçe ve İngilizce; sistem dilini izler.
+
+![Hava durumu](docs/screenshots/tr/weather.png)
+
+![Akıllı ev](docs/screenshots/tr/smart-home.png)
+
+![Dosyalar](docs/screenshots/tr/files.png)
+
+## Akıllı ev
+
+Cihazlar üst şeritteki **Evim** kutusundan eklenir: **Evim → Cihaz ekle**.
+
+![Cihaz ekle](docs/screenshots/tr/add-device.png)
+
+- **Tuya · Smart Life**: Uygulamadaki kullanıcı kodunu yazın ve TV'de çıkan QR kodu Smart Life uygulamasıyla okutun; hesaptaki cihazlardan eklemek istediklerinizi seçin. TV cihazları ev ağında kendisi bulur, adresleri değişirse yeniden arar. Cihaz yeniden kurulursa paneldeki **Yeniden bağlan** anahtarını yeniler.
+- **Dyson**: MyDyson hesabıyla (e-postaya gelen kod ve şifre) ya da hesap olmadan cihazın üstündeki Wi-Fi etiketinden. TV hava temizleyiciyi ev ağında mDNS ile bulur.
+- **Eufy kamera**: Önce Eufy uygulamasında **Kamera Ayarları → Genel → Depolama → NAS (RTSP)**'yi açıp bir kullanıcı adı ve parola belirleyin. Sonra TV'de kullanıcı adı ve parolayı yazın; TV kamerayı ev ağında kendisi bulur, bulamazsa IP adresini sorar. Döndürme için hesap gerekmez.
+
+## Güvenlik
+
+- Cihazlarla konuşma **ev ağında** olur. Hesaplara yalnızca cihaz eklerken bir kez bağlanılır.
+- Tuya, Dyson ve Eufy **hesap şifreleri ve bulut jetonları saklanmaz**; yalnızca giriş sırasında kullanılır.
+- Cihaz anahtarları (Tuya `local_key`, Dyson MQTT şifresi, Eufy RTSP parolası) yalnızca TV'de, uygulamanın özel depolamasında durur.
+- **ADB bağlantısı TV'nin içinde kalır** (127.0.0.1). Launcher, normal bir uygulamanın Android 14'te yapamadığı işler için (Home tuşu, uygulama kaldırma, bellek boşaltma, dosya erişimi, APK kurma) TV'nin kendi ADB'sine bağlanır. İzin ilk seferde TV'de sorulur.
+- Kamera görüntüsü buluta gitmez; ev ağından RTSP ile gelir.
+- Bu repoda hiçbir cihaz anahtarı, hesap bilgisi ya da IP adresi bulunmaz. `secrets/`, `devices.json`, `*.secrets.json` ve `local.properties` `.gitignore` içindedir.
+
+## Gereksinimler
+
+- Android TV ya da Google TV, Android 8.0 veya üzeri
+- Home tuşu, uygulama temizliği, bellek boşaltma ve Dosyalar için TV'de **USB hata ayıklama** (kurulum sihirbazı nasıl açılacağını gösterir)
+
+## Kurulum
+
+### Hazır sürüm
+
+1. [Releases](https://github.com/meteciftci/genius-launcher/releases) sayfasından son `genius-launcher-x.y.z.apk` dosyasını indirin.
+2. Bilgisayardan TV'ye kurun (TV'de USB hata ayıklama açık olmalı):
+   ```bash
+   adb connect 192.168.1.50:5555
+   adb install genius-launcher-x.y.z.apk
+   ```
+3. Uygulamalar listesinden **Genius Launcher**'ı açın. İlk açılışta kurulum sihirbazı çıkar.
+
+### Kaynak koddan derleme
+
+JDK 17 ve Android SDK (platform 35, build-tools 35) gerekir.
 
 ```bash
 brew install openjdk@17
 brew install --cask android-commandlinetools android-platform-tools
 sdkmanager "platforms;android-35" "build-tools;35.0.0"
+git clone https://github.com/meteciftci/genius-launcher.git
+cd genius-launcher
 ```
 
 `local.properties` dosyasına SDK yolunu yazın (bu dosya repoya girmez):
@@ -30,8 +81,7 @@ sdkmanager "platforms;android-35" "build-tools;35.0.0"
 sdk.dir=/opt/homebrew/share/android-commandlinetools
 ```
 
-Tuya cihazlarını TV'den eklemek için QR girişinin istemci kimliğini de aynı dosyaya yazın. Home Assistant'ın
-Tuya entegrasyonunun herkese açık kimliği kullanılabilir; yoksa panelde Tuya seçeneği çalışmaz:
+Tuya cihazlarını TV'den eklemek için QR girişinin istemci kimliğini de aynı dosyaya yazın. Home Assistant'ın Tuya entegrasyonunun herkese açık kimliği kullanılabilir; yazılmazsa panelde Tuya seçeneği çalışmaz:
 
 ```
 tuya.clientId=HA_3y9q4ak7g4ephrvke
@@ -52,66 +102,67 @@ zsh tools/install.sh
 
 Akıcılığı ölçmek için `zsh tools/perf.sh`. Mi Box temizliği ve uyku ayarları için yardımcı betikler `tools/mibox/` altında.
 
-## Akıllı ev kurulumu
+#### Örnek veriler
 
-Ana ekranın üstündeki **Evim** kutusuna basın → **Cihaz ekle** → **Tuya · Smart Life**. Uygulamadaki kullanıcı
-kodunu yazıp TV'de çıkan QR kodu Smart Life uygulamasıyla okutun; hesaptaki cihazlardan eklemek istediklerinizi
-seçin. TV cihazları ev ağında kendisi bulur, adresleri değişirse yeniden arar. Hesap şifresi ya da bulut jetonu
-saklanmaz; cihaz yeniden kurulursa paneldeki **Yeniden bağlan** anahtarını yeniler.
+Launcher'a `demo` isteği gönderilirse TV'deki uygulamalar yerine örnek kartlar (Netflix, Disney+, HBO Max, Prime Video; gerçek logolar yerine harfler) ve şehir olarak İstanbul gösterilir. README ekran görüntüleri bu şekilde alınmıştır. Hiçbir ayar yazılmaz; launcher kapanınca örnek veriler kaybolur.
 
-Dyson için **Cihaz ekle** → **Dyson**: MyDyson hesabıyla (e-postaya gelen kod ve şifre) ya da hesap olmadan
-cihazın üstündeki Wi-Fi etiketinden. TV hava temizleyiciyi ev ağında mDNS ile bulur.
+```bash
+adb shell am start -n dev.evim.tv/.MainActivity --ez demo true
+adb shell cmd locale set-app-locales dev.evim.tv --locales en-US   # İngilizce görüntüler için
+```
 
-Eufy kamera için önce Eufy uygulamasında **Kamera Ayarları → Genel → Depolama → NAS (RTSP)**'yi açıp bir kullanıcı
-adı ve parola belirleyin. Sonra **Cihaz ekle** → **Kamera**: kullanıcı adı ve parolayı yazın; TV kamerayı ev ağında
-Eufy'nin P2P yerel aramasıyla kendisi bulur, bulamazsa IP adresini sorar. Adresi değişen kamera da yeniden bulunur.
+## Kullanım
 
-### Bilinen sınırlar
+| Kumanda | İşlem |
+| --- | --- |
+| OK | Uygulamayı, cihazı ya da dosyayı aç |
+| OK'e basılı tut | Menü: taşı, gizle, renk seç, yeniden adlandır, sil |
+| Geri | Paneli kapat; Dosyalar'da bir üst klasöre çık |
+| Ana ekranda Geri iki kez | Ekran koruyucuyu başlat |
+| Kamerada yön tuşları | Pan & Tilt kamerayı döndür |
+| Kamerada OK | Sesi aç/kapat |
+| Müzikte OK / sol-sağ | Duraklat / 10 saniye sar |
+| Resimde sol-sağ | Klasördeki önceki/sonraki resim |
 
-- Tuya: yerel protokolün 3.3 ve 3.4 sürümleri desteklenir; 3.5 henüz desteklenmez. Tam kontrol yalnızca denenmiş
-  tiplerde (priz/röle, Xenon X8605 mama kabı); bilinmeyen cihazlarda aç/kapa ya da yalnızca durum gösterilir.
-- Dyson: ısıtmalı hava temizleyici (527K) ile denendi; diğer modellerde bazı değerler eksik görünebilir.
-- Eufy: yalnızca RTSP veren kameralar; döndürme Indoor Cam Pan & Tilt (T8410) ile denendi. RTSP açıkken Eufy görüntüyü 1080p'ye düşürür.
+![Genius ayarları](docs/screenshots/tr/settings.png)
 
-## İlk kurulum sihirbazı
+### İlk kurulum sihirbazı
+
+![Kurulum sihirbazı](docs/screenshots/tr/wizard.png)
 
 Launcher ilk açıldığında bir sihirbaz çıkar; her adım atlanabilir ve Genius ayarlarından yeniden çalıştırılabilir:
 
-1. **TV'nin kendi ADB'si:** USB hata ayıklamanın nasıl açılacağını anlatır ve TV'nin izin penceresini çıkarır.
-   Home tuşu, uygulama kaldırma ve bellek boşaltma bununla yapılır; bağlantı TV'nin içinde kalır.
-2. **Home tuşu:** Genius Launcher'ı ana ekran yapar (aşağıya bakın).
-3. **Temizlik:** Markaya göre bilinen gereksiz uygulamaları listeler (önce Xiaomi Mi Box); önerilenler seçili gelir.
-   Uygulamalar silinmez, kullanıcı için kaldırılır. Bağlı olunan Wi-Fi ağını kaydetmiş bir uygulama seçilemez.
-4. **Uyanık tut (isteğe bağlı):** TV kapanınca kutu uyumaz, ev ağında kalır.
+1. **TV'nin kendi ADB'si**: USB hata ayıklamanın nasıl açılacağını anlatır ve TV'nin izin penceresini çıkarır.
+2. **Home tuşu**: Genius Launcher'ı ana ekran yapar (aşağıya bakın).
+3. **Temizlik**: Markaya göre bilinen gereksiz uygulamaları listeler (önce Xiaomi Mi Box); önerilenler seçili gelir. Uygulamalar silinmez, kullanıcı için kaldırılır. Bağlı olunan Wi-Fi ağını kaydetmiş bir uygulama seçilemez.
+4. **Uyanık tut (isteğe bağlı)**: TV kapanınca kutu uyumaz, ev ağında kalır.
 
-Sihirbaz neyi değiştirdiğini (ayarların eski değerleriyle) kaydeder. Genius ayarlarındaki **Sihirbazın
-değişikliklerini geri al** yalnızca bunları eski hâline getirir; **Kaldır** da önce bunları geri getirmeyi sorar.
+Sihirbaz neyi değiştirdiğini (ayarların eski değerleriyle) kaydeder. Genius ayarlarındaki **Sihirbazın değişikliklerini geri al** yalnızca bunları eski hâline getirir; **Kaldır** da önce bunları geri getirmeyi sorar.
 
-## Ana ekran (Home tuşu)
+### Ana ekran (Home tuşu)
 
-Google TV kendi ana ekranı açıkken başka launcher'ları yok sayar. Bu yüzden önce Google TV'nin kurulum sihirbazı, sonra
-ana ekranı kapatılır (kaldırılmaz) ve Home tuşu Genius Launcher'a bağlanır; bağlı olunan Wi-Fi ağını kaydeden uygulama
-kapatılacaksa hiçbir şey yapılmaz. Bunu kurulum sihirbazı ya da Genius ayarları yapar; geliştirme için aynısı Mac'ten:
+Google TV, kendi ana ekranı açıkken başka launcher'ları yok sayar. Bu yüzden önce Google TV'nin kurulum sihirbazı, sonra ana ekranı kapatılır (kaldırılmaz) ve Home tuşu Genius Launcher'a bağlanır. Bağlı olunan Wi-Fi ağını kaydeden uygulama kapatılacaksa hiçbir şey yapılmaz. Bunu kurulum sihirbazı ya da Genius ayarları yapar; geliştirme için aynısı bilgisayardan:
 
 ```bash
 zsh tools/mibox/ana_ekran.sh genius   # Genius Launcher
 zsh tools/mibox/ana_ekran.sh google   # Google TV'ye geri dön
 ```
 
-Launcher 5 dakikada 3 kez çökerse Google TV ana ekranını kendiliğinden geri açar. Ekran koruyucu Google'ınki olarak kalır; Google TV'deki gibi ana ekranda Geri tuşuna art arda iki kez basınca hemen başlar.
+Launcher 5 dakikada 3 kez çökerse Google TV ana ekranını kendiliğinden geri açar.
 
-## Gizli bilgiler
+## Bilinen kısıtlar
 
-Bu repoda **hiçbir cihaz anahtarı, hesap bilgisi ya da IP adresi bulunmaz.** Tuya `local_key`, Dyson MQTT şifresi ve Eufy RTSP parolası gibi bilgiler çalışma zamanında TV'de, uygulamanın özel depolamasında saklanır. Tuya, Dyson ve Eufy hesaplarının şifreleri ve bulut jetonları hiç saklanmaz; yalnızca giriş sırasında kullanılır. `secrets/`, `devices.json`, `*.secrets.json` ve `local.properties` `.gitignore` içindedir.
+- **Tuya**: Yerel protokolün 3.3 ve 3.4 sürümleri desteklenir, 3.5 henüz desteklenmez. Tam kontrol yalnızca denenmiş tiplerde var (priz/röle, Xenon X8605 mama kabı); bilinmeyen cihazlarda aç/kapa ya da yalnızca durum gösterilir.
+- **Dyson**: Isıtmalı hava temizleyici (527K) ile denendi; diğer modellerde bazı değerler eksik görünebilir.
+- **Eufy**: Yalnızca RTSP veren kameralar. Döndürme Indoor Cam Pan & Tilt (T8410) ile denendi. RTSP açıkken Eufy görüntüyü 1080p'ye düşürür.
+- **Dosyalar**: Video ve müzik, cihazın donanımının çözebildiği biçimlerde oynar. Launcher'ın kendi APK'sı Dosyalar'dan kurulunca launcher yeniden başlar.
 
 ## Teşekkür
 
 - Google TV'de ana ekranı değiştirme yaklaşımı için [Free My TV](https://github.com/simbasjungles/free-my-tv) (MIT) projesinden ilham alındı.
-- Tuya QR girişi [tuya-device-sharing-sdk](https://github.com/tuya/tuya-device-sharing-sdk)'nın, Dyson bulut girişi
-  [libdyson-neon](https://github.com/libdyson-wg/libdyson-neon)'un Kotlin'e taşınmış hâlidir.
+- Tuya QR girişi [tuya-device-sharing-sdk](https://github.com/tuya/tuya-device-sharing-sdk)'nın (MIT), Dyson bulut girişi [libdyson-neon](https://github.com/libdyson-wg/libdyson-neon)'un (Apache-2.0) Kotlin'e taşınmış hâlidir.
 - Eufy P2P yerel arama ve döndürme komutu [eufy-security-client](https://github.com/bropat/eufy-security-client)'tan (MIT) alındı.
-- Kullanılan kütüphaneler: [dadb](https://github.com/mobile-dev-inc/dadb), [ZXing](https://github.com/zxing/zxing),
-  [Media3](https://github.com/androidx/media) (hepsi Apache-2.0).
+- Kullanılan kütüphaneler: [dadb](https://github.com/mobile-dev-inc/dadb), [ZXing](https://github.com/zxing/zxing), [Media3](https://github.com/androidx/media) (hepsi Apache-2.0).
 
 ## Lisans
 

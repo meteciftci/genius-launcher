@@ -1,5 +1,6 @@
 package dev.evim.tv
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,11 +15,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         CrashGuard.install(this)
+        if (intent.getBooleanExtra("demo", false)) viewModel.enterDemo()
         setContent {
             EvimTheme {
                 HomeScreen(viewModel)
             }
         }
+    }
+
+    // Launcher Home olduğu için çoğu zaman zaten açıktır; yeni istek buraya gelir
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (intent.getBooleanExtra("demo", false)) viewModel.enterDemo()
     }
 
     override fun onStart() {

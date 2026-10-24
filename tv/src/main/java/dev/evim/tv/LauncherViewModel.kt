@@ -13,6 +13,7 @@ import dadb.AdbAuthException
 import dadb.AdbConnectException
 import dev.evim.tv.data.AppRepository
 import dev.evim.tv.data.City
+import dev.evim.tv.data.DemoMode
 import dev.evim.tv.data.HomeSwitch
 import dev.evim.tv.data.AdbState
 import dev.evim.tv.data.CleanupApp
@@ -120,6 +121,15 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
                 delay(ADB_KEEPALIVE_MS)
             }
         }
+    }
+
+    /** README ekran görüntüleri için örnek veriye geçer; süreç kapanana kadar sürer, ayar yazılmaz. */
+    fun enterDemo() {
+        DemoMode.enabled = true
+        city = DemoMode.CITY
+        forecast = null
+        startWeatherUpdates()
+        refresh()
     }
 
     fun selectCity(selected: City) {
@@ -327,7 +337,7 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
 
     fun refresh() {
         viewModelScope.launch {
-            installed = withContext(Dispatchers.Default) { repo.loadApps() }
+            installed = withContext(Dispatchers.Default) { repo.loadApps().let { if (DemoMode.enabled) DemoMode.apps(it) else it } }
             publish()
         }
         refreshRam()
@@ -480,6 +490,11 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private fun publish() {
+        if (DemoMode.enabled) {
+            apps = installed
+            hiddenApps = emptyList()
+            return
+        }
         val order = prefs.order
         val hidden = prefs.hidden
         val sorted = installed
