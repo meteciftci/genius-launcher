@@ -18,11 +18,28 @@
     <string name="smart_home_title">Smart home</string>
     <string name="smart_home_subtitle">Devices are controlled over your home network, not the cloud.</string>
     <string name="smart_home_add">Add device</string>
-    <string name="smart_home_add_hint">Tuya plugs, relays and feeders or Dyson purifiers</string>
+    <string name="smart_home_add_hint">Tuya plugs and feeders, Dyson purifiers or Eufy cameras</string>
     <string name="smart_home_add_question">What are you adding?</string>
     <string name="card_tuya_title">Plug, relay, pet feeder</string>
     <string name="card_dyson_title">Air purifier</string>
     <string name="reconnect_hint">if the device was set up again</string>
+    <string name="brand_eufy" translatable="false">Eufy</string>
+    <string name="card_camera_title">Camera</string>
+    <string name="camera_default_name">Camera</string>
+    <string name="camera_intro">In the Eufy app, open Camera settings → General → Storage → NAS (RTSP), turn it on and set a username and password. The image comes over your home network; it doesn\'t go to the cloud.</string>
+    <string name="camera_ip_body">The camera\'s IP address (Eufy app: camera settings → About → IP address)</string>
+    <string name="camera_user_body">The RTSP username you set in the Eufy app</string>
+    <string name="camera_password_body">The RTSP password. It stays on this TV only.</string>
+    <string name="camera_checking">Connecting to the camera…</string>
+    <string name="camera_wrong_login">The camera rejected the username or password.</string>
+    <string name="camera_no_stream">The camera answered but has no stream. Check that NAS (RTSP) is turned on.</string>
+    <string name="camera_unreachable">No camera answered at this address. Check the IP address.</string>
+    <string name="camera_watch">watch live</string>
+    <string name="camera_live">LIVE</string>
+    <string name="camera_connecting">Connecting…</string>
+    <string name="camera_stream_failed">The stream couldn\'t be played. Back closes this.</string>
+    <string name="camera_unmute_hint">OK: sound on</string>
+    <string name="camera_mute_hint">OK: sound off</string>
     <string name="smart_home_add_subtitle">Pick the kind of device; you\'ll sign in to its app next</string>
     <string name="brand_tuya" translatable="false">Tuya · Smart Life</string>
     <string name="brand_dyson" translatable="false">Dyson</string>

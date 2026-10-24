@@ -23,6 +23,7 @@ object EvimColors {
     val Tuya = Color(0xFFFF8A5B)
     val Dyson = Color(0xFF3CCFB0)
     val Feeder = Color(0xFFF5B83D)
+    val Camera = Color(0xFFB794F6)
 
     /** Kartlarda ve renk menüsünde sunulan elle seçilebilir renkler. */
     val Picks = listOf(

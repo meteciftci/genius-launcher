@@ -16,6 +16,7 @@ import androidx.compose.material.icons.rounded.Outlet
 import androidx.compose.material.icons.rounded.Pets
 import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material.icons.rounded.Undo
+import androidx.compose.material.icons.rounded.Videocam
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -45,6 +46,7 @@ private sealed interface HomeStep {
     data object Add : HomeStep
     data object Tuya : HomeStep
     data object Dyson : HomeStep
+    data object Camera : HomeStep
     data class Device(val key: String) : HomeStep
     data class Remove(val key: String) : HomeStep
 }
@@ -64,7 +66,7 @@ fun SmartHomeDialog(vm: LauncherViewModel, startAtAdd: Boolean, onDismiss: () ->
         step = when (val current = step) {
             HomeStep.List -> return onDismiss()
             HomeStep.Add -> if (startAtAdd) return onDismiss() else HomeStep.List
-            HomeStep.Tuya, HomeStep.Dyson -> HomeStep.Add
+            HomeStep.Tuya, HomeStep.Dyson, HomeStep.Camera -> HomeStep.Add
             is HomeStep.Device -> HomeStep.List
             is HomeStep.Remove -> HomeStep.Device(current.key)
         }
@@ -111,10 +113,18 @@ fun SmartHomeDialog(vm: LauncherViewModel, startAtAdd: Boolean, onDismiss: () ->
                             Modifier.weight(1f),
                             EvimColors.Dyson,
                         ) { step = HomeStep.Dyson }
+                        ChoiceCard(
+                            Icons.Rounded.Videocam,
+                            stringResource(R.string.card_camera_title),
+                            stringResource(R.string.brand_eufy),
+                            Modifier.weight(1f),
+                            EvimColors.Camera,
+                        ) { step = HomeStep.Camera }
                     }
                 }
                 HomeStep.Tuya -> TuyaAddFlow(vm, first, onDone = { step = HomeStep.List })
                 HomeStep.Dyson -> DysonAddFlow(vm, first, onDone = { step = HomeStep.List })
+                HomeStep.Camera -> EufyAddFlow(vm, first, onDone = { step = HomeStep.List })
                 is HomeStep.Device -> {
                     val device = vm.homeDevices.firstOrNull { it.key == current.key }
                     if (device == null) {
@@ -126,7 +136,11 @@ fun SmartHomeDialog(vm: LauncherViewModel, startAtAdd: Boolean, onDismiss: () ->
                         ChoiceCard(Icons.Rounded.Edit, stringResource(R.string.menu_rename), null, Modifier.weight(1f).focusRequester(first)) { renaming = device }
                         // Anahtar değiştiyse (cihaz yeniden kurulduysa) hesapla yeniden alınır
                         ChoiceCard(Icons.Rounded.Sync, stringResource(R.string.menu_reconnect), stringResource(R.string.reconnect_hint), Modifier.weight(1f)) {
-                            step = if (device is HomeDevice.Purifier) HomeStep.Dyson else HomeStep.Tuya
+                            step = when (device) {
+                                is HomeDevice.Purifier -> HomeStep.Dyson
+                                is HomeDevice.Camera -> HomeStep.Camera
+                                else -> HomeStep.Tuya
+                            }
                         }
                         ChoiceCard(Icons.Rounded.Delete, stringResource(R.string.menu_remove), null, Modifier.weight(1f), EvimColors.Danger) {
                             step = HomeStep.Remove(device.key)
@@ -167,7 +181,11 @@ fun SmartHomeDialog(vm: LauncherViewModel, startAtAdd: Boolean, onDismiss: () ->
     }
 }
 
-private fun HomeDevice.brand() = if (this is HomeDevice.Purifier) R.string.brand_dyson else R.string.brand_tuya
+private fun HomeDevice.brand() = when (this) {
+    is HomeDevice.Purifier -> R.string.brand_dyson
+    is HomeDevice.Camera -> R.string.brand_eufy
+    else -> R.string.brand_tuya
+}
 
 /** Cihaz türünün simgesi ve rengi; panellerde ve menülerde aynı. */
 internal fun HomeDevice.icon(): ImageVector = when (this) {
@@ -175,12 +193,14 @@ internal fun HomeDevice.icon(): ImageVector = when (this) {
     is HomeDevice.Feeder -> Icons.Rounded.Pets
     is HomeDevice.Relay -> Icons.Rounded.Outlet
     is HomeDevice.Other -> Icons.Rounded.DevicesOther
+    is HomeDevice.Camera -> Icons.Rounded.Videocam
 }
 
 internal fun HomeDevice.tint(): Color = when (this) {
     is HomeDevice.Purifier -> EvimColors.Dyson
     is HomeDevice.Feeder -> EvimColors.Feeder
     is HomeDevice.Relay, is HomeDevice.Other -> EvimColors.Tuya
+    is HomeDevice.Camera -> EvimColors.Camera
 }
 
 

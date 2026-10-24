@@ -20,6 +20,9 @@ sealed interface HomeDevice {
 
     data class Purifier(override val key: String, override val name: String, override val reachable: Boolean, val state: DysonState?) : HomeDevice
 
+    /** Eufy kamera: karta basınca canlı görüntü açılır. */
+    data class Camera(override val key: String, override val name: String, override val reachable: Boolean) : HomeDevice
+
     /** Desteklenmeyen tip: yalnızca ağda cevap verip vermediği gösterilir. */
     data class Other(override val key: String, override val name: String, override val reachable: Boolean) : HomeDevice
 }
@@ -30,6 +33,7 @@ fun HomeDevice.withName(name: String): HomeDevice = when (this) {
     is HomeDevice.Feeder -> copy(name = name)
     is HomeDevice.Purifier -> copy(name = name)
     is HomeDevice.Other -> copy(name = name)
+    is HomeDevice.Camera -> copy(name = name)
 }
 
 data class Meal(val hour: Int, val minute: Int, val portions: Int)
@@ -42,16 +46,18 @@ class SmartHome(private val context: Context) {
     private val stored = File(context.filesDir, "home.json")
     private var tuya: Map<String, TuyaEntry> = emptyMap()
     private var dyson: Map<String, DysonEntry> = emptyMap()
+    private var cameras: Map<String, CameraEntry> = emptyMap()
     private val discovery = TuyaDiscovery(context)
     private val dysonDiscovery = DysonDiscovery(context)
     private var lastScan = 0L
     private var lastDysonScan = 0L
 
-    val isConfigured: Boolean get() = tuya.isNotEmpty() || dyson.isNotEmpty()
+    val isConfigured: Boolean get() = tuya.isNotEmpty() || dyson.isNotEmpty() || cameras.isNotEmpty()
 
     fun load() {
         tuya = emptyMap()
         dyson = emptyMap()
+        cameras = emptyMap()
         if (!stored.exists()) return
         val json = JSONObject(stored.readText())
         tuya = json.optJSONArray("tuya").objects().associate { t ->
@@ -65,6 +71,9 @@ class SmartHome(private val context: Context) {
             )
             t.getString("id") to entry
         }
+        cameras = json.optJSONArray("eufy").objects().associate { c ->
+            c.getString("id") to CameraEntry(c.getString("name"), EufyCamera(c.getString("ip"), c.getString("user"), c.getString("password")))
+        }
         dyson = json.optJSONArray("dyson").objects().associate { d ->
             d.getString("serial") to DysonEntry(
                 name = d.getString("name"),
@@ -77,7 +86,7 @@ class SmartHome(private val context: Context) {
     fun remove(key: String) {
         if (!stored.exists()) return
         val json = JSONObject(stored.readText())
-        for ((list, id) in listOf("tuya" to "id", "dyson" to "serial")) {
+        for ((list, id) in listOf("tuya" to "id", "dyson" to "serial", "eufy" to "id")) {
             val kept = json.optJSONArray(list).objects().filter { it.optString(id) != key }
             json.put(list, JSONArray(kept))
         }
@@ -124,6 +133,20 @@ class SmartHome(private val context: Context) {
 
     val dysonSerials: Set<String> get() = dyson.keys
 
+    /** Kamerayı ekler; aynı adresteki kamera zaten varsa kullanıcı adı ve parolası yenilenir. */
+    fun addCamera(name: String, camera: EufyCamera, user: String, password: String) {
+        val json = if (stored.exists()) JSONObject(stored.readText()) else JSONObject()
+        val list = json.optJSONArray("eufy").objects().toMutableList()
+        val entry = list.firstOrNull { it.optString("ip") == camera.ip }
+            ?: JSONObject().put("id", "eufy-" + java.util.UUID.randomUUID().toString().take(8)).put("name", name).also { list += it }
+        entry.put("ip", camera.ip).put("user", user).put("password", password)
+        json.put("eufy", JSONArray(list))
+        stored.writeText(json.toString())
+        load()
+    }
+
+    fun streamUrl(key: String): String? = cameras[key]?.camera?.streamUrl
+
     /** Hangi Tuya cihazlarının eklendiği; yeniden bağlanırken seçili gelirler. */
     val tuyaIds: Set<String> get() = tuya.keys
 
@@ -142,7 +165,8 @@ class SmartHome(private val context: Context) {
             val again = dyson.filterKeys { it in lost }.map { (key, entry) -> purifier(key, entry) { entry.device.state() } }.associateBy { it.key }
             purifiers = purifiers.map { again[it.key] ?: it }
         }
-        return purifiers + tuyaDevices
+        val cams = cameras.map { (key, entry) -> HomeDevice.Camera(key, entry.name, entry.camera.reachable()) }
+        return purifiers + cams + tuyaDevices
     }
 
     private fun pollTuya(entries: Map<String, TuyaEntry>): List<HomeDevice> = entries.map { (key, entry) ->
@@ -233,6 +257,8 @@ class SmartHome(private val context: Context) {
     private class TuyaEntry(val name: String, val kind: TuyaKind, val switchDp: String, val device: TuyaDevice)
 
     private class DysonEntry(val name: String, val device: DysonDevice)
+
+    private class CameraEntry(val name: String, val camera: EufyCamera)
 
     companion object {
         private const val DP_RELAY = "1"

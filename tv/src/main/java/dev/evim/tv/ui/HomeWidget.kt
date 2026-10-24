@@ -91,6 +91,7 @@ private val CardShape = RoundedCornerShape(12.dp)
 fun HomeWidget(vm: LauncherViewModel, modifier: Modifier = Modifier) {
     var feeder by remember { mutableStateOf<HomeDevice.Feeder?>(null) }
     var purifierKey by remember { mutableStateOf<String?>(null) }
+    var camera by remember { mutableStateOf<HomeDevice.Camera?>(null) }
     var showAll by remember { mutableStateOf(false) }
     var movingKey by remember { mutableStateOf<String?>(null) }
     var panelMovingKey by remember { mutableStateOf<String?>(null) }
@@ -103,6 +104,7 @@ fun HomeWidget(vm: LauncherViewModel, modifier: Modifier = Modifier) {
             is HomeDevice.Feeder -> feeder = device
             is HomeDevice.Relay -> if (device.reachable) vm.toggleRelay(device)
             is HomeDevice.Other -> Unit
+            is HomeDevice.Camera -> if (device.reachable) camera = device
         }
     }
 
@@ -160,6 +162,9 @@ fun HomeWidget(vm: LauncherViewModel, modifier: Modifier = Modifier) {
             onSave = { vm.renameDevice(device, it); renaming = null },
             onDismiss = { renaming = null },
         )
+    }
+    camera?.let { device ->
+        vm.cameraStream(device)?.let { url -> CameraDialog(device.name, url, onDismiss = { camera = null }) }
     }
     feeder?.let { device ->
         FeederDialog(device, onFeed = { vm.feed(device, it); feeder = null }, onDismiss = { feeder = null })
@@ -440,6 +445,7 @@ private fun HomeDevice.detail(): String {
         is HomeDevice.Feeder -> nextMeal?.let { stringResource(R.string.feeder_meal, it.time(), it.portions) }.orEmpty()
         is HomeDevice.Purifier -> ""
         is HomeDevice.Other -> stringResource(R.string.home_online)
+        is HomeDevice.Camera -> stringResource(R.string.camera_watch)
     }
 }
 

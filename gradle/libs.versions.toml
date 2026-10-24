@@ -10,6 +10,7 @@ palette = "1.0.0"
 coroutines = "1.9.0"
 dadb = "2.0.0"
 zxing = "3.5.3"
+media3 = "1.4.1"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -25,6 +26,9 @@ androidx-tv-material ={ module = "androidx.tv:tv-material", version.ref = "tvMat
 androidx-palette = { module = "androidx.palette:palette-ktx", version.ref = "palette" }
 dadb = { module = "dev.mobile:dadb", version.ref = "dadb" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
+media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3" }
+media3-exoplayer-rtsp = { module = "androidx.media3:media3-exoplayer-rtsp", version.ref = "media3" }
+media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3" }
 kotlinx-coroutines-android ={ module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 
 [plugins]

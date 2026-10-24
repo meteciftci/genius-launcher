@@ -31,6 +31,7 @@ import dev.evim.tv.data.home.DysonAccountDevice
 import dev.evim.tv.data.home.DysonChallenge
 import dev.evim.tv.data.home.DysonCloud
 import dev.evim.tv.data.home.DysonDiscovery
+import dev.evim.tv.data.home.EufyCamera
 import dev.evim.tv.data.home.TuyaAccountDevice
 import dev.evim.tv.data.home.TuyaCloud
 import dev.evim.tv.data.home.TuyaDiscovery
@@ -258,6 +259,20 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
         runCatching { dysonDiscovery.scan(devices.map { it.serial }.toSet()) }.getOrDefault(emptyMap())
 
     val dysonAddedSerials: Set<String> get() = home.dysonSerials
+
+    /** Kamerayı yerel ağda kullanıcı adı ve parolasıyla dener; olursa ekler. */
+    suspend fun addCamera(name: String, ip: String, user: String, password: String): EufyCamera.Check {
+        val camera = EufyCamera(ip, user, password)
+        val check = withContext(Dispatchers.IO) { camera.check() }
+        if (check == EufyCamera.Check.OK) {
+            homeIo { home.addCamera(name, camera, user, password) }
+            homeConfigured = home.isConfigured
+            startHomeUpdates()
+        }
+        return check
+    }
+
+    fun cameraStream(device: HomeDevice.Camera): String? = home.streamUrl(device.key)
 
     suspend fun addDyson(devices: List<DysonAccountDevice>, ips: Map<String, String>) {
         homeIo { home.addDyson(devices, ips) }

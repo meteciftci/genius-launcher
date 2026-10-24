@@ -139,7 +139,7 @@ internal fun DysonAddFlow(vm: LauncherViewModel, focus: FocusRequester, onDone: 
 
 /** Tek alanlı adım: açıklama, yazı alanı ve "Devam". Her adımda alan sıfırdan başlar. */
 @Composable
-private fun Field(body: String, initial: String, type: KeyboardType, secret: Boolean, focus: FocusRequester, onNext: (String) -> Unit) {
+internal fun Field(body: String, initial: String, type: KeyboardType, secret: Boolean, focus: FocusRequester, onNext: (String) -> Unit) {
     key(body) {
         var value by remember { mutableStateOf(TextFieldValue(initial, androidx.compose.ui.text.TextRange(initial.length))) }
         val keyboard = LocalSoftwareKeyboardController.current

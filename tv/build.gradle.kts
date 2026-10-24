@@ -61,5 +61,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.dadb)
     implementation(libs.zxing.core)
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.exoplayer.rtsp)
+    implementation(libs.media3.ui)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
