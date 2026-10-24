@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
 import dev.evim.tv.LauncherViewModel
+import dev.evim.tv.data.FILES_APP
 import dev.evim.tv.data.LauncherApp
 import dev.evim.tv.data.weatherDescription
 import androidx.tv.material3.ClickableSurfaceDefaults
@@ -75,6 +76,9 @@ fun HomeScreen(vm: LauncherViewModel) {
     var showSettings by remember { mutableStateOf(false) }
     var showSmartHome by remember { mutableStateOf(false) }
     var showWizard by remember { mutableStateOf(false) }
+    var showFiles by remember { mutableStateOf(false) }
+    // Dosyalar kartı bir uygulama değil, launcher'ın kendi ekranını açar
+    val open: (LauncherApp) -> Unit = { app -> if (app.packageName == FILES_APP) showFiles = true else vm.launch(app) }
     // Şehir ayarlardan seçildiyse sonunda hava paneline değil ayarlara dönülür
     var cityFromSettings by remember { mutableStateOf(false) }
     val firstCard = remember { FocusRequester() }
@@ -137,7 +141,7 @@ fun HomeScreen(vm: LauncherViewModel) {
                         modifier = if (index == 0) Modifier.focusRequester(firstCard) else Modifier,
                         onFocused = { focused = app },
                         onClick = {
-                            if (movingPackage != null) movingPackage = null else vm.launch(app)
+                            if (movingPackage != null) movingPackage = null else open(app)
                         },
                         onLongClick = { if (movingPackage == null) menuFor = app },
                         onMove = { delta -> vm.move(app, delta) },
@@ -159,12 +163,15 @@ fun HomeScreen(vm: LauncherViewModel) {
             AppMenu(
                 app = app,
                 onDismiss = { menuFor = null },
-                onOpen = { menuFor = null; vm.launch(app) },
+                onOpen = { menuFor = null; open(app) },
                 onMove = { menuFor = null; movingPackage = app.packageName },
                 onHide = { menuFor = null; vm.hide(app) },
                 onColor = { vm.setColor(app, it) },
-                onInfo = { menuFor = null; vm.openAppInfo(app) },
+                onInfo = { menuFor = null; vm.openAppInfo(app) }.takeIf { app.packageName != FILES_APP },
             )
+        }
+        if (showFiles) {
+            FilesDialog(onInstalled = vm::refresh, onDismiss = { showFiles = false })
         }
         // İlk açılışta kendiliğinden, sonra Genius ayarlarından
         if (showWizard || vm.setupPending) {

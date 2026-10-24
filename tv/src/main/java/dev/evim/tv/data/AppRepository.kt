@@ -32,6 +32,9 @@ data class LauncherApp(
     val color: Color = autoColor,
 )
 
+/** Launcher'ın kendi "Dosyalar" kartı; uygulamalar gibi sıralanır, gizlenir ve renklendirilir. */
+const val FILES_APP = "dev.evim.tv:files"
+
 data class RamInfo(val usedFraction: Float, val totalMb: Long)
 
 /** Wi-Fi sinyali 0-4 arası; null ise Wi-Fi'ye bağlı değil. */
@@ -60,7 +63,12 @@ class AppRepository(private val context: Context) {
                 icon = bitmap.asImageBitmap(),
                 autoColor = accentFrom(bitmap),
             )
-        }
+        } + filesCard()
+    }
+
+    private fun filesCard(): LauncherApp {
+        val bitmap = context.getDrawable(R.drawable.ic_files)!!.toBitmap(ICON_PX, ICON_PX, Bitmap.Config.ARGB_8888)
+        return LauncherApp(FILES_APP, context.getString(R.string.files_title), bitmap.asImageBitmap(), autoColor = FILES_COLOR)
     }
 
     fun launch(packageName: String) {
@@ -174,5 +182,6 @@ class AppRepository(private val context: Context) {
         const val ICON_PX = 192
         const val TV_SETTINGS_PACKAGE = "com.android.tv.settings"
         val FALLBACK = Color(0xFF4A5060)
+        val FILES_COLOR = Color(0xFF2F6FDB)
     }
 }

@@ -265,4 +265,31 @@
     <string name="about_version">Version %s</string>
     <string name="about_body">Open source Android TV launcher. The Home button approach is inspired by Free My TV (MIT).</string>
     <string name="about_source" translatable="false">github.com/meteciftci/genius-launcher</string>
+
+    <!-- Dosyalar -->
+    <string name="files_title">Files</string>
+    <string name="files_free">%1$s free of %2$s</string>
+    <string name="files_hint">OK opens · hold OK for more · Back goes up a folder</string>
+    <string name="files_loading">Loading…</string>
+    <string name="files_empty">This folder is empty.</string>
+    <string name="files_access_adb_off">Files needs USB debugging to get access to storage. Turn it on in the setup wizard (Genius settings).</string>
+    <string name="files_access_denied">The TV didn\'t allow USB debugging for Genius Launcher. Allow it in the setup wizard (Genius settings).</string>
+    <string name="files_cannot_open">This file can\'t be opened on this TV.</string>
+    <string name="files_open_with">Open with another app</string>
+    <string name="files_delete">Delete</string>
+    <string name="files_delete_title">Delete %s?</string>
+    <string name="files_delete_body">The file is deleted from this TV. This can\'t be undone.</string>
+    <string name="files_delete_folder_body">The folder and everything in it are deleted from this TV. This can\'t be undone.</string>
+    <string name="files_delete_failed">Couldn\'t delete it.</string>
+    <string name="files_rename_failed">Couldn\'t rename it. The name may already be in use.</string>
+    <string name="files_install_title">Install this app?</string>
+    <string name="files_install_body">The app is installed on this TV. Only install apps from sources you trust.</string>
+    <string name="files_install">Install</string>
+    <string name="files_installing">Installing…</string>
+    <string name="files_installed">Installed. It\'s now in your apps.</string>
+    <string name="files_install_failed">Couldn\'t install it. The file may be damaged or made for another device.</string>
+    <string name="files_play_failed">This file can\'t be played.</string>
+    <string name="files_audio_hint">OK: pause · ◀ ▶: 10 seconds</string>
+    <string name="files_internal">Internal storage</string>
+    <string name="files_rename_title">Rename</string>
 </resources>

@@ -38,6 +38,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -238,9 +240,15 @@ private fun DeviceMenu(
     }
 }
 
-/** Kumandanın ekran klavyesiyle yeni ad yazılır; boş bırakılırsa cihazın kendi adına döner. */
+/** Kumandanın ekran klavyesiyle yeni ad yazılır; cihazlarda boş bırakılırsa cihazın kendi adına döner. */
 @Composable
-internal fun RenameDialog(current: String, onSave: (String) -> Unit, onDismiss: () -> Unit) {
+internal fun RenameDialog(
+    current: String,
+    onSave: (String) -> Unit,
+    onDismiss: () -> Unit,
+    title: String = stringResource(R.string.rename_title),
+    subtitle: String? = stringResource(R.string.rename_subtitle),
+) {
     var name by remember { mutableStateOf(TextFieldValue(current, TextRange(current.length))) }
     val field = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
@@ -250,7 +258,7 @@ internal fun RenameDialog(current: String, onSave: (String) -> Unit, onDismiss: 
     }
     Dialog(onDismissRequest = onDismiss) {
         Panel(width = 420.dp) {
-            PanelHeader(stringResource(R.string.rename_title), stringResource(R.string.rename_subtitle), Icons.Rounded.Edit)
+            PanelHeader(title, subtitle, Icons.Rounded.Edit)
             TextInput(name, { name = it }, Modifier.focusRequester(field))
             PanelActions {
                 PillButton(stringResource(R.string.cancel), onClick = onDismiss)
@@ -270,6 +278,7 @@ internal fun TextInput(
     secret: Boolean = false,
 ) {
     val keyboard = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
@@ -279,7 +288,15 @@ internal fun TextInput(
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = ImeAction.Done, autoCorrectEnabled = false),
         keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }),
         visualTransformation = if (secret) PasswordVisualTransformation() else VisualTransformation.None,
-        modifier = modifier.fillMaxWidth(),
+        // Tek satırda yukarı/aşağının yazıda anlamı yok; odak alttaki düğmelere geçebilsin
+        modifier = modifier.fillMaxWidth().onPreviewKeyEvent { event ->
+            if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+            when (event.key) {
+                Key.DirectionDown -> focusManager.moveFocus(FocusDirection.Down)
+                Key.DirectionUp -> focusManager.moveFocus(FocusDirection.Up)
+                else -> false
+            }
+        },
         decorationBox = { inner ->
             Box(
                 Modifier

@@ -250,4 +250,31 @@
     <string name="working">Yapılıyor…</string>
     <string name="about_version">Sürüm %s</string>
     <string name="about_body">Açık kaynak Android TV launcher\'ı. Home tuşu yöntemi Free My TV\'den (MIT) esinlenildi.</string>
+
+    <!-- Dosyalar -->
+    <string name="files_title">Dosyalar</string>
+    <string name="files_free">%1$s boş / %2$s</string>
+    <string name="files_hint">OK açar · OK\'e basılı tut: diğer işlemler · Geri: üst klasör</string>
+    <string name="files_loading">Yükleniyor…</string>
+    <string name="files_empty">Bu klasör boş.</string>
+    <string name="files_access_adb_off">Dosyalar, depolamaya erişmek için USB hata ayıklamaya ihtiyaç duyar. Kurulum sihirbazından (Genius ayarları) açın.</string>
+    <string name="files_access_denied">TV, Genius Launcher\'a USB hata ayıklama izni vermedi. Kurulum sihirbazından (Genius ayarları) izin verin.</string>
+    <string name="files_cannot_open">Bu dosya bu TV\'de açılamıyor.</string>
+    <string name="files_open_with">Başka uygulamayla aç</string>
+    <string name="files_delete">Sil</string>
+    <string name="files_delete_title">%s silinsin mi?</string>
+    <string name="files_delete_body">Dosya bu TV\'den silinir. Geri alınamaz.</string>
+    <string name="files_delete_folder_body">Klasör ve içindeki her şey bu TV\'den silinir. Geri alınamaz.</string>
+    <string name="files_delete_failed">Silinemedi.</string>
+    <string name="files_rename_failed">Yeniden adlandırılamadı. Bu ad kullanılıyor olabilir.</string>
+    <string name="files_install_title">Bu uygulama kurulsun mu?</string>
+    <string name="files_install_body">Uygulama bu TV\'ye kurulur. Yalnızca güvendiğiniz kaynaklardan gelen uygulamaları kurun.</string>
+    <string name="files_install">Kur</string>
+    <string name="files_installing">Kuruluyor…</string>
+    <string name="files_installed">Kuruldu. Artık uygulamalarınızın arasında.</string>
+    <string name="files_install_failed">Kurulamadı. Dosya bozuk olabilir ya da başka bir cihaz için yapılmış olabilir.</string>
+    <string name="files_play_failed">Bu dosya oynatılamıyor.</string>
+    <string name="files_audio_hint">OK: duraklat · ◀ ▶: 10 saniye</string>
+    <string name="files_internal">Dahili hafıza</string>
+    <string name="files_rename_title">Yeniden adlandır</string>
 </resources>

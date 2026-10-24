@@ -60,7 +60,8 @@ fun AppMenu(
     onMove: () -> Unit,
     onHide: () -> Unit,
     onColor: (Color?) -> Unit,
-    onInfo: () -> Unit,
+    /** null: "Uygulama bilgisi" gösterilmez (launcher'ın kendi kartları). */
+    onInfo: (() -> Unit)?,
 ) {
     var pickingColor by remember { mutableStateOf(false) }
     val first = remember { FocusRequester() }
@@ -79,7 +80,7 @@ fun AppMenu(
                 ListRow(stringResource(R.string.menu_move), icon = Icons.Rounded.SwapHoriz, onClick = onMove)
                 ListRow(stringResource(R.string.menu_pick_color), icon = Icons.Rounded.Palette, onClick = { pickingColor = true })
                 ListRow(stringResource(R.string.menu_hide), icon = Icons.Rounded.VisibilityOff, onClick = onHide)
-                ListRow(stringResource(R.string.menu_app_info), icon = Icons.Rounded.Info, onClick = onInfo)
+                if (onInfo != null) ListRow(stringResource(R.string.menu_app_info), icon = Icons.Rounded.Info, onClick = onInfo)
             } else {
                 Text(stringResource(R.string.color_title), color = EvimColors.TextDim, fontSize = 11.sp)
                 Spacer(Modifier.height(10.dp))
