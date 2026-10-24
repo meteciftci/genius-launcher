@@ -56,7 +56,11 @@ Devices are added from the **Home** chip in the top bar: **Home → Add device**
 
 ### Prebuilt release
 
-1. Download the latest `genius-launcher-x.y.z.apk` from the [Releases](https://github.com/meteciftci/genius-launcher/releases) page.
+1. Download the latest version from the [Releases](https://github.com/meteciftci/genius-launcher/releases) page. There are two editions:
+   - `genius-launcher-x.y.z.apk`: the full edition, with the smart home
+   - `genius-launcher-lite-x.y.z.apk`: **Lite**, without the smart home; the home screen, Files, weather and updates are the same
+
+   Both are the same app, so one installs over the other and settings are kept. In-app updates download the edition you have installed.
 2. Install it on the TV from a computer (USB debugging must be on):
    ```bash
    adb connect 192.168.1.50:5555
@@ -95,10 +99,11 @@ Put the TV's adb address in `tools/.tv` (not committed either):
 echo 192.168.1.50:5555 > tools/.tv
 ```
 
-Build a release and install it on the TV. The script compiles the app ahead of time on the device (avoiding stutter on the first launches) and opens it:
+Build a release and install it on the TV. The script compiles the app ahead of time on the device (avoiding stutter on the first launches) and opens it. Add `lite` for the Lite edition:
 
 ```bash
 zsh tools/install.sh
+zsh tools/install.sh lite
 ```
 
 Use `zsh tools/perf.sh` to measure smoothness. Helper scripts for Mi Box cleanup and sleep settings are in `tools/mibox/`.

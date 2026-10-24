@@ -26,6 +26,19 @@ android {
         buildConfigField("String", "TUYA_SCHEMA", "\"${local.getProperty("tuya.schema", "")}\"")
     }
 
+    // İki sürüm, aynı paket adıyla: "full" akıllı evle, "lite" akıllı evsiz (bu kodlar derlemeden atılır)
+    flavorDimensions += "edition"
+    productFlavors {
+        create("full") {
+            dimension = "edition"
+            buildConfigField("boolean", "SMART_HOME", "true")
+        }
+        create("lite") {
+            dimension = "edition"
+            buildConfigField("boolean", "SMART_HOME", "false")
+        }
+    }
+
     // Yayın anahtarı repo dışında durur, parolası macOS Anahtar Zinciri'nden okunur. Anahtarı olmayanlar
     // (başka geliştiriciler) release derlemesini debug anahtarıyla imzalar.
     val releaseKey = File(System.getProperty("user.home"), ".android/genius-release.jks")

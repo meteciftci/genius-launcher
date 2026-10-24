@@ -42,6 +42,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.tv.material3.Text
 import dev.evim.tv.LauncherViewModel
+import dev.evim.tv.BuildConfig
 import dev.evim.tv.R
 import dev.evim.tv.data.SwitchCheck
 import kotlinx.coroutines.launch
@@ -122,12 +123,14 @@ fun SettingsDialog(
                         }
                     }
                     CardRow {
-                        ChoiceCard(
-                            Icons.Rounded.Dashboard,
-                            stringResource(R.string.settings_widget),
-                            stringResource(R.string.settings_widget_count, vm.widgetLimit),
-                            Modifier.weight(1f),
-                        ) { go(Step.WIDGET) }
+                        if (BuildConfig.SMART_HOME) {
+                            ChoiceCard(
+                                Icons.Rounded.Dashboard,
+                                stringResource(R.string.settings_widget),
+                                stringResource(R.string.settings_widget_count, vm.widgetLimit),
+                                Modifier.weight(1f),
+                            ) { go(Step.WIDGET) }
+                        }
                         ChoiceCard(Icons.Rounded.AutoFixHigh, stringResource(R.string.settings_wizard), null, Modifier.weight(1f), onClick = onWizard)
                         // Yeni sürüm varken "Hakkında" kartı güncellemeye götürür
                         val update = vm.update

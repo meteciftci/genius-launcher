@@ -60,13 +60,14 @@ class RamMessage(@StringRes val text: Int, vararg val args: Any)
 class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     private val repo = AppRepository(app)
     private val prefs = LauncherPrefs(app)
-    private val home = SmartHome(app)
+    // Lite sürümde akıllı ev nesneleri hiç oluşturulmaz
+    private val home by lazy { SmartHome(app) }
     private val homeSwitch = HomeSwitch(app)
     private val setup = Setup(app)
     private val updater = Updater(app)
-    private val tuyaCloud = TuyaCloud(BuildConfig.TUYA_CLIENT_ID, BuildConfig.TUYA_SCHEMA)
-    private val tuyaDiscovery = TuyaDiscovery(app)
-    private val dysonDiscovery = DysonDiscovery(app)
+    private val tuyaCloud by lazy { TuyaCloud(BuildConfig.TUYA_CLIENT_ID, BuildConfig.TUYA_SCHEMA) }
+    private val tuyaDiscovery by lazy { TuyaDiscovery(app) }
+    private val dysonDiscovery by lazy { DysonDiscovery(app) }
     // Tuya cihazları aynı anda tek yerel bağlantı kabul edebiliyor; sorgu ve komutlar sırayla gider
     private val homeLock = Mutex()
     private var installed: List<LauncherApp> = emptyList()
@@ -210,6 +211,7 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Ekran görünürken cihaz durumlarını düzenli yeniler; [stopHomeUpdates] ile durur. */
     fun startHomeUpdates() {
+        if (!BuildConfig.SMART_HOME) return
         homeJob?.cancel()
         homeJob = viewModelScope.launch {
             withContext(Dispatchers.IO) { runCatching { home.load() } }

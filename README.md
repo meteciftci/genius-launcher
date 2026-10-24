@@ -56,7 +56,11 @@ Cihazlar üst şeritteki **Evim** kutusundan eklenir: **Evim → Cihaz ekle**.
 
 ### Hazır sürüm
 
-1. [Releases](https://github.com/meteciftci/genius-launcher/releases) sayfasından son `genius-launcher-x.y.z.apk` dosyasını indirin.
+1. [Releases](https://github.com/meteciftci/genius-launcher/releases) sayfasından son sürümü indirin. İki sürüm var:
+   - `genius-launcher-x.y.z.apk`: tam sürüm, akıllı ev dahil
+   - `genius-launcher-lite-x.y.z.apk`: **Lite**, akıllı ev olmadan; ana ekran, Dosyalar, hava durumu ve güncellemeler aynı
+
+   İkisi aynı uygulamadır, biri diğerinin üzerine kurulabilir; ayarlar korunur. Uygulama içi güncelleme kurulu sürümün türünü indirir.
 2. Bilgisayardan TV'ye kurun (TV'de USB hata ayıklama açık olmalı):
    ```bash
    adb connect 192.168.1.50:5555
@@ -95,10 +99,11 @@ TV'nin adb adresini `tools/.tv` dosyasına yazın (bu dosya da repoya girmez):
 echo 192.168.1.50:5555 > tools/.tv
 ```
 
-Release derleyip TV'ye yükleyin. Betik uygulamayı cihazda önceden derler (ilk açılışlardaki takılmayı önler) ve açar:
+Release derleyip TV'ye yükleyin. Betik uygulamayı cihazda önceden derler (ilk açılışlardaki takılmayı önler) ve açar. Lite sürüm için `lite` yazın:
 
 ```bash
 zsh tools/install.sh
+zsh tools/install.sh lite
 ```
 
 Akıcılığı ölçmek için `zsh tools/perf.sh`. Mi Box temizliği ve uyku ayarları için yardımcı betikler `tools/mibox/` altında.

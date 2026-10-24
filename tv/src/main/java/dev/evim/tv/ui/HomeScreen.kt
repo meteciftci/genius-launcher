@@ -1,5 +1,6 @@
 package dev.evim.tv.ui
 
+import dev.evim.tv.BuildConfig
 import dev.evim.tv.R
 import androidx.compose.ui.res.stringResource
 import androidx.activity.compose.BackHandler
@@ -150,8 +151,8 @@ fun HomeScreen(vm: LauncherViewModel) {
             }
         }
 
-        // Sağ üstte, büyük harfin eski yerinde
-        HomeWidget(
+        // Sağ üstte, büyük harfin eski yerinde; lite sürümde akıllı ev yok, sağ taraf boş kalır
+        if (BuildConfig.SMART_HOME) HomeWidget(
             vm = vm,
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -177,7 +178,7 @@ fun HomeScreen(vm: LauncherViewModel) {
         if (showWizard || vm.setupPending) {
             SetupWizardDialog(vm = vm, onDismiss = { showWizard = false })
         }
-        if (showSmartHome) {
+        if (BuildConfig.SMART_HOME && showSmartHome) {
             // Cihaz yokken panel doğrudan eklemeyle açılır
             val empty = remember { vm.homeDevices.isEmpty() }
             SmartHomeDialog(vm = vm, startAtAdd = empty, onDismiss = { showSmartHome = false })

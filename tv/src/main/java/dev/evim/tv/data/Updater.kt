@@ -1,6 +1,7 @@
 package dev.evim.tv.data
 
 import android.content.Context
+import dev.evim.tv.BuildConfig
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
@@ -33,7 +34,11 @@ class Updater(private val context: Context) {
         val version = release.optString("tag_name").removePrefix("v")
         if (!isNewer(version, currentVersion)) return null
         val assets = release.optJSONArray("assets") ?: return null
-        val apk = (0 until assets.length()).map { assets.getJSONObject(it) }.firstOrNull { it.optString("name").endsWith(".apk") } ?: return null
+        // Her sürüm kendi dosyasını alır: lite "genius-launcher-lite-x.y.z.apk", tam "genius-launcher-x.y.z.apk"
+        val apk = (0 until assets.length()).map { assets.getJSONObject(it) }.firstOrNull {
+            val name = it.optString("name")
+            name.endsWith(".apk") && name.contains("-lite-") == !BuildConfig.SMART_HOME
+        } ?: return null
         // GitHub her dosya için "sha256:..." özetini verir; özeti olmayan dosya kurulmaz
         val digest = apk.optString("digest").removePrefix("sha256:").takeIf { it.length == 64 } ?: return null
         return AppUpdate(

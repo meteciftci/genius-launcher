@@ -2,6 +2,7 @@ package dev.evim.tv.ui
 
 import android.text.format.DateFormat
 import androidx.compose.ui.platform.LocalContext
+import dev.evim.tv.BuildConfig
 import dev.evim.tv.R
 import androidx.compose.ui.res.stringResource
 import android.provider.Settings
@@ -93,8 +94,10 @@ fun TopBar(vm: LauncherViewModel, onWeatherClick: () -> Unit, onSmartHome: () ->
             )
         }
         Spacer(Modifier.weight(1f))
-        HomeChip(vm = vm, onClick = onSmartHome)
-        Spacer(Modifier.width(8.dp))
+        if (BuildConfig.SMART_HOME) {
+            HomeChip(vm = vm, onClick = onSmartHome)
+            Spacer(Modifier.width(8.dp))
+        }
         ShortcutsChip(vm = vm, onGeniusSettings = onGeniusSettings)
         Spacer(Modifier.width(8.dp))
         RamChip(vm = vm)

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Yalnızca akıllı evli sürümün izinleri -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Tuya cihazlarının ev ağına yaptığı UDP yayınlarını dinlemek için -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+</manifest>
