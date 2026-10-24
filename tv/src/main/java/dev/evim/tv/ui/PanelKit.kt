@@ -46,17 +46,17 @@ import androidx.tv.material3.Text
 internal fun PanelHeader(title: String, subtitle: String? = null, icon: ImageVector? = null, tint: Color = EvimColors.Accent) {
     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         if (icon != null) {
-            Box(Modifier.size(46.dp).background(tint.copy(alpha = 0.18f), CircleShape), contentAlignment = Alignment.Center) {
-                Icon(icon, null, tint = tint, modifier = Modifier.size(24.dp))
+            Box(Modifier.size(40.dp).background(tint.copy(alpha = 0.18f), CircleShape), contentAlignment = Alignment.Center) {
+                Icon(icon, null, tint = tint, modifier = Modifier.size(22.dp))
             }
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(8.dp))
         }
         Text(title, color = Color.White, fontSize = 19.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
         if (!subtitle.isNullOrEmpty()) {
             Spacer(Modifier.height(4.dp))
             Text(subtitle, color = EvimColors.TextDim, fontSize = 12.sp, lineHeight = 17.sp, textAlign = TextAlign.Center)
         }
-        Spacer(Modifier.height(18.dp))
+        Spacer(Modifier.height(14.dp))
     }
 }
 
@@ -108,7 +108,7 @@ internal fun ChoiceCard(
 ) {
     Surface(
         onClick = onClick,
-        modifier = modifier.height(128.dp),
+        modifier = modifier.height(112.dp),
         shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(18.dp)),
         scale = ClickableSurfaceDefaults.scale(focusedScale = 1.05f),
         border = ClickableSurfaceDefaults.border(border = Border(BorderStroke(1.dp, EvimColors.ChipBorder), shape = RoundedCornerShape(18.dp))),
@@ -120,14 +120,14 @@ internal fun ChoiceCard(
         ),
     ) {
         Column(
-            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 14.dp),
+            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            Box(Modifier.size(40.dp).background(tint.copy(alpha = 0.2f), CircleShape), contentAlignment = Alignment.Center) {
-                Icon(icon, null, tint = tint, modifier = Modifier.size(22.dp))
+            Box(Modifier.size(36.dp).background(tint.copy(alpha = 0.2f), CircleShape), contentAlignment = Alignment.Center) {
+                Icon(icon, null, tint = tint, modifier = Modifier.size(20.dp))
             }
-            Spacer(Modifier.height(9.dp))
+            Spacer(Modifier.height(7.dp))
             Text(title, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center, maxLines = 2)
             if (!subtitle.isNullOrEmpty()) {
                 Text(

@@ -144,7 +144,7 @@ internal fun Panel(width: Dp = 320.dp, content: @Composable () -> Unit) {
             .width(width)
             .background(Color(0xF717171E), RoundedCornerShape(26.dp))
             .border(1.dp, EvimColors.ChipBorder, RoundedCornerShape(26.dp))
-            .padding(horizontal = 26.dp, vertical = 24.dp),
+            .padding(horizontal = 26.dp, vertical = 18.dp),
     ) { content() }
 }
 
