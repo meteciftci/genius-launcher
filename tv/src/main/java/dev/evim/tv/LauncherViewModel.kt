@@ -91,6 +91,14 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     /** Home tuşu Genius Launcher'ı mı açıyor; ekrana dönülünce yenilenir. */
     var geniusIsHome by mutableStateOf(false)
         private set
+    var widgetLimit by mutableStateOf(prefs.widgetLimit)
+        private set
+
+    fun changeWidgetLimit(limit: Int) {
+        prefs.widgetLimit = limit
+        widgetLimit = limit
+    }
+
     /** İlk açılışta kurulum sihirbazı kendiliğinden gösterilir. */
     var setupPending by mutableStateOf(!prefs.setupShown)
         private set

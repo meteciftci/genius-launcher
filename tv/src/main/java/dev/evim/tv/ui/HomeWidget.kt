@@ -78,7 +78,6 @@ import dev.evim.tv.data.home.Meal
 import dev.evim.tv.data.home.celsiusToDyson
 
 /** Widget'ta gösterilen en fazla kart; fazlası "Diğer" kartındaki panelde. */
-private const val WIDGET_LIMIT = 4
 
 private val CardShape = RoundedCornerShape(12.dp)
 
@@ -113,7 +112,8 @@ fun HomeWidget(vm: LauncherViewModel, modifier: Modifier = Modifier) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         // Cihaz yoksa widget hiç görünmez; ekleme Evim kutusundan
         val devices = vm.homeDevices
-        val visible = if (devices.size > WIDGET_LIMIT) devices.take(WIDGET_LIMIT - 1) else devices
+        val limit = vm.widgetLimit
+        val visible = if (devices.size > limit) devices.take(limit - 1) else devices
         visible.forEach { device ->
             key(device.key) {
                 DeviceCard(
@@ -125,7 +125,7 @@ fun HomeWidget(vm: LauncherViewModel, modifier: Modifier = Modifier) {
                 )
             }
         }
-        if (devices.size > WIDGET_LIMIT) {
+        if (devices.size > limit) {
             OtherCard(count = devices.size - visible.size) { showAll = true }
         }
         MoveHint(visible = movingKey != null && !showAll)

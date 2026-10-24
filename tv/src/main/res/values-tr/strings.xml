@@ -185,6 +185,10 @@
     <string name="settings_subtitle">Launcher\'ın kendi ayarları; TV\'nin ayarları dişli simgesinde</string>
     <string name="settings_hidden_count">%d gizli</string>
     <string name="settings_undo_setup_hint">Kaldırılan uygulamaları ve eski uyku ayarlarını geri getir</string>
+    <string name="settings_widget">Evim widget\'ı</string>
+    <string name="settings_widget_count">%d kart</string>
+    <string name="settings_widget_body">Widget\'ta kaç cihaz kartı görünsün; fazlası Diğer\'e girer.</string>
+    <string name="settings_uninstall_hint">Home\'u Google TV\'ye verip uygulamayı kaldır</string>
     <string name="settings_wizard">Kurulum sihirbazı</string>
     <string name="settings_undo_setup">Sihirbazın değişikliklerini geri al</string>
     <string name="undo_setup_title">Sihirbazın değişiklikleri geri alınsın mı?</string>

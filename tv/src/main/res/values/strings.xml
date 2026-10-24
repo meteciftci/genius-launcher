@@ -199,6 +199,10 @@
     <string name="settings_subtitle">The launcher\'s own settings; the TV\'s settings stay in the gear icon</string>
     <string name="settings_hidden_count">%d hidden</string>
     <string name="settings_undo_setup_hint">Bring back removed apps and old sleep settings</string>
+    <string name="settings_widget">Home widget</string>
+    <string name="settings_widget_count">%d cards</string>
+    <string name="settings_widget_body">How many device cards the widget shows; the rest go under Other.</string>
+    <string name="settings_uninstall_hint">Give Home back to Google TV and remove the app</string>
     <string name="settings_wizard">Setup wizard</string>
     <string name="settings_undo_setup">Undo the setup wizard\'s changes</string>
     <string name="undo_setup_title">Undo the setup wizard\'s changes?</string>

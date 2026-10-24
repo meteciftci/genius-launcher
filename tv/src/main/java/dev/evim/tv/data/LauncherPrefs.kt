@@ -54,6 +54,11 @@ class LauncherPrefs(context: Context) {
         deviceOrder = deviceOrder - key
     }
 
+    /** Evim widget'ında en fazla kaç kart gösterilir; fazlası "Diğer" kartına girer. */
+    var widgetLimit: Int
+        get() = sp.getInt(KEY_WIDGET_LIMIT, 4)
+        set(value) = sp.edit { putInt(KEY_WIDGET_LIMIT, value) }
+
     /** İlk kurulum sihirbazı bir kez gösterildi mi (bitirilse de atlansa da). */
     var setupShown: Boolean
         get() = sp.getBoolean(KEY_SETUP_SHOWN, false)
@@ -74,6 +79,7 @@ class LauncherPrefs(context: Context) {
         const val KEY_DEVICE_ORDER = "device_order"
         const val KEY_TUYA_USER_CODE = "tuya_user_code"
         const val KEY_SETUP_SHOWN = "setup_shown"
+        const val KEY_WIDGET_LIMIT = "widget_limit"
         const val KEY_CITY = "city"
         const val KEY_LAT = "lat"
         const val KEY_LON = "lon"

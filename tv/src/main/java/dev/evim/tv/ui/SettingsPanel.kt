@@ -3,6 +3,8 @@ package dev.evim.tv.ui
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoFixHigh
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Dashboard
 import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Info
@@ -37,7 +39,10 @@ import dev.evim.tv.R
 import dev.evim.tv.data.SwitchCheck
 import kotlinx.coroutines.launch
 
-private enum class Step { MENU, ABOUT, TO_GENIUS, TO_GOOGLE, UNDO_SETUP, UNINSTALL }
+// Widget'ın sığdığı aralık: Dyson büyük kart, gerisi tek satır
+private val WIDGET_LIMITS = listOf(3, 4, 5, 6)
+
+private enum class Step { MENU, WIDGET, ABOUT, TO_GENIUS, TO_GOOGLE, UNDO_SETUP, UNINSTALL }
 
 /**
  * Launcher'ın kendi ayarları: gizli uygulamalar, hava durumu şehri, Home tuşu, hakkında ve kaldırma.
@@ -110,16 +115,39 @@ fun SettingsDialog(
                         }
                     }
                     CardRow {
+                        ChoiceCard(
+                            Icons.Rounded.Dashboard,
+                            stringResource(R.string.settings_widget),
+                            stringResource(R.string.settings_widget_count, vm.widgetLimit),
+                            Modifier.weight(1f),
+                        ) { go(Step.WIDGET) }
                         ChoiceCard(Icons.Rounded.AutoFixHigh, stringResource(R.string.settings_wizard), null, Modifier.weight(1f), onClick = onWizard)
                         ChoiceCard(Icons.Rounded.Info, stringResource(R.string.settings_about), null, Modifier.weight(1f)) { go(Step.ABOUT) }
-                        ChoiceCard(Icons.Rounded.DeleteForever, stringResource(R.string.settings_uninstall), null, Modifier.weight(1f), EvimColors.Danger) {
-                            go(Step.UNINSTALL)
-                        }
+                    }
+                    Spacer(Modifier.height(6.dp))
+                    ListRow(stringResource(R.string.settings_uninstall), stringResource(R.string.settings_uninstall_hint), Icons.Rounded.DeleteForever, EvimColors.Danger, trailing = Trailing.Chevron) {
+                        go(Step.UNINSTALL)
                     }
                     if (setupChanged) {
-                        Spacer(Modifier.height(6.dp))
                         ListRow(stringResource(R.string.settings_undo_setup), stringResource(R.string.settings_undo_setup_hint), Icons.Rounded.Restore, trailing = Trailing.Chevron) {
                             go(Step.UNDO_SETUP)
+                        }
+                    }
+                }
+                Step.WIDGET -> {
+                    PanelHeader(stringResource(R.string.settings_widget), stringResource(R.string.settings_widget_body), Icons.Rounded.Dashboard)
+                    CardRow {
+                        WIDGET_LIMITS.forEach { limit ->
+                            ChoiceCard(
+                                if (limit == vm.widgetLimit) Icons.Rounded.CheckCircle else Icons.Rounded.Dashboard,
+                                stringResource(R.string.settings_widget_count, limit),
+                                null,
+                                Modifier.weight(1f).then(if (limit == vm.widgetLimit) Modifier.focusRequester(first) else Modifier),
+                                if (limit == vm.widgetLimit) EvimColors.Online else EvimColors.Accent,
+                            ) {
+                                vm.changeWidgetLimit(limit)
+                                go(Step.MENU)
+                            }
                         }
                     }
                 }
