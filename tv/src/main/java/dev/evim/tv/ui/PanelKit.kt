@@ -128,7 +128,8 @@ internal fun ChoiceCard(
                 Icon(icon, null, tint = tint, modifier = Modifier.size(20.dp))
             }
             Spacer(Modifier.height(7.dp))
-            Text(title, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center, maxLines = 2)
+            // İki satırlık başlık, simge ve alt yazıyla birlikte kartın yüksekliğine sığsın
+            Text(title, fontSize = 13.sp, lineHeight = 16.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center, maxLines = 2)
             if (!subtitle.isNullOrEmpty()) {
                 Text(
                     subtitle,
