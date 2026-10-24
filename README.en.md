@@ -18,6 +18,7 @@ A clean, ad-free home screen for Android TV and Google TV. It also controls the 
 - **Camera**: Press an Eufy camera's card for a full-screen live view with sound (RTSP). Pan & Tilt cameras turn with the remote's arrow keys.
 - **Setup wizard**: Full-screen illustrated steps for the TV's ADB permission, the Home button, removing bloatware and "stay awake". Everything can be undone.
 - **Memory**: RAM use in the top bar; **Free up** closes apps running in the background.
+- **Updates**: Since the app isn't on the Play Store, it finds new versions on GitHub by itself and shows a dot on the Genius settings icon. Pressing **Update** downloads the APK, checks it against GitHub's SHA-256 digest and installs it over the TV's ADB; settings and devices stay.
 - **Screensaver**: As on Google TV, pressing Back twice on the home screen starts it.
 - English and Turkish; follows the system language.
 

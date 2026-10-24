@@ -18,6 +18,7 @@ Android TV ve Google TV için reklamsız, sade bir ana ekran. Evdeki akıllı ci
 - **Kamera**: Eufy kameranın karta basınca tam ekran, sesli canlı görüntüsü (RTSP). Pan & Tilt kameralar kumandanın yön tuşlarıyla döndürülür.
 - **Kurulum sihirbazı**: Tam ekran, görselli adımlarla TV'nin ADB izni, Home tuşu, gereksiz uygulamaların temizliği ve "uyanık tut". Hepsi geri alınabilir.
 - **Bellek**: Üst şeritte RAM kullanımı; **Boşalt** arka plandaki uygulamaları kapatır.
+- **Güncelleme**: Uygulama Play Store'da olmadığı için yeni sürümleri GitHub'dan kendisi bulur; Genius ayarları simgesinde bir nokta çıkar. **Güncelle**'ye basınca APK indirilir, GitHub'ın verdiği SHA-256 özetiyle doğrulanır ve TV'nin ADB'siyle kurulur; ayarlar ve cihazlar yerinde kalır.
 - **Ekran koruyucu**: Google TV'deki gibi ana ekranda Geri tuşuna art arda iki kez basınca başlar.
 - Türkçe ve İngilizce; sistem dilini izler.
 
