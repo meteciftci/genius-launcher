@@ -14,12 +14,14 @@
     <string name="smart_home_title">Akıllı ev</string>
     <string name="smart_home_subtitle">Cihazlar buluttan değil, ev ağınızdan yönetilir.</string>
     <string name="smart_home_add">Cihaz ekle</string>
+    <string name="brand_tuya_kinds">akıllı prizler, röleler, mama kapları</string>
+    <string name="brand_dyson_kinds">hava temizleyiciler (Pure Cool, Hot+Cool, Humidify+Cool)</string>
     <string name="smart_home_add_subtitle">Cihazınızın kullandığı uygulamayı seçin</string>
     <string name="menu_remove">Kaldır</string>
     <string name="remove_device_title">%s kaldırılsın mı?</string>
     <string name="remove_device_body">Cihaz ve anahtarı bu TV\'den silinir. %s hesabınızda kalır; yeniden ekleyebilirsiniz.</string>
     <string name="remove_confirm">Kaldır</string>
-    <string name="dyson_choice_body">MyDyson hesabınızla giriş yapın ya da cihazın üstündeki etiketteki Wi-Fi adı ve parolasını kullanın (hesap gerekmez).</string>
+    <string name="dyson_choice_body">Dyson hava temizleyicinizi ekleyin: MyDyson hesabınızla giriş yapın ya da cihazın üstündeki etiketteki Wi-Fi adı ve parolasını kullanın (hesap gerekmez).</string>
     <string name="dyson_with_account">MyDyson hesabı</string>
     <string name="dyson_with_sticker">Cihazdaki Wi-Fi etiketi</string>
     <string name="dyson_email_body">MyDyson e-posta adresiniz</string>

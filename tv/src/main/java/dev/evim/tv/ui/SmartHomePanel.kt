@@ -66,8 +66,8 @@ fun SmartHomeDialog(vm: LauncherViewModel, startAtAdd: Boolean, onDismiss: () ->
                 }
                 HomeStep.Add -> {
                     PanelTitle(stringResource(R.string.smart_home_add), stringResource(R.string.smart_home_add_subtitle))
-                    MenuItem(stringResource(R.string.brand_tuya), Modifier.focusRequester(first)) { step = HomeStep.Tuya }
-                    MenuItem(stringResource(R.string.brand_dyson)) { step = HomeStep.Dyson }
+                    MenuItem("${stringResource(R.string.brand_tuya)}  ·  ${stringResource(R.string.brand_tuya_kinds)}", Modifier.focusRequester(first)) { step = HomeStep.Tuya }
+                    MenuItem("${stringResource(R.string.brand_dyson)}  ·  ${stringResource(R.string.brand_dyson_kinds)}") { step = HomeStep.Dyson }
                 }
                 HomeStep.Tuya -> TuyaAddFlow(vm, first, onDone = { step = HomeStep.List })
                 HomeStep.Dyson -> DysonAddFlow(vm, first, onDone = { step = HomeStep.List })

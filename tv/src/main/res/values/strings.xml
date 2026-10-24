@@ -21,11 +21,13 @@
     <string name="smart_home_add_subtitle">Choose the app your device uses</string>
     <string name="brand_tuya" translatable="false">Tuya · Smart Life</string>
     <string name="brand_dyson" translatable="false">Dyson</string>
+    <string name="brand_tuya_kinds">smart plugs, relays, pet feeders</string>
+    <string name="brand_dyson_kinds">air purifiers (Pure Cool, Hot+Cool, Humidify+Cool)</string>
     <string name="menu_remove">Remove</string>
     <string name="remove_device_title">Remove %s?</string>
     <string name="remove_device_body">The device and its key are deleted from this TV. It stays in your %s account; you can add it again.</string>
     <string name="remove_confirm">Remove</string>
-    <string name="dyson_choice_body">Sign in with your MyDyson account, or use the Wi-Fi name and password on the sticker on the device (no account needed).</string>
+    <string name="dyson_choice_body">Add a Dyson air purifier: sign in with your MyDyson account, or use the Wi-Fi name and password on the sticker on the device (no account needed).</string>
     <string name="dyson_with_account">MyDyson account</string>
     <string name="dyson_with_sticker">Wi-Fi sticker on the device</string>
     <string name="dyson_email_body">Your MyDyson email address</string>
