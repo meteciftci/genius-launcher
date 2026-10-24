@@ -12,6 +12,9 @@ import androidx.lifecycle.viewModelScope
 import dadb.AdbAuthException
 import dadb.AdbConnectException
 import dev.evim.tv.data.AppRepository
+import dev.evim.tv.data.AppUpdate
+import dev.evim.tv.data.UpdateException
+import dev.evim.tv.data.Updater
 import dev.evim.tv.data.City
 import dev.evim.tv.data.DemoMode
 import dev.evim.tv.data.HomeSwitch
@@ -60,6 +63,7 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     private val home = SmartHome(app)
     private val homeSwitch = HomeSwitch(app)
     private val setup = Setup(app)
+    private val updater = Updater(app)
     private val tuyaCloud = TuyaCloud(BuildConfig.TUYA_CLIENT_ID, BuildConfig.TUYA_SCHEMA)
     private val tuyaDiscovery = TuyaDiscovery(app)
     private val dysonDiscovery = DysonDiscovery(app)
@@ -121,7 +125,44 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
                 delay(ADB_KEEPALIVE_MS)
             }
         }
+        // Günde bir kez yeni sürüm var mı diye bakılır; açılışta ağın gelmesi için biraz beklenir
+        viewModelScope.launch {
+            delay(UPDATE_FIRST_CHECK_MS)
+            while (true) {
+                runCatching { withContext(Dispatchers.IO) { updater.latest() } }.onSuccess { update = it }
+                delay(UPDATE_CHECK_MS)
+            }
+        }
     }
+
+    val appVersion: String get() = updater.currentVersion
+
+    /** Yeni sürüm varsa ayarlarda ve Genius ayarları simgesinde gösterilir. */
+    var update by mutableStateOf<AppUpdate?>(null)
+        private set
+
+    /** Ayarlardaki "Güncellemeleri denetle": yeni sürüm varsa onu döner, ağ hatasında hata metni. */
+    suspend fun checkUpdate(): Result<AppUpdate?> =
+        runCatching { withContext(Dispatchers.IO) { updater.latest() } }.onSuccess { update = it }
+
+    /**
+     * İndirir, doğrular ve kurar. Kurulum başarılıysa launcher kapanıp yeniden açılır, bu fonksiyon dönmez;
+     * dönerse hata metniyle döner.
+     */
+    suspend fun installUpdate(target: AppUpdate, onProgress: (Float) -> Unit): Int =
+        runCatching {
+            withContext(Dispatchers.IO) {
+                val apk = updater.download(target) { p -> viewModelScope.launch { onProgress(p) } }
+                updater.install(apk)
+            }
+        }.exceptionOrNull().let { error ->
+            when {
+                error == null -> R.string.update_failed
+                error is UpdateException && error.reason == UpdateException.Reason.CORRUPT -> R.string.update_corrupt
+                error is UpdateException -> R.string.update_network
+                else -> errorText(error)
+            }
+        }
 
     /** README ekran görüntüleri için örnek veriye geçer; süreç kapanana kadar sürer, ayar yazılmaz. */
     fun enterDemo() {
@@ -509,6 +550,8 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
 
     private companion object {
         const val WEATHER_REFRESH_MS = 30 * 60 * 1000L
+        const val UPDATE_FIRST_CHECK_MS = 30_000L
+        const val UPDATE_CHECK_MS = 24 * 60 * 60 * 1000L
         const val HOME_REFRESH_MS = 15_000L
         // 2 saniyede bir, 3 dakika
         const val TUYA_LOGIN_POLLS = 90

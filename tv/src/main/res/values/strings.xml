@@ -292,4 +292,19 @@
     <string name="files_audio_hint">OK: pause · ◀ ▶: 10 seconds</string>
     <string name="files_internal">Internal storage</string>
     <string name="files_rename_title">Rename</string>
+
+    <!-- Güncelleme -->
+    <string name="update_available">Update available</string>
+    <string name="update_check">Check for updates</string>
+    <string name="update_checking">Looking for a new version…</string>
+    <string name="update_none">Genius Launcher is up to date.</string>
+    <string name="update_title">Version %s</string>
+    <string name="update_current">Installed now: %s</string>
+    <string name="update_later">Later</string>
+    <string name="update_now">Update</string>
+    <string name="update_downloading">Downloading… %d%%</string>
+    <string name="update_installing">Installing… The launcher will open with the new version in a moment.</string>
+    <string name="update_network">Couldn\'t reach GitHub. Check the internet connection and try again.</string>
+    <string name="update_corrupt">The downloaded file couldn\'t be verified or installed; nothing was changed.</string>
+    <string name="update_failed">The update couldn\'t be installed.</string>
 </resources>

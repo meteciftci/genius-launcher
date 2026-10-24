@@ -154,13 +154,13 @@ private fun ShortcutsChip(vm: LauncherViewModel, onGeniusSettings: () -> Unit) {
             ) { vm.openAccessorySettings() }
             IconButton(Icons.Rounded.Tv, stringResource(R.string.shortcut_display_sound)) { vm.openSettings(Settings.ACTION_SOUND_SETTINGS) }
             IconButton(Icons.Rounded.Settings, stringResource(R.string.shortcut_settings)) { vm.openSettings(Settings.ACTION_SETTINGS) }
-            IconButton(Icons.Rounded.Tune, stringResource(R.string.settings_title), onGeniusSettings)
+            IconButton(Icons.Rounded.Tune, stringResource(R.string.settings_title), badge = vm.update != null, onClick = onGeniusSettings)
         }
     }
 }
 
 @Composable
-private fun IconButton(icon: ImageVector, description: String, onClick: () -> Unit) {
+private fun IconButton(icon: ImageVector, description: String, badge: Boolean = false, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         modifier = Modifier.size(26.dp),
@@ -175,6 +175,8 @@ private fun IconButton(icon: ImageVector, description: String, onClick: () -> Un
     ) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Icon(icon, contentDescription = description, modifier = Modifier.size(15.dp))
+            // Yeni sürüm var
+            if (badge) Box(Modifier.align(Alignment.TopEnd).padding(top = 3.dp, end = 3.dp).size(6.dp).background(EvimColors.Online, CircleShape))
         }
     }
 }

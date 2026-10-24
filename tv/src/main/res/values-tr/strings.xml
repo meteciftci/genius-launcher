@@ -277,4 +277,19 @@
     <string name="files_audio_hint">OK: duraklat · ◀ ▶: 10 saniye</string>
     <string name="files_internal">Dahili hafıza</string>
     <string name="files_rename_title">Yeniden adlandır</string>
+
+    <!-- Güncelleme -->
+    <string name="update_available">Güncelleme var</string>
+    <string name="update_check">Güncellemeleri denetle</string>
+    <string name="update_checking">Yeni sürüm aranıyor…</string>
+    <string name="update_none">Genius Launcher güncel.</string>
+    <string name="update_title">Sürüm %s</string>
+    <string name="update_current">Şu an kurulu: %s</string>
+    <string name="update_later">Sonra</string>
+    <string name="update_now">Güncelle</string>
+    <string name="update_downloading">İndiriliyor… %%%d</string>
+    <string name="update_installing">Kuruluyor… Launcher birazdan yeni sürümle açılacak.</string>
+    <string name="update_network">GitHub\'a ulaşılamadı. İnternet bağlantısını kontrol edip yeniden deneyin.</string>
+    <string name="update_corrupt">İndirilen dosya doğrulanamadı ya da kurulamadı; hiçbir şey değiştirilmedi.</string>
+    <string name="update_failed">Güncelleme kurulamadı.</string>
 </resources>

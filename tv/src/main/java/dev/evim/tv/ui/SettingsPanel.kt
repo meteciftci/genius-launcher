@@ -2,6 +2,12 @@ package dev.evim.tv.ui
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material.icons.Icons
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Box
+import dev.evim.tv.data.AppUpdate
 import androidx.compose.material.icons.rounded.AutoFixHigh
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Dashboard
@@ -10,6 +16,7 @@ import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Restore
+import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -42,7 +49,7 @@ import kotlinx.coroutines.launch
 // Widget'ın sığdığı aralık: Dyson büyük kart, gerisi tek satır
 private val WIDGET_LIMITS = listOf(3, 4, 5, 6)
 
-private enum class Step { MENU, WIDGET, ABOUT, TO_GENIUS, TO_GOOGLE, UNDO_SETUP, UNINSTALL }
+private enum class Step { MENU, WIDGET, ABOUT, UPDATE, TO_GENIUS, TO_GOOGLE, UNDO_SETUP, UNINSTALL }
 
 /**
  * Launcher'ın kendi ayarları: gizli uygulamalar, hava durumu şehri, Home tuşu, hakkında ve kaldırma.
@@ -122,7 +129,19 @@ fun SettingsDialog(
                             Modifier.weight(1f),
                         ) { go(Step.WIDGET) }
                         ChoiceCard(Icons.Rounded.AutoFixHigh, stringResource(R.string.settings_wizard), null, Modifier.weight(1f), onClick = onWizard)
-                        ChoiceCard(Icons.Rounded.Info, stringResource(R.string.settings_about), null, Modifier.weight(1f)) { go(Step.ABOUT) }
+                        // Yeni sürüm varken "Hakkında" kartı güncellemeye götürür
+                        val update = vm.update
+                        if (update != null) {
+                            ChoiceCard(
+                                Icons.Rounded.SystemUpdate,
+                                stringResource(R.string.update_available),
+                                stringResource(R.string.about_version, update.version),
+                                Modifier.weight(1f),
+                                tint = EvimColors.Online,
+                            ) { go(Step.UPDATE) }
+                        } else {
+                            ChoiceCard(Icons.Rounded.Info, stringResource(R.string.settings_about), stringResource(R.string.about_version, vm.appVersion), Modifier.weight(1f)) { go(Step.ABOUT) }
+                        }
                     }
                     Spacer(Modifier.height(6.dp))
                     ListRow(stringResource(R.string.settings_uninstall), stringResource(R.string.settings_uninstall_hint), Icons.Rounded.DeleteForever, EvimColors.Danger, trailing = Trailing.Chevron) {
@@ -152,14 +171,36 @@ fun SettingsDialog(
                     }
                 }
                 Step.ABOUT -> {
-                    val context = LocalContext.current
-                    val version = remember {
-                        runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull().orEmpty()
-                    }
-                    PanelHeader(stringResource(R.string.app_name), stringResource(R.string.about_version, version), Icons.Rounded.Info)
+                    var checking by remember { mutableStateOf(false) }
+                    var upToDate by remember { mutableStateOf(false) }
+                    PanelHeader(stringResource(R.string.app_name), stringResource(R.string.about_version, vm.appVersion), Icons.Rounded.Info)
                     PanelText(stringResource(R.string.about_body))
                     PanelText(stringResource(R.string.about_source))
-                    PanelActions { PillButton(stringResource(R.string.done), Modifier.focusRequester(first)) { go(Step.MENU) } }
+                    when {
+                        checking -> PanelNote(stringResource(R.string.update_checking), EvimColors.Accent)
+                        upToDate -> PanelNote(stringResource(R.string.update_none), EvimColors.Online)
+                    }
+                    PanelActions {
+                        PillButton(stringResource(R.string.done), Modifier.focusRequester(first)) { go(Step.MENU) }
+                        PillButton(stringResource(R.string.update_check)) {
+                            if (checking) return@PillButton
+                            checking = true
+                            upToDate = false
+                            scope.launch {
+                                val result = vm.checkUpdate()
+                                checking = false
+                                when {
+                                    result.isFailure -> error = R.string.update_network
+                                    result.getOrNull() != null -> go(Step.UPDATE)
+                                    else -> upToDate = true
+                                }
+                            }
+                        }
+                    }
+                }
+                Step.UPDATE -> {
+                    val update = vm.update
+                    if (update != null) UpdateStep(vm, update, first, onLater = { go(Step.MENU) }) else LaunchedEffect(Unit) { go(Step.MENU) }
                 }
                 Step.TO_GENIUS -> Confirm(
                     icon = Icons.Rounded.Home,
@@ -261,5 +302,58 @@ private fun Confirm(
     PanelActions {
         PillButton(stringResource(R.string.cancel), Modifier.focusRequester(focus), onClick = onCancel)
         PillButton(confirm, primary = true) { if (!busy) onConfirm() }
+    }
+}
+
+/** Yeni sürümün notları ve "Güncelle". Kurulum başlayınca launcher kapanıp yeni sürümle yeniden açılır. */
+@Composable
+private fun UpdateStep(vm: LauncherViewModel, update: AppUpdate, first: FocusRequester, onLater: () -> Unit) {
+    // null: soruluyor; 0..1: indiriliyor; 1 ve üstü: kuruluyor
+    var progress by remember { mutableStateOf<Float?>(null) }
+    var installing by remember { mutableStateOf(false) }
+    var failure by remember { mutableStateOf<Int?>(null) }
+    val scope = rememberCoroutineScope()
+    PanelHeader(
+        stringResource(R.string.update_title, update.version),
+        stringResource(R.string.update_current, vm.appVersion),
+        Icons.Rounded.SystemUpdate,
+        EvimColors.Online,
+    )
+    if (update.notes.isNotBlank()) {
+        Text(
+            update.notes,
+            color = EvimColors.TextDim,
+            fontSize = 12.sp,
+            lineHeight = 17.sp,
+            maxLines = 9,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        )
+    }
+    when {
+        failure != null -> PanelNote(stringResource(failure!!), EvimColors.Danger)
+        installing -> PanelNote(stringResource(R.string.update_installing), EvimColors.Accent)
+        progress != null -> {
+            PanelNote(stringResource(R.string.update_downloading, ((progress ?: 0f) * 100).toInt()), EvimColors.Accent)
+            Box(Modifier.fillMaxWidth().height(4.dp).background(Color(0x33FFFFFF), RoundedCornerShape(50))) {
+                Box(Modifier.fillMaxWidth(progress ?: 0f).height(4.dp).background(EvimColors.Online, RoundedCornerShape(50)))
+            }
+        }
+    }
+    if (progress == null || failure != null) {
+        PanelActions {
+            PillButton(stringResource(R.string.update_later), onClick = onLater)
+            PillButton(stringResource(R.string.update_now), Modifier.focusRequester(first), primary = true) {
+                failure = null
+                progress = 0f
+                scope.launch {
+                    failure = vm.installUpdate(update) { p ->
+                        progress = p
+                        if (p >= 1f) installing = true
+                    }
+                    installing = false
+                }
+            }
+        }
     }
 }
