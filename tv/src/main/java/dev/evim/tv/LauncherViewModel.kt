@@ -24,6 +24,13 @@ import dev.evim.tv.data.Weather
 import dev.evim.tv.data.WeatherClient
 import dev.evim.tv.data.home.HomeDevice
 import dev.evim.tv.data.home.SmartHome
+import dev.evim.tv.data.home.TuyaAccountDevice
+import dev.evim.tv.data.home.TuyaCloud
+import dev.evim.tv.data.home.TuyaDiscovery
+import dev.evim.tv.data.home.TuyaLanDevice
+import dev.evim.tv.data.home.TuyaSession
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import dev.evim.tv.data.home.withName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -42,6 +49,8 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     private val prefs = LauncherPrefs(app)
     private val home = SmartHome(app)
     private val homeSwitch = HomeSwitch(app)
+    private val tuyaCloud = TuyaCloud(BuildConfig.TUYA_CLIENT_ID, BuildConfig.TUYA_SCHEMA)
+    private val tuyaDiscovery = TuyaDiscovery(app)
     // Tuya cihazları aynı anda tek yerel bağlantı kabul edebiliyor; sorgu ve komutlar sırayla gider
     private val homeLock = Mutex()
     private var installed: List<LauncherApp> = emptyList()
@@ -176,6 +185,45 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
             homeDevices = homeDevices.filter { it.key != device.key }
             homeConfigured = home.isConfigured
         }
+    }
+
+    /** İstemci kimliği local.properties'te yoksa Tuya ile ekleme kapalıdır. */
+    val tuyaAvailable: Boolean get() = BuildConfig.TUYA_CLIENT_ID.isNotEmpty()
+
+    val tuyaUserCode: String get() = prefs.tuyaUserCode
+
+    /** QR girişini başlatır; okutulacak QR içeriği ve beklenecek jeton döner. */
+    suspend fun tuyaStartLogin(userCode: String): Pair<String, String> = withContext(Dispatchers.IO) {
+        val token = tuyaCloud.startLogin(userCode)
+        prefs.tuyaUserCode = userCode
+        tuyaCloud.qrContent(token) to token
+    }
+
+    /** Kullanıcı uygulamada onaylayana kadar bekler; süre dolarsa null. */
+    suspend fun tuyaAwaitLogin(token: String, userCode: String): TuyaSession? = withContext(Dispatchers.IO) {
+        repeat(TUYA_LOGIN_POLLS) {
+            runCatching { tuyaCloud.loginResult(token, userCode) }.getOrNull()?.let { return@withContext it }
+            delay(2_000)
+        }
+        null
+    }
+
+    /** Hesaptaki cihazlar ve ev ağında duyulanlar; ikisi aynı anda yapılır. */
+    suspend fun tuyaCandidates(session: TuyaSession): Pair<List<TuyaAccountDevice>, Map<String, TuyaLanDevice>> =
+        withContext(Dispatchers.IO) {
+            coroutineScope {
+                val lan = async { runCatching { tuyaDiscovery.scan() }.getOrDefault(emptyMap()) }
+                val devices = tuyaCloud.devices(session)
+                devices to lan.await()
+            }
+        }
+
+    val tuyaAddedIds: Set<String> get() = home.tuyaIds
+
+    suspend fun addTuya(devices: List<TuyaAccountDevice>, lan: Map<String, TuyaLanDevice>) {
+        homeIo { home.addTuya(devices, lan) }
+        homeConfigured = home.isConfigured
+        startHomeUpdates()
     }
 
     /** Boş ad verilirse cihazın kendi adına döner. */
@@ -330,6 +378,8 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     private companion object {
         const val WEATHER_REFRESH_MS = 30 * 60 * 1000L
         const val HOME_REFRESH_MS = 15_000L
+        // 2 saniyede bir, 3 dakika
+        const val TUYA_LOGIN_POLLS = 90
         // ADB izni 7 gün kullanılmazsa düşüyor; günde bir yenilemek yeterli
         const val ADB_KEEPALIVE_MS = 24 * 60 * 60 * 1000L
     }

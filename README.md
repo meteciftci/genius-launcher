@@ -28,6 +28,14 @@ sdkmanager "platforms;android-35" "build-tools;35.0.0"
 sdk.dir=/opt/homebrew/share/android-commandlinetools
 ```
 
+Tuya cihazlarını TV'den eklemek için QR girişinin istemci kimliğini de aynı dosyaya yazın. Home Assistant'ın
+Tuya entegrasyonunun herkese açık kimliği kullanılabilir; yoksa panelde Tuya seçeneği çalışmaz:
+
+```
+tuya.clientId=HA_3y9q4ak7g4ephrvke
+tuya.schema=haauthorize
+```
+
 TV'nin adb adresini `tools/.tv` dosyasına yazın (bu dosya da repoya girmez):
 
 ```bash
@@ -43,6 +51,12 @@ zsh tools/install.sh
 Akıcılığı ölçmek için `zsh tools/perf.sh`. Mi Box temizliği ve uyku ayarları için yardımcı betikler `tools/mibox/` altında.
 
 ## Akıllı ev kurulumu
+
+Ana ekranın üstündeki **Evim** kutusuna basın → **Cihaz ekle** → **Tuya · Smart Life**. Uygulamadaki kullanıcı
+kodunu yazıp TV'de çıkan QR kodu Smart Life uygulamasıyla okutun; hesaptaki cihazlardan eklemek istediklerinizi
+seçin. TV cihazları ev ağında kendisi bulur, adresleri değişirse yeniden arar. Hesap şifresi ya da bulut jetonu
+saklanmaz; cihaz yeniden kurulursa paneldeki **Yeniden bağlan** anahtarını yeniler. Dyson için TV'den ekleme
+sonraki sürümde; o zamana kadar Mac'teki eski yol:
 
 Anahtarlar bir kez Mac'ten alınır ve TV'ye gönderilir (Python 3, `pip install -r tools/smarthome/requirements.txt`):
 

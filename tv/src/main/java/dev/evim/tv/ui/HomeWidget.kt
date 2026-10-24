@@ -87,6 +87,7 @@ fun HomeWidget(vm: LauncherViewModel, modifier: Modifier = Modifier) {
             is HomeDevice.Purifier -> purifierKey = device.key
             is HomeDevice.Feeder -> feeder = device
             is HomeDevice.Relay -> if (device.reachable) vm.toggleRelay(device)
+            is HomeDevice.Other -> Unit
         }
     }
 
@@ -230,29 +231,36 @@ internal fun RenameDialog(current: String, onSave: (String) -> Unit, onDismiss: 
     Dialog(onDismissRequest = onDismiss) {
         Panel(width = 420.dp) {
             DialogTitle(stringResource(R.string.rename_title), stringResource(R.string.rename_subtitle))
-            BasicTextField(
-                value = name,
-                onValueChange = { name = it },
-                singleLine = true,
-                textStyle = TextStyle(color = Color.White, fontSize = 15.sp),
-                cursorBrush = SolidColor(Color.White),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }),
-                modifier = Modifier.focusRequester(field).fillMaxWidth(),
-                decorationBox = { inner ->
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .background(Color(0x1FFFFFFF), RoundedCornerShape(10.dp))
-                            .padding(horizontal = 12.dp, vertical = 10.dp),
-                    ) { inner() }
-                },
-            )
+            TextInput(name, { name = it }, Modifier.focusRequester(field))
             Spacer(Modifier.height(10.dp))
             MenuItem(stringResource(R.string.rename_save)) { onSave(name.text) }
             MenuItem(stringResource(R.string.cancel), onClick = onDismiss)
         }
     }
+}
+
+/** Tek satırlık yazı alanı; OK'e basınca ekran klavyesi kapanır. */
+@Composable
+internal fun TextInput(value: TextFieldValue, onValueChange: (TextFieldValue) -> Unit, modifier: Modifier = Modifier) {
+    val keyboard = LocalSoftwareKeyboardController.current
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        singleLine = true,
+        textStyle = TextStyle(color = Color.White, fontSize = 15.sp),
+        cursorBrush = SolidColor(Color.White),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }),
+        modifier = modifier.fillMaxWidth(),
+        decorationBox = { inner ->
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .background(Color(0x1FFFFFFF), RoundedCornerShape(10.dp))
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+            ) { inner() }
+        },
+    )
 }
 
 @Composable
@@ -408,6 +416,7 @@ private fun HomeDevice.detail(): String {
         is HomeDevice.Relay -> stringResource(if (on) R.string.relay_on else R.string.relay_off)
         is HomeDevice.Feeder -> nextMeal?.let { stringResource(R.string.feeder_meal, it.time(), it.portions) }.orEmpty()
         is HomeDevice.Purifier -> ""
+        is HomeDevice.Other -> stringResource(R.string.home_online)
     }
 }
 

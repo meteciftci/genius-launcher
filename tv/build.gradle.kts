@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -14,6 +16,13 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "0.1.0"
+
+        // Tuya QR girişinin istemci kimliği koda değil git'e girmeyen local.properties'e yazılır
+        val local = Properties().apply {
+            rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use(::load)
+        }
+        buildConfigField("String", "TUYA_CLIENT_ID", "\"${local.getProperty("tuya.clientId", "")}\"")
+        buildConfigField("String", "TUYA_SCHEMA", "\"${local.getProperty("tuya.schema", "")}\"")
     }
 
     buildTypes {
@@ -34,6 +43,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -50,5 +60,6 @@ dependencies {
     implementation(libs.androidx.palette)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.dadb)
+    implementation(libs.zxing.core)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

@@ -2,6 +2,7 @@ package dev.evim.tv.data.home
 
 import android.content.Context
 import androidx.compose.runtime.Immutable
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.util.Calendar
@@ -18,6 +19,9 @@ sealed interface HomeDevice {
     data class Feeder(override val key: String, override val name: String, override val reachable: Boolean, val nextMeal: Meal?) : HomeDevice
 
     data class Purifier(override val key: String, override val name: String, override val reachable: Boolean, val state: DysonState?) : HomeDevice
+
+    /** Desteklenmeyen tip: yalnızca ağda cevap verip vermediği gösterilir. */
+    data class Other(override val key: String, override val name: String, override val reachable: Boolean) : HomeDevice
 }
 
 /** Aynı cihazı başka bir adla döner. */
@@ -25,19 +29,22 @@ fun HomeDevice.withName(name: String): HomeDevice = when (this) {
     is HomeDevice.Relay -> copy(name = name)
     is HomeDevice.Feeder -> copy(name = name)
     is HomeDevice.Purifier -> copy(name = name)
+    is HomeDevice.Other -> copy(name = name)
 }
 
 data class Meal(val hour: Int, val minute: Int, val portions: Int)
 
 /**
  * Cihaz anahtarlarını uygulamanın özel klasöründeki home.json'dan okur ve cihazlarla yerel ağda konuşur.
- * Anahtarlar kaynak kodda değil: tools/smarthome/push_to_tv.py dosyayı ADB ile uygulamanın harici
- * klasörüne koyar, uygulama ilk fırsatta özel klasörüne taşıyıp kopyayı siler.
+ * Anahtarlar kaynak kodda değil: akıllı ev panelinden hesapla eklenirken yazılır. (Eski yol:
+ * tools/smarthome/push_to_tv.py dosyayı ADB ile harici klasöre koyar, uygulama özel klasörüne taşır.)
  */
 class SmartHome(private val context: Context) {
     private val stored = File(context.filesDir, "home.json")
     private var tuya: Map<String, TuyaEntry> = emptyMap()
     private var dyson: Map<String, DysonEntry> = emptyMap()
+    private val discovery = TuyaDiscovery(context)
+    private var lastScan = 0L
 
     val isConfigured: Boolean get() = tuya.isNotEmpty() || dyson.isNotEmpty()
 
@@ -52,10 +59,13 @@ class SmartHome(private val context: Context) {
         if (!stored.exists()) return
         val json = JSONObject(stored.readText())
         tuya = json.optJSONArray("tuya").objects().associate { t ->
+            val category = t.optString("category")
             val entry = TuyaEntry(
                 name = t.getString("name"),
-                category = t.getString("category"),
-                device = TuyaDevice(t.getString("id"), t.getString("ip"), t.getString("local_key"), t.getString("version")),
+                // Eski dosyalarda tip yok; kategoriden çıkarılır
+                kind = t.optString("kind").let { kind -> TuyaKind.entries.firstOrNull { it.name == kind } } ?: kindOf(category),
+                switchDp = t.optString("switch_dp").ifEmpty { DP_RELAY },
+                device = TuyaDevice(t.getString("id"), t.optString("ip"), t.getString("local_key"), t.optString("version").ifEmpty { "3.3" }),
             )
             t.getString("id") to entry
         }
@@ -73,25 +83,86 @@ class SmartHome(private val context: Context) {
         val json = JSONObject(stored.readText())
         for ((list, id) in listOf("tuya" to "id", "dyson" to "serial")) {
             val kept = json.optJSONArray(list).objects().filter { it.optString(id) != key }
-            json.put(list, org.json.JSONArray(kept))
+            json.put(list, JSONArray(kept))
         }
         stored.writeText(json.toString())
         load()
     }
 
+    /**
+     * Hesaptan seçilen Tuya cihazlarını ekler; zaten ekliyse anahtarı, adresi ve tipi yenilenir
+     * (yeniden bağlanma da budur). [lan] ev ağında bulunanların adresleri; bulunamayanlar sonra aranır.
+     */
+    fun addTuya(devices: List<TuyaAccountDevice>, lan: Map<String, TuyaLanDevice>) {
+        val json = if (stored.exists()) JSONObject(stored.readText()) else JSONObject()
+        val byId = json.optJSONArray("tuya").objects().associateBy { it.getString("id") }.toMutableMap()
+        for (device in devices) {
+            val entry = byId[device.id] ?: JSONObject().put("id", device.id).put("name", device.name)
+            entry.put("local_key", device.localKey)
+                .put("category", device.category)
+                .put("product_id", device.productId)
+                .put("kind", device.kind.name)
+                .put("switch_dp", device.switchDp ?: "")
+            lan[device.id]?.let { entry.put("ip", it.ip).put("version", it.version) }
+            byId[device.id] = entry
+        }
+        json.put("tuya", JSONArray(byId.values))
+        stored.writeText(json.toString())
+        load()
+    }
+
+    /** Hangi Tuya cihazlarının eklendiği; yeniden bağlanırken seçili gelirler. */
+    val tuyaIds: Set<String> get() = tuya.keys
+
     /** Tüm cihazları sorar; cevap vermeyenler [HomeDevice.reachable] = false olarak döner. */
     fun poll(): List<HomeDevice> {
+        var tuyaDevices = pollTuya(tuya)
+        // Cevap vermeyen varsa adresi değişmiş olabilir: ağ dinlenir, adresi değişenler yeniden sorulur
+        val unreachable = tuyaDevices.filter { !it.reachable }.map { it.key }.toSet()
+        if (unreachable.isNotEmpty() && rediscover(unreachable)) {
+            val again = pollTuya(tuya.filterKeys { it in unreachable }).associateBy { it.key }
+            tuyaDevices = tuyaDevices.map { again[it.key] ?: it }
+        }
         val purifiers = dyson.map { (key, entry) -> purifier(key, entry) { entry.device.state() } }
-        val feeders = tuya.filter { it.value.isFeeder }.map { (key, entry) -> feeder(key, entry) { entry.device.status() } }
-        val relays = tuya.filter { it.value.isRelay }.map { (key, entry) -> relay(key, entry) { entry.device.status() } }
-        return purifiers + feeders + relays
+        return purifiers + tuyaDevices
+    }
+
+    private fun pollTuya(entries: Map<String, TuyaEntry>): List<HomeDevice> = entries.map { (key, entry) ->
+        when (entry.kind) {
+            TuyaKind.FEEDER -> feeder(key, entry) { entry.device.status() }
+            TuyaKind.RELAY, TuyaKind.SWITCH -> relay(key, entry) { entry.device.status() }
+            TuyaKind.STATUS -> HomeDevice.Other(key, entry.name, reachable = runCatching { entry.device.status() }.isSuccess)
+        }
+    }.sortedBy { if (it is HomeDevice.Feeder) 0 else 1 }
+
+    /** Adresi değişen cihaz bulunduysa true; ağ en fazla birkaç dakikada bir dinlenir. */
+    private fun rediscover(keys: Set<String>): Boolean {
+        val now = System.currentTimeMillis()
+        if (now - lastScan < RESCAN_MS) return false
+        lastScan = now
+        val found = runCatching { discovery.scan() }.getOrDefault(emptyMap())
+        val json = JSONObject(stored.readText())
+        var changed = false
+        json.optJSONArray("tuya").objects().filter { it.getString("id") in keys }.forEach { entry ->
+            val lan = found[entry.getString("id")] ?: return@forEach
+            if (lan.ip != entry.optString("ip") || lan.version != entry.optString("version")) {
+                entry.put("ip", lan.ip).put("version", lan.version)
+                changed = true
+            }
+        }
+        if (changed) {
+            stored.writeText(json.toString())
+            load()
+        }
+        return changed
     }
 
     fun toggleRelay(device: HomeDevice.Relay): HomeDevice {
         val entry = tuya.getValue(device.key)
+        val dp = entry.switchDp
         return relay(device.key, entry) {
-            val changed = entry.device.set(mapOf(DP_RELAY to !device.on))
-            mapOf(DP_RELAY to (changed[DP_RELAY] ?: !device.on))
+            val changed = entry.device.set(mapOf(dp to !device.on))
+            mapOf(dp to (changed[dp] ?: !device.on))
         }
     }
 
@@ -106,7 +177,7 @@ class SmartHome(private val context: Context) {
 
     private fun relay(key: String, entry: TuyaEntry, read: () -> Map<String, Any>): HomeDevice.Relay {
         val dps = runCatching(read).getOrNull()
-        return HomeDevice.Relay(key, entry.name, reachable = dps != null, on = dps?.get(DP_RELAY) == true)
+        return HomeDevice.Relay(key, entry.name, reachable = dps != null, on = dps?.get(entry.switchDp) == true)
     }
 
     private fun feeder(key: String, entry: TuyaEntry, read: () -> Map<String, Any>): HomeDevice.Feeder {
@@ -120,10 +191,7 @@ class SmartHome(private val context: Context) {
         return HomeDevice.Purifier(key, entry.name, reachable = state != null, state = state)
     }
 
-    private class TuyaEntry(val name: String, val category: String, val device: TuyaDevice) {
-        val isRelay get() = category in RELAY_CATEGORIES
-        val isFeeder get() = category in FEEDER_CATEGORIES
-    }
+    private class TuyaEntry(val name: String, val kind: TuyaKind, val switchDp: String, val device: TuyaDevice)
 
     private class DysonEntry(val name: String, val device: DysonDevice)
 
@@ -132,8 +200,15 @@ class SmartHome(private val context: Context) {
         // Uygulamadan elle besleme yapılırken dinlenerek bulundu: porsiyon sayısı yazılır
         private const val DP_MANUAL_FEED = "243"
         private const val DP_MEAL_PLAN = "237"
+        private const val RESCAN_MS = 3 * 60_000L
         private val RELAY_CATEGORIES = setOf("tdq", "kg", "cz", "pc")
         private val FEEDER_CATEGORIES = setOf("sp", "cwwsq")
+
+        private fun kindOf(category: String) = when (category) {
+            in RELAY_CATEGORIES -> TuyaKind.RELAY
+            in FEEDER_CATEGORIES -> TuyaKind.FEEDER
+            else -> TuyaKind.STATUS
+        }
 
         /**
          * Öğün planı 15 karakterlik kayıtlardan oluşur: gün maskesi (2), saat (2), dakika (2),
@@ -152,7 +227,7 @@ class SmartHome(private val context: Context) {
             return sorted.firstOrNull { it.hour * 60 + it.minute > minuteOfDay } ?: sorted.firstOrNull()
         }
 
-        private fun org.json.JSONArray?.objects(): List<JSONObject> =
+        private fun JSONArray?.objects(): List<JSONObject> =
             if (this == null) emptyList() else (0 until length()).map { getJSONObject(it) }
     }
 }

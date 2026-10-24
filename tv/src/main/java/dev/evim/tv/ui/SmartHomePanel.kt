@@ -27,6 +27,7 @@ import dev.evim.tv.data.home.HomeDevice
 private sealed interface HomeStep {
     data object List : HomeStep
     data object Add : HomeStep
+    data object Tuya : HomeStep
     data class Brand(val label: Int) : HomeStep
     data class Device(val key: String) : HomeStep
     data class Remove(val key: String) : HomeStep
@@ -47,7 +48,7 @@ fun SmartHomeDialog(vm: LauncherViewModel, startAtAdd: Boolean, onDismiss: () ->
         step = when (val current = step) {
             HomeStep.List -> return onDismiss()
             HomeStep.Add -> if (startAtAdd) return onDismiss() else HomeStep.List
-            is HomeStep.Brand -> HomeStep.Add
+            is HomeStep.Brand, HomeStep.Tuya -> HomeStep.Add
             is HomeStep.Device -> HomeStep.List
             is HomeStep.Remove -> HomeStep.Device(current.key)
         }
@@ -57,21 +58,22 @@ fun SmartHomeDialog(vm: LauncherViewModel, startAtAdd: Boolean, onDismiss: () ->
         Panel(width = 440.dp) {
             when (val current = step) {
                 HomeStep.List -> {
-                    Title(stringResource(R.string.smart_home_title), stringResource(R.string.smart_home_subtitle))
+                    PanelTitle(stringResource(R.string.smart_home_title), stringResource(R.string.smart_home_subtitle))
                     MenuItem("+  ${stringResource(R.string.smart_home_add)}", Modifier.focusRequester(first)) { step = HomeStep.Add }
                     vm.homeDevices.forEach { device ->
                         MenuItem("${device.name}  ·  ${stringResource(device.brand())}") { step = HomeStep.Device(device.key) }
                     }
                 }
                 HomeStep.Add -> {
-                    Title(stringResource(R.string.smart_home_add), stringResource(R.string.smart_home_add_subtitle))
-                    MenuItem(stringResource(R.string.brand_tuya), Modifier.focusRequester(first)) { step = HomeStep.Brand(R.string.brand_tuya) }
+                    PanelTitle(stringResource(R.string.smart_home_add), stringResource(R.string.smart_home_add_subtitle))
+                    MenuItem(stringResource(R.string.brand_tuya), Modifier.focusRequester(first)) { step = HomeStep.Tuya }
                     MenuItem(stringResource(R.string.brand_dyson)) { step = HomeStep.Brand(R.string.brand_dyson) }
                 }
+                HomeStep.Tuya -> TuyaAddFlow(vm, first, onDone = { step = HomeStep.List })
                 is HomeStep.Brand -> {
                     // Hesapla giriş akışları sonraki parçalarda gelecek
-                    Title(stringResource(current.label), null)
-                    Body(stringResource(R.string.smart_home_coming))
+                    PanelTitle(stringResource(current.label), null)
+                    PanelBody(stringResource(R.string.smart_home_coming))
                     MenuItem(stringResource(R.string.done), Modifier.focusRequester(first), ::back)
                 }
                 is HomeStep.Device -> {
@@ -80,10 +82,14 @@ fun SmartHomeDialog(vm: LauncherViewModel, startAtAdd: Boolean, onDismiss: () ->
                         step = HomeStep.List
                         return@Panel
                     }
-                    Title(device.name, stringResource(device.brand()))
+                    PanelTitle(device.name, stringResource(device.brand()))
                     MenuItem(stringResource(R.string.menu_rename), Modifier.focusRequester(first)) { renaming = device }
                     if (vm.hasCustomName(device)) {
                         MenuItem(stringResource(R.string.menu_reset_name)) { vm.renameDevice(device, null) }
+                    }
+                    // Anahtar değiştiyse (cihaz yeniden kurulduysa) hesapla yeniden alınır; Dyson 4. parçada
+                    if (device !is HomeDevice.Purifier) {
+                        MenuItem(stringResource(R.string.menu_reconnect)) { step = HomeStep.Tuya }
                     }
                     MenuItem(stringResource(R.string.menu_remove)) { step = HomeStep.Remove(device.key) }
                 }
@@ -94,8 +100,8 @@ fun SmartHomeDialog(vm: LauncherViewModel, startAtAdd: Boolean, onDismiss: () ->
                         return@Panel
                     }
                     // Geri alınamaz: odak "Vazgeç"te başlar
-                    Title(stringResource(R.string.remove_device_title, device.name), null)
-                    Body(stringResource(R.string.remove_device_body, stringResource(device.brand())))
+                    PanelTitle(stringResource(R.string.remove_device_title, device.name), null)
+                    PanelBody(stringResource(R.string.remove_device_body, stringResource(device.brand())))
                     MenuItem(stringResource(R.string.remove_confirm)) {
                         vm.removeDevice(device)
                         step = if (vm.homeDevices.size <= 1) HomeStep.Add else HomeStep.List
@@ -118,13 +124,13 @@ fun SmartHomeDialog(vm: LauncherViewModel, startAtAdd: Boolean, onDismiss: () ->
 private fun HomeDevice.brand() = if (this is HomeDevice.Purifier) R.string.brand_dyson else R.string.brand_tuya
 
 @Composable
-private fun Title(title: String, subtitle: String?) {
+internal fun PanelTitle(title: String, subtitle: String?) {
     Text(title, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
     if (subtitle != null) Text(subtitle, color = EvimColors.TextDim, fontSize = 11.sp)
     Spacer(Modifier.height(14.dp))
 }
 
 @Composable
-private fun Body(text: String) {
+internal fun PanelBody(text: String) {
     Text(text, color = EvimColors.TextDim, fontSize = 12.sp, lineHeight = 17.sp, modifier = Modifier.padding(bottom = 10.dp))
 }

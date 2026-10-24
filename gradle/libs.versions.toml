@@ -9,6 +9,7 @@ coreKtx = "1.15.0"
 palette = "1.0.0"
 coroutines = "1.9.0"
 dadb = "2.0.0"
+zxing = "3.5.3"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
@@ -23,6 +24,7 @@ androidx-compose-material-icons = { module = "androidx.compose.material:material
 androidx-tv-material ={ module = "androidx.tv:tv-material", version.ref = "tvMaterial" }
 androidx-palette = { module = "androidx.palette:palette-ktx", version.ref = "palette" }
 dadb = { module = "dev.mobile:dadb", version.ref = "dadb" }
+zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
 kotlinx-coroutines-android ={ module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 
 [plugins]
