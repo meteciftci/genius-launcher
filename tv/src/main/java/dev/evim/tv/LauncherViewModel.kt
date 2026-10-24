@@ -22,6 +22,7 @@ import dev.evim.tv.data.Weather
 import dev.evim.tv.data.WeatherClient
 import dev.evim.tv.data.home.HomeDevice
 import dev.evim.tv.data.home.SmartHome
+import dev.evim.tv.data.home.withName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -125,7 +126,7 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
             withContext(Dispatchers.IO) { runCatching { home.load() } }
             homeConfigured = home.isConfigured
             while (isActive && home.isConfigured) {
-                homeDevices = sortDevices(homeIo { home.poll() })
+                homeDevices = present(homeIo { home.poll() })
                 delay(HOME_REFRESH_MS)
             }
         }
@@ -145,7 +146,7 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun updateDevice(action: () -> HomeDevice) {
         viewModelScope.launch {
-            val updated = homeIo(action)
+            val updated = present(listOf(homeIo(action))).single()
             homeDevices = homeDevices.map { if (it.key == updated.key) updated else it }
         }
     }
@@ -158,13 +159,26 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
         if (from < 0 || from == to) return
         keys.add(to, keys.removeAt(from))
         prefs.deviceOrder = keys
-        homeDevices = sortDevices(homeDevices)
+        homeDevices = present(homeDevices)
     }
 
-    private fun sortDevices(devices: List<HomeDevice>): List<HomeDevice> {
+    /** Boş ad verilirse cihazın kendi adına döner. */
+    fun renameDevice(device: HomeDevice, name: String?) {
+        prefs.setDeviceName(device.key, name)
+        // Kendi adı bir sonraki yoklamada geri gelir; o zamana kadar listedeki ad kalsın
+        homeDevices = present(homeDevices)
+        if (name.isNullOrBlank()) startHomeUpdates()
+    }
+
+    fun hasCustomName(device: HomeDevice) = prefs.deviceName(device.key) != null
+
+    /** Kullanıcının sırasını ve verdiği adları uygular. */
+    private fun present(devices: List<HomeDevice>): List<HomeDevice> {
         val order = prefs.deviceOrder
         // Sıralanmamış yeni cihazlar sona, geldikleri sırayla eklenir
-        return devices.sortedBy { order.indexOf(it.key).let { i -> if (i < 0) Int.MAX_VALUE else i } }
+        return devices
+            .sortedBy { order.indexOf(it.key).let { i -> if (i < 0) Int.MAX_VALUE else i } }
+            .map { device -> prefs.deviceName(device.key)?.let(device::withName) ?: device }
     }
 
     private suspend fun <T> homeIo(block: () -> T): T = withContext(Dispatchers.IO) { homeLock.withLock { block() } }

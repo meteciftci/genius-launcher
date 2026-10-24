@@ -34,6 +34,11 @@
     <string name="device_move_hint">▲ ▼ ile taşı  ·  OK ile bitir</string>
     <string name="feeder_meal">%1$s · %2$d porsiyon</string>
     <string name="purifier_target">hedef %d°</string>
+    <string name="menu_rename">Yeniden adlandır</string>
+    <string name="menu_reset_name">Asıl adına dön</string>
+    <string name="rename_title">Cihazı yeniden adlandır</string>
+    <string name="rename_subtitle">Boş bırakırsanız cihazın kendi adı kullanılır</string>
+    <string name="rename_save">Kaydet</string>
     <string name="home_unreachable">ulaşılamıyor</string>
     <string name="relay_on">Açık</string>
     <string name="relay_off">Kapalı</string>

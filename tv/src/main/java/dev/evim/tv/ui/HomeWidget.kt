@@ -36,7 +36,16 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,7 +69,8 @@ private val CardShape = RoundedCornerShape(12.dp)
 
 /**
  * Ana ekranın sağındaki Evim widget'ı: cihazlar kullanıcının sırasıyla alt alta.
- * Karta uzun basınca taşıma moduna girilir; yukarı/aşağı ile yer değiştirir, OK ya da Geri bitirir.
+ * Karta uzun basınca menü açılır (aç, taşı, yeniden adlandır). Taşıma modunda yukarı/aşağı ile
+ * yer değiştirir, OK ya da Geri bitirir.
  */
 @Composable
 fun HomeWidget(vm: LauncherViewModel, modifier: Modifier = Modifier) {
@@ -68,6 +78,9 @@ fun HomeWidget(vm: LauncherViewModel, modifier: Modifier = Modifier) {
     var purifierKey by remember { mutableStateOf<String?>(null) }
     var showAll by remember { mutableStateOf(false) }
     var movingKey by remember { mutableStateOf<String?>(null) }
+    var panelMovingKey by remember { mutableStateOf<String?>(null) }
+    var menuFor by remember { mutableStateOf<HomeDevice?>(null) }
+    var renaming by remember { mutableStateOf<HomeDevice?>(null) }
 
     val open: (HomeDevice) -> Unit = { device ->
         when (device) {
@@ -91,7 +104,7 @@ fun HomeWidget(vm: LauncherViewModel, modifier: Modifier = Modifier) {
                     device = device,
                     moving = movingKey == device.key,
                     onClick = { if (movingKey != null) movingKey = null else open(device) },
-                    onLongClick = { if (movingKey == null) movingKey = device.key },
+                    onLongClick = { if (movingKey == null) menuFor = device },
                     onMove = { vm.moveDevice(device, it) },
                 )
             }
@@ -105,9 +118,33 @@ fun HomeWidget(vm: LauncherViewModel, modifier: Modifier = Modifier) {
     if (showAll) {
         AllDevicesDialog(
             devices = vm.homeDevices,
+            movingKey = panelMovingKey,
             onOpen = open,
+            onMenu = { menuFor = it },
             onMove = vm::moveDevice,
-            onDismiss = { showAll = false; movingKey = null },
+            onStopMoving = { panelMovingKey = null },
+            onDismiss = { showAll = false; panelMovingKey = null },
+        )
+    }
+    menuFor?.let { device ->
+        DeviceMenu(
+            device = device,
+            customName = vm.hasCustomName(device),
+            onDismiss = { menuFor = null },
+            onOpen = { menuFor = null; open(device) },
+            onMove = {
+                menuFor = null
+                if (showAll) panelMovingKey = device.key else movingKey = device.key
+            },
+            onRename = { menuFor = null; renaming = device },
+            onResetName = { menuFor = null; vm.renameDevice(device, null) },
+        )
+    }
+    renaming?.let { device ->
+        RenameDialog(
+            current = device.name,
+            onSave = { vm.renameDevice(device, it); renaming = null },
+            onDismiss = { renaming = null },
         )
     }
     feeder?.let { device ->
@@ -123,16 +160,18 @@ fun HomeWidget(vm: LauncherViewModel, modifier: Modifier = Modifier) {
 @Composable
 private fun AllDevicesDialog(
     devices: List<HomeDevice>,
+    movingKey: String?,
     onOpen: (HomeDevice) -> Unit,
+    onMenu: (HomeDevice) -> Unit,
     onMove: (HomeDevice, Int) -> Unit,
+    onStopMoving: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var movingKey by remember { mutableStateOf<String?>(null) }
     val first = remember { FocusRequester() }
     LaunchedEffect(Unit) { runCatching { first.requestFocus() } }
 
     Dialog(
-        onDismissRequest = { if (movingKey != null) movingKey = null else onDismiss() },
+        onDismissRequest = { if (movingKey != null) onStopMoving() else onDismiss() },
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Panel(width = 420.dp) {
@@ -144,14 +183,76 @@ private fun AllDevicesDialog(
                             device = device,
                             moving = movingKey == device.key,
                             modifier = if (i == 0) Modifier.focusRequester(first) else Modifier,
-                            onClick = { if (movingKey != null) movingKey = null else onOpen(device) },
-                            onLongClick = { if (movingKey == null) movingKey = device.key },
+                            onClick = { if (movingKey != null) onStopMoving() else onOpen(device) },
+                            onLongClick = { if (movingKey == null) onMenu(device) },
                             onMove = { onMove(device, it) },
                         )
                     }
                 }
             }
             MoveHint(visible = movingKey != null)
+        }
+    }
+}
+
+/** Karta uzun basınca açılır; uygulama kartlarındaki menünün eşi. */
+@Composable
+private fun DeviceMenu(
+    device: HomeDevice,
+    customName: Boolean,
+    onDismiss: () -> Unit,
+    onOpen: () -> Unit,
+    onMove: () -> Unit,
+    onRename: () -> Unit,
+    onResetName: () -> Unit,
+) {
+    val first = remember { FocusRequester() }
+    LaunchedEffect(Unit) { runCatching { first.requestFocus() } }
+    Dialog(onDismissRequest = onDismiss) {
+        Panel {
+            DialogTitle(device.name, null)
+            MenuItem(stringResource(R.string.menu_open), Modifier.focusRequester(first), onOpen)
+            MenuItem(stringResource(R.string.menu_move), onClick = onMove)
+            MenuItem(stringResource(R.string.menu_rename), onClick = onRename)
+            if (customName) MenuItem(stringResource(R.string.menu_reset_name), onClick = onResetName)
+        }
+    }
+}
+
+/** Kumandanın ekran klavyesiyle yeni ad yazılır; boş bırakılırsa cihazın kendi adına döner. */
+@Composable
+private fun RenameDialog(current: String, onSave: (String) -> Unit, onDismiss: () -> Unit) {
+    var name by remember { mutableStateOf(TextFieldValue(current, TextRange(current.length))) }
+    val field = remember { FocusRequester() }
+    val keyboard = LocalSoftwareKeyboardController.current
+    LaunchedEffect(Unit) {
+        runCatching { field.requestFocus() }
+        keyboard?.show()
+    }
+    Dialog(onDismissRequest = onDismiss) {
+        Panel(width = 420.dp) {
+            DialogTitle(stringResource(R.string.rename_title), stringResource(R.string.rename_subtitle))
+            BasicTextField(
+                value = name,
+                onValueChange = { name = it },
+                singleLine = true,
+                textStyle = TextStyle(color = Color.White, fontSize = 15.sp),
+                cursorBrush = SolidColor(Color.White),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }),
+                modifier = Modifier.focusRequester(field).fillMaxWidth(),
+                decorationBox = { inner ->
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .background(Color(0x1FFFFFFF), RoundedCornerShape(10.dp))
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                    ) { inner() }
+                },
+            )
+            Spacer(Modifier.height(10.dp))
+            MenuItem(stringResource(R.string.rename_save)) { onSave(name.text) }
+            MenuItem(stringResource(R.string.cancel), onClick = onDismiss)
         }
     }
 }

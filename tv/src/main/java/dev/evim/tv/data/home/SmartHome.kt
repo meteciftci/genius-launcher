@@ -20,6 +20,13 @@ sealed interface HomeDevice {
     data class Purifier(override val key: String, override val name: String, override val reachable: Boolean, val state: DysonState?) : HomeDevice
 }
 
+/** Aynı cihazı başka bir adla döner. */
+fun HomeDevice.withName(name: String): HomeDevice = when (this) {
+    is HomeDevice.Relay -> copy(name = name)
+    is HomeDevice.Feeder -> copy(name = name)
+    is HomeDevice.Purifier -> copy(name = name)
+}
+
 data class Meal(val hour: Int, val minute: Int, val portions: Int)
 
 /**

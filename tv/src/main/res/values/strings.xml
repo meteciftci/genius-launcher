@@ -39,6 +39,11 @@
     <string name="device_move_hint">▲ ▼ to move  ·  OK to finish</string>
     <string name="feeder_meal">%1$s · %2$d portion(s)</string>
     <string name="purifier_target">target %d°</string>
+    <string name="menu_rename">Rename</string>
+    <string name="menu_reset_name">Use original name</string>
+    <string name="rename_title">Rename device</string>
+    <string name="rename_subtitle">Leave it empty to use the device\'s own name</string>
+    <string name="rename_save">Save</string>
     <string name="home_unreachable">unreachable</string>
     <string name="relay_on">On</string>
     <string name="relay_off">Off</string>

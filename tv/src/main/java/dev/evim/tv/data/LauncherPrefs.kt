@@ -41,7 +41,16 @@ class LauncherPrefs(context: Context) {
             putString(KEY_REGION, value.region)
         }
 
+    /** Kullanıcının launcher'da verdiği cihaz adı; yoksa cihazın kendi adı kullanılır. */
+    fun deviceName(key: String): String? = sp.getString(nameKey(key), null)
+
+    fun setDeviceName(key: String, name: String?) = sp.edit {
+        if (name.isNullOrBlank()) remove(nameKey(key)) else putString(nameKey(key), name.trim())
+    }
+
     private fun colorKey(packageName: String) = "color_$packageName"
+
+    private fun nameKey(key: String) = "device_name_$key"
 
     private companion object {
         const val KEY_ORDER = "order"
