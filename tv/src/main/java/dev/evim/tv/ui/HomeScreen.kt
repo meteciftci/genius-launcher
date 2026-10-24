@@ -75,6 +75,7 @@ fun HomeScreen(vm: LauncherViewModel) {
     var pickingCity by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
     var showSmartHome by remember { mutableStateOf(false) }
+    var showWizard by remember { mutableStateOf(false) }
     // Şehir ayarlardan seçildiyse sonunda hava paneline değil ayarlara dönülür
     var cityFromSettings by remember { mutableStateOf(false) }
     val firstCard = remember { FocusRequester() }
@@ -166,6 +167,10 @@ fun HomeScreen(vm: LauncherViewModel) {
                 onInfo = { menuFor = null; vm.openAppInfo(app) },
             )
         }
+        // İlk açılışta kendiliğinden, sonra Genius ayarlarından
+        if (showWizard || vm.setupPending) {
+            SetupWizardDialog(vm = vm, onDismiss = { showWizard = false })
+        }
         if (showSmartHome) {
             // Cihaz yokken panel doğrudan eklemeyle açılır
             val empty = remember { vm.homeDevices.isEmpty() }
@@ -177,6 +182,7 @@ fun HomeScreen(vm: LauncherViewModel) {
                 vm = vm,
                 onHiddenApps = { showHidden = true },
                 onCity = { cityFromSettings = true; pickingCity = true },
+                onWizard = { showSettings = false; showWizard = true },
                 onDismiss = { showSettings = false },
             )
         }

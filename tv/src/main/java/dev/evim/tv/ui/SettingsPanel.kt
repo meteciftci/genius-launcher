@@ -8,6 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -24,8 +25,9 @@ import androidx.tv.material3.Text
 import dev.evim.tv.LauncherViewModel
 import dev.evim.tv.R
 import dev.evim.tv.data.SwitchCheck
+import kotlinx.coroutines.launch
 
-private enum class Step { MENU, ABOUT, TO_GENIUS, TO_GOOGLE, UNINSTALL }
+private enum class Step { MENU, ABOUT, TO_GENIUS, TO_GOOGLE, UNDO_SETUP, UNINSTALL }
 
 /**
  * Launcher'ın kendi ayarları: gizli uygulamalar, hava durumu şehri, Home tuşu, hakkında ve kaldırma.
@@ -36,6 +38,7 @@ fun SettingsDialog(
     vm: LauncherViewModel,
     onHiddenApps: () -> Unit,
     onCity: () -> Unit,
+    onWizard: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     var step by remember { mutableStateOf(Step.MENU) }
@@ -44,6 +47,13 @@ fun SettingsDialog(
     var erasesNetworks by remember { mutableStateOf(false) }
     val first = remember { FocusRequester() }
     LaunchedEffect(step) { runCatching { first.requestFocus() } }
+    // Sihirbazın geri alınabilecek bir şey yapıp yapmadığı; geri alma ve kaldırma adımları buna göre değişir
+    var setupChanged by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(step) {
+        val (home, removed, awake) = vm.setupChanges()
+        setupChanged = home || removed > 0 || awake
+    }
 
     fun go(next: Step) {
         error = null
@@ -85,6 +95,8 @@ fun SettingsDialog(
                             }
                         }
                     }
+                    MenuItem(stringResource(R.string.settings_wizard), onClick = onWizard)
+                    if (setupChanged) MenuItem(stringResource(R.string.settings_undo_setup), onClick = { go(Step.UNDO_SETUP) })
                     MenuItem(stringResource(R.string.settings_about), onClick = { go(Step.ABOUT) })
                     MenuItem(stringResource(R.string.settings_uninstall), onClick = { go(Step.UNINSTALL) })
                 }
@@ -131,21 +143,44 @@ fun SettingsDialog(
                     },
                     onCancel = { go(Step.MENU) },
                 )
-                Step.UNINSTALL -> Confirm(
-                    title = stringResource(R.string.uninstall_title),
-                    body = listOf(stringResource(R.string.uninstall_body)),
-                    confirm = stringResource(R.string.uninstall_confirm),
+                Step.UNDO_SETUP -> Confirm(
+                    title = stringResource(R.string.undo_setup_title),
+                    body = listOf(stringResource(R.string.undo_setup_body)),
+                    confirm = stringResource(R.string.undo_setup_confirm),
                     busy = busy,
                     focus = first,
                     onConfirm = {
                         busy = true
-                        vm.uninstall { failure ->
+                        scope.launch {
+                            val failure = vm.undoSetup()
                             busy = false
-                            error = failure
+                            if (failure == null) go(Step.MENU) else error = failure
                         }
                     },
                     onCancel = { go(Step.MENU) },
                 )
+                Step.UNINSTALL -> {
+                    val uninstall = { restore: Boolean ->
+                        if (!busy) {
+                            busy = true
+                            vm.uninstall(restoreSetup = restore) { failure ->
+                                busy = false
+                                error = failure
+                            }
+                        }
+                    }
+                    Title(stringResource(R.string.uninstall_title), null)
+                    Body(stringResource(R.string.uninstall_body))
+                    // Sihirbaz bir şey kaldırdıysa ya da değiştirdiyse onların da geri getirilmesi önerilir
+                    if (setupChanged) {
+                        Body(stringResource(R.string.uninstall_restore_body))
+                        MenuItem(stringResource(R.string.uninstall_restore_confirm)) { uninstall(true) }
+                        MenuItem(stringResource(R.string.uninstall_only_confirm)) { uninstall(false) }
+                    } else {
+                        MenuItem(stringResource(R.string.uninstall_confirm)) { uninstall(false) }
+                    }
+                    MenuItem(stringResource(R.string.cancel), Modifier.focusRequester(first)) { go(Step.MENU) }
+                }
             }
             if (busy) Body(stringResource(R.string.working))
             error?.let { Text(stringResource(it), color = EvimColors.Warning, fontSize = 11.sp, modifier = Modifier.padding(top = 8.dp)) }

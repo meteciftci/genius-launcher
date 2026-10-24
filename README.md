@@ -8,7 +8,8 @@ Android TV / Google TV için reklamsız, sade bir ana ekran (launcher) ve evdeki
 
 - **Vitrin:** Odaktaki uygulamanın simgesinden çıkarılan renkle boyanan büyük bir karşılama alanı; yanında hava durumu (Open-Meteo, şehir seçilebilir, saatlik ve 7 günlük panel).
 - **Uygulamalar:** Kumandada OK'a basılı tutunca açılan menüden sıralama, gizleme ve renk seçme.
-- **Evim widget'ı:** Tuya (röle, mama kabı) ve Dyson cihazları buluta gitmeden, yerel ağdan. Kartlar sıralanabilir ve yeniden adlandırılabilir; dördü aşkın cihaz "Diğer" panelinde.
+- **Evim widget'ı:** Tuya (röle, mama kabı) ve Dyson cihazları buluta gitmeden, yerel ağdan. Kartlar sıralanabilir ve yeniden adlandırılabilir; dördü aşkın cihaz "Diğer" panelinde. Cihazlar TV'den, Evim kutusundaki panelden eklenir.
+- **Kurulum sihirbazı:** ADB izni, Home tuşu, gereksiz uygulama temizliği ve "uyanık tut"; hepsi geri alınabilir.
 - **Üst şerit:** Saat, Wi-Fi/Bluetooth/ayar kısayolları, RAM kullanımı ve "Boşalt" düğmesi (TV'nin kendi ADB'siyle).
 - **Dil:** Sistem dilini izler; İngilizce ve Türkçe.
 
@@ -60,19 +61,25 @@ saklanmaz; cihaz yeniden kurulursa paneldeki **Yeniden bağlan** anahtarını ye
 Dyson için **Cihaz ekle** → **Dyson**: MyDyson hesabıyla (e-postaya gelen kod ve şifre) ya da hesap olmadan
 cihazın üstündeki Wi-Fi etiketinden. TV hava temizleyiciyi ev ağında mDNS ile bulur.
 
-Eski yol (Mac'ten, sonraki sürümde kaldırılacak):
+## İlk kurulum sihirbazı
 
-Anahtarlar bir kez Mac'ten alınır ve TV'ye gönderilir (Python 3, `pip install -r tools/smarthome/requirements.txt`):
+Launcher ilk açıldığında bir sihirbaz çıkar; her adım atlanabilir ve Genius ayarlarından yeniden çalıştırılabilir:
 
-```bash
-python tools/smarthome/tuya_keys.py    # Tuya Smart / Smart Life uygulamasıyla QR okutarak
-python tools/smarthome/dyson_keys.py   # MyDyson hesabıyla (e-postaya kod gelir)
-python tools/smarthome/push_to_tv.py   # TV'ye gönderir; launcher açılınca içeri alır
-```
+1. **TV'nin kendi ADB'si:** USB hata ayıklamanın nasıl açılacağını anlatır ve TV'nin izin penceresini çıkarır.
+   Home tuşu, uygulama kaldırma ve bellek boşaltma bununla yapılır; bağlantı TV'nin içinde kalır.
+2. **Home tuşu:** Genius Launcher'ı ana ekran yapar (aşağıya bakın).
+3. **Temizlik:** Markaya göre bilinen gereksiz uygulamaları listeler (önce Xiaomi Mi Box); önerilenler seçili gelir.
+   Uygulamalar silinmez, kullanıcı için kaldırılır. Bağlı olunan Wi-Fi ağını kaydetmiş bir uygulama seçilemez.
+4. **Uyanık tut (isteğe bağlı):** TV kapanınca kutu uyumaz, ev ağında kalır.
+
+Sihirbaz neyi değiştirdiğini (ayarların eski değerleriyle) kaydeder. Genius ayarlarındaki **Sihirbazın
+değişikliklerini geri al** yalnızca bunları eski hâline getirir; **Kaldır** da önce bunları geri getirmeyi sorar.
 
 ## Ana ekran (Home tuşu)
 
-Google TV kendi ana ekranı açıkken başka launcher'ları yok sayar. Bu betik önce kurulum sihirbazını, sonra Google TV ana ekranını kapatır (kaldırmaz) ve Home tuşunu Genius Launcher'a bağlar; bağlı olunan Wi-Fi ağını kaydeden uygulama kapatılacaksa hiçbir şey yapmaz:
+Google TV kendi ana ekranı açıkken başka launcher'ları yok sayar. Bu yüzden önce Google TV'nin kurulum sihirbazı, sonra
+ana ekranı kapatılır (kaldırılmaz) ve Home tuşu Genius Launcher'a bağlanır; bağlı olunan Wi-Fi ağını kaydeden uygulama
+kapatılacaksa hiçbir şey yapılmaz. Bunu kurulum sihirbazı ya da Genius ayarları yapar; geliştirme için aynısı Mac'ten:
 
 ```bash
 zsh tools/mibox/ana_ekran.sh genius   # Genius Launcher

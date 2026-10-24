@@ -36,8 +36,7 @@ data class Meal(val hour: Int, val minute: Int, val portions: Int)
 
 /**
  * Cihaz anahtarlarını uygulamanın özel klasöründeki home.json'dan okur ve cihazlarla yerel ağda konuşur.
- * Anahtarlar kaynak kodda değil: akıllı ev panelinden hesapla eklenirken yazılır. (Eski yol:
- * tools/smarthome/push_to_tv.py dosyayı ADB ile harici klasöre koyar, uygulama özel klasörüne taşır.)
+ * Anahtarlar kaynak kodda değil: akıllı ev panelinden hesapla eklenirken yazılır.
  */
 class SmartHome(private val context: Context) {
     private val stored = File(context.filesDir, "home.json")
@@ -50,12 +49,7 @@ class SmartHome(private val context: Context) {
 
     val isConfigured: Boolean get() = tuya.isNotEmpty() || dyson.isNotEmpty()
 
-    /** Yeni gönderilmiş bir ayar dosyası varsa içeri alır, sonra ayarları yükler. */
     fun load() {
-        context.getExternalFilesDir(null)?.let { File(it, "home.json") }?.takeIf { it.exists() }?.let { incoming ->
-            incoming.copyTo(stored, overwrite = true)
-            incoming.delete()
-        }
         tuya = emptyMap()
         dyson = emptyMap()
         if (!stored.exists()) return

@@ -14,6 +14,9 @@ import dadb.AdbConnectException
 import dev.evim.tv.data.AppRepository
 import dev.evim.tv.data.City
 import dev.evim.tv.data.HomeSwitch
+import dev.evim.tv.data.AdbState
+import dev.evim.tv.data.CleanupApp
+import dev.evim.tv.data.Setup
 import dev.evim.tv.data.SwitchCheck
 import dev.evim.tv.data.Forecast
 import dev.evim.tv.data.LauncherApp
@@ -53,6 +56,7 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     private val prefs = LauncherPrefs(app)
     private val home = SmartHome(app)
     private val homeSwitch = HomeSwitch(app)
+    private val setup = Setup(app)
     private val tuyaCloud = TuyaCloud(BuildConfig.TUYA_CLIENT_ID, BuildConfig.TUYA_SCHEMA)
     private val tuyaDiscovery = TuyaDiscovery(app)
     private val dysonDiscovery = DysonDiscovery(app)
@@ -84,6 +88,9 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Home tuşu Genius Launcher'ı mı açıyor; ekrana dönülünce yenilenir. */
     var geniusIsHome by mutableStateOf(false)
+        private set
+    /** İlk açılışta kurulum sihirbazı kendiliğinden gösterilir. */
+    var setupPending by mutableStateOf(!prefs.setupShown)
         private set
 
     var homeDevices by mutableStateOf<List<HomeDevice>>(emptyList())
@@ -296,22 +303,61 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun setGeniusHome(enabled: Boolean, onDone: (Int?) -> Unit) {
+    /** [fromWizard] ise sihirbazın geri alabilmesi için kaydedilir. */
+    fun setGeniusHome(enabled: Boolean, fromWizard: Boolean = false, onDone: (Int?) -> Unit) {
         viewModelScope.launch {
             val result = runCatching {
-                withContext(Dispatchers.IO) { if (enabled) homeSwitch.toGenius() else homeSwitch.toGoogle() }
+                withContext(Dispatchers.IO) {
+                    if (enabled) homeSwitch.toGenius() else homeSwitch.toGoogle()
+                    if (enabled && fromWizard) setup.recordHome()
+                }
             }
             geniusIsHome = homeSwitch.isGeniusHome
             onDone(result.exceptionOrNull()?.let(::errorText))
         }
     }
 
-    /** Başarılı olursa uygulama kaldırılır ve bu süreç sonlanır; yalnızca hata geri bildirilir. */
-    fun uninstall(onError: (Int) -> Unit) {
+    /**
+     * Başarılı olursa uygulama kaldırılır ve bu süreç sonlanır; yalnızca hata geri bildirilir.
+     * [restoreSetup] ise önce sihirbazın kaldırdığı uygulamalar ve değiştirdiği ayarlar geri getirilir.
+     */
+    fun uninstall(restoreSetup: Boolean, onError: (Int) -> Unit) {
         viewModelScope.launch {
-            runCatching { withContext(Dispatchers.IO) { homeSwitch.uninstall() } }
-                .onFailure { onError(errorText(it)) }
+            runCatching {
+                withContext(Dispatchers.IO) {
+                    if (restoreSetup) setup.undo(includeHome = false)
+                    homeSwitch.uninstall()
+                }
+            }.onFailure { onError(errorText(it)) }
         }
+    }
+
+    fun finishSetup() {
+        prefs.setupShown = true
+        setupPending = false
+    }
+
+    val isXiaomi: Boolean get() = setup.isXiaomi
+
+    suspend fun adbState(): AdbState = withContext(Dispatchers.IO) { setup.adbState() }
+
+    suspend fun cleanupCandidates(): List<CleanupApp> = withContext(Dispatchers.IO) { setup.cleanupCandidates() }
+
+    suspend fun removeApps(packages: List<String>): Int =
+        withContext(Dispatchers.IO) { setup.removeApps(packages) }.also { refresh() }
+
+    suspend fun keepAwake(): Int? = runCatching { withContext(Dispatchers.IO) { setup.keepAwake() } }.exceptionOrNull()?.let(::errorText)
+
+    /** Sihirbazın yaptıkları: Home, kaldırılan uygulama sayısı, uyanık kal. Ayarlar her açılışta yeniden okur. */
+    suspend fun setupChanges(): Triple<Boolean, Int, Boolean> = withContext(Dispatchers.IO) {
+        Triple(setup.changedHome, setup.removedApps.size, setup.keptAwake)
+    }
+
+    suspend fun undoSetup(): Int? {
+        val error = runCatching { withContext(Dispatchers.IO) { setup.undo(includeHome = true) } }.exceptionOrNull()
+        geniusIsHome = homeSwitch.isGeniusHome
+        refresh()
+        return error?.let(::errorText)
     }
 
     @StringRes

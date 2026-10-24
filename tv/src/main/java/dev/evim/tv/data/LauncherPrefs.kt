@@ -54,6 +54,11 @@ class LauncherPrefs(context: Context) {
         deviceOrder = deviceOrder - key
     }
 
+    /** İlk kurulum sihirbazı bir kez gösterildi mi (bitirilse de atlansa da). */
+    var setupShown: Boolean
+        get() = sp.getBoolean(KEY_SETUP_SHOWN, false)
+        set(value) = sp.edit { putBoolean(KEY_SETUP_SHOWN, value) }
+
     /** Smart Life'taki kullanıcı kodu; hesap şifresi ya da jeton değil, yeniden bağlanırken yazmamak için. */
     var tuyaUserCode: String
         get() = sp.getString(KEY_TUYA_USER_CODE, "").orEmpty()
@@ -68,6 +73,7 @@ class LauncherPrefs(context: Context) {
         const val KEY_HIDDEN = "hidden"
         const val KEY_DEVICE_ORDER = "device_order"
         const val KEY_TUYA_USER_CODE = "tuya_user_code"
+        const val KEY_SETUP_SHOWN = "setup_shown"
         const val KEY_CITY = "city"
         const val KEY_LAT = "lat"
         const val KEY_LON = "lon"
