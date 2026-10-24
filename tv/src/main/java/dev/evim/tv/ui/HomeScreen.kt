@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,6 +41,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import android.graphics.Bitmap
+import android.os.SystemClock
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -83,8 +85,22 @@ fun HomeScreen(vm: LauncherViewModel) {
         if (vm.apps.isNotEmpty()) runCatching { firstCard.requestFocus() }
     }
 
-    // Ana ekranda geri tuşu hiçbir yere gitmez; taşıma modundaysa modu bitirir
-    BackHandler { movingPackage = null }
+    // Ana ekranda geri tuşu hiçbir yere gitmez: taşıma modundaysa modu bitirir,
+    // Google TV'deki gibi art arda iki basış ekran koruyucuyu başlatır
+    var lastBack by remember { mutableLongStateOf(0L) }
+    BackHandler {
+        if (movingPackage != null) {
+            movingPackage = null
+            return@BackHandler
+        }
+        val now = SystemClock.uptimeMillis()
+        if (now - lastBack < DOUBLE_BACK_MS) {
+            lastBack = 0L
+            vm.startScreensaver()
+        } else {
+            lastBack = now
+        }
+    }
 
     // Zemin rengini pencere teması çiziyor (themes.xml); burada ikinci kez boyamıyoruz
     Box(Modifier.fillMaxSize()) {
@@ -179,6 +195,8 @@ fun HomeScreen(vm: LauncherViewModel) {
         }
     }
 }
+
+private const val DOUBLE_BACK_MS = 700L
 
 @Composable
 private fun Hero(app: LauncherApp?, accent: () -> Color, weather: Weather?, city: String, onWeatherClick: () -> Unit) {

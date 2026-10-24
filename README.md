@@ -61,7 +61,7 @@ zsh tools/mibox/ana_ekran.sh genius   # Genius Launcher
 zsh tools/mibox/ana_ekran.sh google   # Google TV'ye geri dön
 ```
 
-Launcher 5 dakikada 3 kez çökerse Google TV ana ekranını kendiliğinden geri açar. Ekran koruyucu Google'ınki olarak kalır.
+Launcher 5 dakikada 3 kez çökerse Google TV ana ekranını kendiliğinden geri açar. Ekran koruyucu Google'ınki olarak kalır; Google TV'deki gibi ana ekranda Geri tuşuna art arda iki kez basınca hemen başlar.
 
 ## Gizli bilgiler
 

@@ -145,6 +145,15 @@ class AppRepository(private val context: Context) {
 
     fun keepAdbAuthorized() = adb.keepAlive()
 
+    /**
+     * Google TV'deki gibi ekran koruyucuyu hemen başlatır. `cmd dreams` root istiyor; ekran koruyucu
+     * servisinin dream() çağrısı (işlem kodu 1) ise shell'in WRITE_DREAM_STATE izniyle çalışıyor.
+     * Arka plan iş parçacığından çağrılmalı.
+     */
+    fun startScreensaver() {
+        adb.shell("service call dreams 1")
+    }
+
     private fun availableMb(): Long = ActivityManager.MemoryInfo().also(am::getMemoryInfo).availMem / (1024 * 1024)
 
     private fun accentFrom(bitmap: Bitmap): Color {

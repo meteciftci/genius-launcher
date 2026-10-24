@@ -198,6 +198,10 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
 
     fun openSettings(action: String) = repo.openSettings(action)
 
+    fun startScreensaver() {
+        viewModelScope.launch(Dispatchers.IO) { runCatching { repo.startScreensaver() } }
+    }
+
     fun openAccessorySettings() {
         viewModelScope.launch(Dispatchers.IO) { repo.openAccessorySettings() }
     }
