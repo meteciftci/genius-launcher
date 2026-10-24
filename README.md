@@ -6,11 +6,12 @@ Android TV / Google TV için reklamsız, sade bir ana ekran (launcher) ve evdeki
 
 ## Neler var
 
-- **Vitrin:** Odaktaki uygulamanın simgesinden çıkarılan renkle boyanan büyük bir karşılama alanı; yanında hava durumu (Open-Meteo, şehir seçilebilir, saatlik ve 7 günlük panel).
-- **Uygulamalar:** Kumandada OK'a basılı tutunca açılan menüden sıralama, gizleme ve renk seçme.
-- **Evim widget'ı:** Tuya (röle, mama kabı) ve Dyson cihazları buluta gitmeden, yerel ağdan. Kartlar sıralanabilir ve yeniden adlandırılabilir; dördü aşkın cihaz "Diğer" panelinde. Cihazlar TV'den, Evim kutusundaki panelden eklenir.
-- **Kurulum sihirbazı:** ADB izni, Home tuşu, gereksiz uygulama temizliği ve "uyanık tut"; hepsi geri alınabilir.
-- **Üst şerit:** Saat, Wi-Fi/Bluetooth/ayar kısayolları, RAM kullanımı ve "Boşalt" düğmesi (TV'nin kendi ADB'siyle).
+- **Vitrin:** Odaktaki uygulamanın simgesinden çıkarılan renkle boyanan büyük bir karşılama alanı.
+- **Uygulamalar:** Kumandada OK'a basılı tutunca açılan menüden sıralama, gizleme ve renk seçme. Yeni yüklenen uygulamaların kartı kendiliğinden gelir.
+- **Evim widget'ı:** Tuya (priz, röle, mama kabı), Dyson hava temizleyiciler ve Eufy kameralar, buluta gitmeden yerel ağdan. Kartlar sıralanabilir ve yeniden adlandırılabilir; kaç kart görüneceği ayarlardan seçilir (3–6), fazlası "Diğer" panelinde.
+- **Kamera:** Eufy kameranın karta basınca tam ekran canlı görüntüsü (RTSP, 1080p, sesli).
+- **Kurulum sihirbazı:** Tam ekran, görselli adımlarla ADB izni, Home tuşu, gereksiz uygulama temizliği ve "uyanık tut"; hepsi geri alınabilir.
+- **Üst şerit:** Saat ve hava durumu (Open-Meteo, şehir seçilebilir, saatlik ve 7 günlük panel), Evim kutusu, Wi-Fi/Bluetooth/ayar kısayolları, Genius ayarları, RAM kullanımı ve "Boşalt" düğmesi (TV'nin kendi ADB'siyle).
 - **Dil:** Sistem dilini izler; İngilizce ve Türkçe.
 
 ## Derleme
@@ -61,6 +62,17 @@ saklanmaz; cihaz yeniden kurulursa paneldeki **Yeniden bağlan** anahtarını ye
 Dyson için **Cihaz ekle** → **Dyson**: MyDyson hesabıyla (e-postaya gelen kod ve şifre) ya da hesap olmadan
 cihazın üstündeki Wi-Fi etiketinden. TV hava temizleyiciyi ev ağında mDNS ile bulur.
 
+Eufy kamera için önce Eufy uygulamasında **Kamera Ayarları → Genel → Depolama → NAS (RTSP)**'yi açıp bir kullanıcı
+adı ve parola belirleyin. Sonra **Cihaz ekle** → **Kamera**: kullanıcı adı ve parolayı yazın; TV kamerayı ev ağında
+Eufy'nin P2P yerel aramasıyla kendisi bulur, bulamazsa IP adresini sorar. Adresi değişen kamera da yeniden bulunur.
+
+### Bilinen sınırlar
+
+- Tuya: yerel protokolün 3.3 ve 3.4 sürümleri desteklenir; 3.5 henüz desteklenmez. Tam kontrol yalnızca denenmiş
+  tiplerde (priz/röle, Xenon X8605 mama kabı); bilinmeyen cihazlarda aç/kapa ya da yalnızca durum gösterilir.
+- Dyson: ısıtmalı hava temizleyici (527K) ile denendi; diğer modellerde bazı değerler eksik görünebilir.
+- Eufy: yalnızca RTSP veren kameralar; döndürme henüz yok. RTSP açıkken Eufy görüntüyü 1080p'ye düşürür.
+
 ## İlk kurulum sihirbazı
 
 Launcher ilk açıldığında bir sihirbaz çıkar; her adım atlanabilir ve Genius ayarlarından yeniden çalıştırılabilir:
@@ -90,12 +102,16 @@ Launcher 5 dakikada 3 kez çökerse Google TV ana ekranını kendiliğinden geri
 
 ## Gizli bilgiler
 
-Bu repoda **hiçbir cihaz anahtarı, hesap bilgisi ya da IP adresi bulunmaz.** Tuya `local_key`, Dyson MQTT şifresi gibi bilgiler çalışma zamanında cihazda (uygulamanın özel depolamasında) saklanır. `secrets/`, `devices.json` ve `*.secrets.json` `.gitignore` içindedir.
+Bu repoda **hiçbir cihaz anahtarı, hesap bilgisi ya da IP adresi bulunmaz.** Tuya `local_key`, Dyson MQTT şifresi ve Eufy RTSP parolası gibi bilgiler çalışma zamanında TV'de, uygulamanın özel depolamasında saklanır. Tuya, Dyson ve Eufy hesaplarının şifreleri ve bulut jetonları hiç saklanmaz; yalnızca giriş sırasında kullanılır. `secrets/`, `devices.json`, `*.secrets.json` ve `local.properties` `.gitignore` içindedir.
 
 ## Teşekkür
 
-Google TV'de ana ekranı değiştirme yaklaşımı için [Free My TV](https://github.com/simbasjungles/free-my-tv) (MIT) projesinden ilham alındı.
+- Google TV'de ana ekranı değiştirme yaklaşımı için [Free My TV](https://github.com/simbasjungles/free-my-tv) (MIT) projesinden ilham alındı.
+- Tuya QR girişi [tuya-device-sharing-sdk](https://github.com/tuya/tuya-device-sharing-sdk)'nın, Dyson bulut girişi
+  [libdyson-neon](https://github.com/libdyson-wg/libdyson-neon)'un Kotlin'e taşınmış hâlidir.
+- Kullanılan kütüphaneler: [dadb](https://github.com/mobile-dev-inc/dadb), [ZXing](https://github.com/zxing/zxing),
+  [Media3](https://github.com/androidx/media) (hepsi Apache-2.0).
 
 ## Lisans
 
-Henüz seçilmedi.
+[MIT](LICENSE)
