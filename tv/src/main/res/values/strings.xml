@@ -30,7 +30,8 @@
     <string name="camera_ip_body">The camera\'s IP address (Eufy app: camera settings → About → IP address)</string>
     <string name="camera_user_body">The RTSP username you set in the Eufy app</string>
     <string name="camera_password_body">The RTSP password. It stays on this TV only.</string>
-    <string name="camera_checking">Connecting to the camera…</string>
+    <string name="camera_checking">Looking for the camera on your home network…</string>
+    <string name="camera_not_found">The camera wasn\'t found on the home network. Type its IP address.</string>
     <string name="camera_wrong_login">The camera rejected the username or password.</string>
     <string name="camera_no_stream">The camera answered but has no stream. Check that NAS (RTSP) is turned on.</string>
     <string name="camera_unreachable">No camera answered at this address. Check the IP address.</string>

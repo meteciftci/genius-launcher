@@ -21,9 +21,10 @@ import kotlinx.coroutines.launch
 
 private sealed interface CameraStep {
     data object Intro : CameraStep
-    data object Ip : CameraStep
-    data class User(val ip: String) : CameraStep
-    data class Password(val ip: String, val user: String) : CameraStep
+    data object User : CameraStep
+    data class Password(val user: String) : CameraStep
+    /** Kamera ev ağında bulunamadı; adresi sorulur. */
+    data class Ip(val user: String, val password: String) : CameraStep
     data object Checking : CameraStep
     data class Failed(val message: Int) : CameraStep
 }
@@ -41,41 +42,43 @@ internal fun EufyAddFlow(vm: LauncherViewModel, focus: FocusRequester, onDone: (
     val defaultName = stringResource(R.string.camera_default_name)
 
     PanelHeader(stringResource(R.string.card_camera_title), stringResource(R.string.brand_eufy), Icons.Rounded.Videocam, EvimColors.Camera)
+    fun add(user: String, password: String, ip: String?) {
+        step = CameraStep.Checking
+        scope.launch {
+            step = when (vm.addCamera(defaultName, ip, user, password)) {
+                EufyCamera.Check.OK -> return@launch onDone()
+                EufyCamera.Check.WRONG_LOGIN -> CameraStep.Failed(R.string.camera_wrong_login)
+                EufyCamera.Check.NO_STREAM -> CameraStep.Failed(R.string.camera_no_stream)
+                // Kendiliğinden bulunamadıysa adres sorulur; yazılan adreste de yoksa hata
+                EufyCamera.Check.UNREACHABLE -> if (ip == null) CameraStep.Ip(user, password) else CameraStep.Failed(R.string.camera_unreachable)
+            }
+        }
+    }
+
     when (val current = step) {
         CameraStep.Intro -> {
             PanelText(stringResource(R.string.camera_intro))
-            PanelActions { PillButton(stringResource(R.string.tuya_continue), Modifier.focusRequester(focus), primary = true) { step = CameraStep.Ip } }
+            PanelActions { PillButton(stringResource(R.string.tuya_continue), Modifier.focusRequester(focus), primary = true) { step = CameraStep.User } }
         }
-        CameraStep.Ip -> Field(stringResource(R.string.camera_ip_body), "192.168.", KeyboardType.Decimal, secret = false, focus) { ip ->
-            step = CameraStep.User(ip)
-        }
-        is CameraStep.User -> Field(stringResource(R.string.camera_user_body), "", KeyboardType.Ascii, secret = false, focus) { user ->
-            step = CameraStep.Password(current.ip, user)
+        CameraStep.User -> Field(stringResource(R.string.camera_user_body), "", KeyboardType.Ascii, secret = false, focus) { user ->
+            step = CameraStep.Password(user)
         }
         is CameraStep.Password -> Field(stringResource(R.string.camera_password_body), "", KeyboardType.Password, secret = true, focus) { password ->
-            step = CameraStep.Checking
-            scope.launch {
-                val result = vm.addCamera(defaultName, current.ip, current.user, password)
-                if (result == EufyCamera.Check.OK) {
-                    onDone()
-                } else {
-                    step = CameraStep.Failed(
-                        when (result) {
-                            EufyCamera.Check.WRONG_LOGIN -> R.string.camera_wrong_login
-                            EufyCamera.Check.NO_STREAM -> R.string.camera_no_stream
-                            else -> R.string.camera_unreachable
-                        },
-                    )
-                }
+            add(current.user, password, ip = null)
+        }
+        is CameraStep.Ip -> {
+            PanelNote(stringResource(R.string.camera_not_found))
+            Field(stringResource(R.string.camera_ip_body), "192.168.", KeyboardType.Decimal, secret = false, focus) { ip ->
+                add(current.user, current.password, ip)
             }
         }
         CameraStep.Checking -> {
             PanelNote(stringResource(R.string.camera_checking), EvimColors.Accent)
-            PanelActions { PillButton(stringResource(R.string.cancel), Modifier.focusRequester(focus)) { step = CameraStep.Ip } }
+            PanelActions { PillButton(stringResource(R.string.cancel), Modifier.focusRequester(focus)) { step = CameraStep.User } }
         }
         is CameraStep.Failed -> {
             PanelNote(stringResource(current.message), EvimColors.Danger)
-            PanelActions { PillButton(stringResource(R.string.tuya_retry), Modifier.focusRequester(focus), primary = true) { step = CameraStep.Ip } }
+            PanelActions { PillButton(stringResource(R.string.tuya_retry), Modifier.focusRequester(focus), primary = true) { step = CameraStep.User } }
         }
     }
 }

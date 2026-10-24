@@ -32,6 +32,7 @@ import dev.evim.tv.data.home.DysonChallenge
 import dev.evim.tv.data.home.DysonCloud
 import dev.evim.tv.data.home.DysonDiscovery
 import dev.evim.tv.data.home.EufyCamera
+import dev.evim.tv.data.home.EufyDiscovery
 import dev.evim.tv.data.home.TuyaAccountDevice
 import dev.evim.tv.data.home.TuyaCloud
 import dev.evim.tv.data.home.TuyaDiscovery
@@ -260,16 +261,29 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
 
     val dysonAddedSerials: Set<String> get() = home.dysonSerials
 
-    /** Kamerayı yerel ağda kullanıcı adı ve parolasıyla dener; olursa ekler. */
-    suspend fun addCamera(name: String, ip: String, user: String, password: String): EufyCamera.Check {
-        val camera = EufyCamera(ip, user, password)
-        val check = withContext(Dispatchers.IO) { camera.check() }
-        if (check == EufyCamera.Check.OK) {
-            homeIo { home.addCamera(name, camera, user, password) }
-            homeConfigured = home.isConfigured
-            startHomeUpdates()
+    /**
+     * Kamerayı ekler. [ip] verilmezse ev ağında Eufy kameraları aranır ve kullanıcı adı ile parolayı kabul eden
+     * ilki alınır; hiç kamera bulunamazsa UNREACHABLE döner ve arayüz adresi sorar.
+     */
+    suspend fun addCamera(name: String, ip: String?, user: String, password: String): EufyCamera.Check = withContext(Dispatchers.IO) {
+        val found = runCatching { EufyDiscovery.scan() }.getOrDefault(emptyMap())
+        val candidates = if (ip != null) listOf(found.entries.firstOrNull { it.value == ip }?.key to ip) else found.map { it.key to it.value }
+        var result = EufyCamera.Check.UNREACHABLE
+        for ((did, address) in candidates) {
+            val camera = EufyCamera(address, user, password)
+            val check = camera.check()
+            if (check == EufyCamera.Check.OK) {
+                homeIo { home.addCamera(name, camera, user, password, did) }
+                withContext(Dispatchers.Main) {
+                    homeConfigured = home.isConfigured
+                    startHomeUpdates()
+                }
+                return@withContext check
+            }
+            // Birden çok kamera varsa en anlamlı hata gösterilir: parola reddi, yayın yok, cevap yok
+            if (check == EufyCamera.Check.WRONG_LOGIN || result == EufyCamera.Check.UNREACHABLE) result = check
         }
-        return check
+        result
     }
 
     fun cameraStream(device: HomeDevice.Camera): String? = home.streamUrl(device.key)

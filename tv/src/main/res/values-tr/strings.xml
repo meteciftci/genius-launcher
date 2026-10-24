@@ -27,7 +27,8 @@
     <string name="camera_ip_body">Kameranın IP adresi (Eufy uygulaması: kamera ayarları → Cihaz Hakkında → IP Adresi)</string>
     <string name="camera_user_body">Eufy uygulamasında belirlediğiniz RTSP kullanıcı adı</string>
     <string name="camera_password_body">RTSP parolası. Yalnızca bu TV\'de kalır.</string>
-    <string name="camera_checking">Kameraya bağlanılıyor…</string>
+    <string name="camera_checking">Kamera ev ağında aranıyor…</string>
+    <string name="camera_not_found">Kamera ev ağında bulunamadı. IP adresini yazın.</string>
     <string name="camera_wrong_login">Kamera kullanıcı adını ya da parolayı kabul etmedi.</string>
     <string name="camera_no_stream">Kamera cevap verdi ama yayın yok. NAS (RTSP)\'nin açık olduğunu kontrol edin.</string>
     <string name="camera_unreachable">Bu adreste cevap veren kamera yok. IP adresini kontrol edin.</string>

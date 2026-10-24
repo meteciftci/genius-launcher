@@ -51,6 +51,7 @@ class SmartHome(private val context: Context) {
     private val dysonDiscovery = DysonDiscovery(context)
     private var lastScan = 0L
     private var lastDysonScan = 0L
+    private var lastCameraScan = 0L
 
     val isConfigured: Boolean get() = tuya.isNotEmpty() || dyson.isNotEmpty() || cameras.isNotEmpty()
 
@@ -133,13 +134,17 @@ class SmartHome(private val context: Context) {
 
     val dysonSerials: Set<String> get() = dyson.keys
 
-    /** Kamerayı ekler; aynı adresteki kamera zaten varsa kullanıcı adı ve parolası yenilenir. */
-    fun addCamera(name: String, camera: EufyCamera, user: String, password: String) {
+    /**
+     * Kamerayı ekler; aynı P2P kimliği (ya da kimlik bilinmiyorsa aynı adres) zaten varsa adresi, kullanıcı adı
+     * ve parolası yenilenir. [did] kameranın P2P kimliği; adresi değişince kamera bununla yeniden bulunur.
+     */
+    fun addCamera(name: String, camera: EufyCamera, user: String, password: String, did: String?) {
         val json = if (stored.exists()) JSONObject(stored.readText()) else JSONObject()
         val list = json.optJSONArray("eufy").objects().toMutableList()
-        val entry = list.firstOrNull { it.optString("ip") == camera.ip }
+        val entry = list.firstOrNull { (did != null && it.optString("did") == did) || it.optString("ip") == camera.ip }
             ?: JSONObject().put("id", "eufy-" + java.util.UUID.randomUUID().toString().take(8)).put("name", name).also { list += it }
         entry.put("ip", camera.ip).put("user", user).put("password", password)
+        if (did != null) entry.put("did", did)
         json.put("eufy", JSONArray(list))
         stored.writeText(json.toString())
         load()
@@ -165,7 +170,10 @@ class SmartHome(private val context: Context) {
             val again = dyson.filterKeys { it in lost }.map { (key, entry) -> purifier(key, entry) { entry.device.state() } }.associateBy { it.key }
             purifiers = purifiers.map { again[it.key] ?: it }
         }
-        val cams = cameras.map { (key, entry) -> HomeDevice.Camera(key, entry.name, entry.camera.reachable()) }
+        var cams = cameras.map { (key, entry) -> HomeDevice.Camera(key, entry.name, entry.camera.reachable()) }
+        if (cams.any { !it.reachable } && rediscoverCameras()) {
+            cams = cameras.map { (key, entry) -> HomeDevice.Camera(key, entry.name, entry.camera.reachable()) }
+        }
         return purifiers + cams + tuyaDevices
     }
 
@@ -189,6 +197,28 @@ class SmartHome(private val context: Context) {
             val lan = found[entry.getString("id")] ?: return@forEach
             if (lan.ip != entry.optString("ip") || lan.version != entry.optString("version")) {
                 entry.put("ip", lan.ip).put("version", lan.version)
+                changed = true
+            }
+        }
+        if (changed) {
+            stored.writeText(json.toString())
+            load()
+        }
+        return changed
+    }
+
+    /** Cevap vermeyen kameraları P2P kimlikleriyle ev ağında arar; adresi değişen bulunduysa true. */
+    private fun rediscoverCameras(): Boolean {
+        val now = System.currentTimeMillis()
+        if (now - lastCameraScan < RESCAN_MS || !stored.exists()) return false
+        lastCameraScan = now
+        val found = runCatching { EufyDiscovery.scan() }.getOrDefault(emptyMap())
+        val json = JSONObject(stored.readText())
+        var changed = false
+        json.optJSONArray("eufy").objects().forEach { entry ->
+            val ip = found[entry.optString("did")] ?: return@forEach
+            if (ip != entry.optString("ip")) {
+                entry.put("ip", ip)
                 changed = true
             }
         }
