@@ -75,7 +75,6 @@
     <string name="menu_pick_color">Pick color</string>
     <string name="menu_hide">Hide</string>
     <string name="menu_app_info">App info</string>
-    <string name="menu_hidden_apps">Hidden apps (%d)</string>
     <string name="color_title">Card and showcase color</string>
     <string name="color_auto">Automatic color (from icon)</string>
     <string name="done">Done</string>
@@ -116,4 +115,30 @@
     <string name="city_hint">e.g. Bodrum</string>
     <string name="city_searching">Searching…</string>
     <string name="city_no_results">No results</string>
+
+    <!-- Genius settings -->
+    <string name="settings_title">Genius settings</string>
+    <string name="settings_city">Weather city</string>
+    <string name="settings_home">Home button</string>
+    <string name="settings_home_genius" translatable="false">Genius Launcher</string>
+    <string name="settings_home_google" translatable="false">Google TV</string>
+    <string name="settings_about">About</string>
+    <string name="settings_uninstall">Uninstall and restore</string>
+    <string name="home_to_genius_title">Make Genius Launcher the home screen?</string>
+    <string name="home_to_genius_body">Google TV\'s home screen and its setup app are turned off, not removed. The screensaver stays.</string>
+    <string name="home_erases_networks">Some Wi-Fi networks saved by Google TV\'s setup will be erased. The network you\'re connected to stays.</string>
+    <string name="home_blocked">Google TV\'s setup saved the Wi-Fi network you\'re connected to, and turning it off would erase it. Forget the network in Settings, connect again, then try once more.</string>
+    <string name="home_to_google_title">Give the Home button back to Google TV?</string>
+    <string name="home_to_google_body">Google TV\'s home screen and its setup app are turned back on.</string>
+    <string name="switch_confirm">Switch</string>
+    <string name="uninstall_title">Uninstall Genius Launcher?</string>
+    <string name="uninstall_body">The Home button goes back to Google TV, then the app and its data (device keys, names, order) are removed. The TV keeps the app\'s USB debugging permission; you can revoke it in Developer options.</string>
+    <string name="uninstall_confirm">Uninstall</string>
+    <string name="adb_needs_permission">Approve the USB debugging prompt on the TV, then try again.</string>
+    <string name="adb_off">USB debugging is off. Turn it on in Developer options.</string>
+    <string name="action_failed">Couldn\'t finish. Try again.</string>
+    <string name="working">Working…</string>
+    <string name="about_version">Version %s</string>
+    <string name="about_body">Open source Android TV launcher. The Home button approach is inspired by Free My TV (MIT).</string>
+    <string name="about_source" translatable="false">github.com/meteciftci/genius-launcher</string>
 </resources>

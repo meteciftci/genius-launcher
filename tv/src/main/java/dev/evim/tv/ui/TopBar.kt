@@ -17,6 +17,7 @@ import androidx.compose.material.icons.rounded.NetworkWifi1Bar
 import androidx.compose.material.icons.rounded.NetworkWifi2Bar
 import androidx.compose.material.icons.rounded.NetworkWifi3Bar
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.Tv
 import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material.icons.rounded.WifiOff
@@ -55,7 +56,7 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun TopBar(vm: LauncherViewModel) {
+fun TopBar(vm: LauncherViewModel, onGeniusSettings: () -> Unit) {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -93,7 +94,7 @@ fun TopBar(vm: LauncherViewModel) {
             Box(Modifier.size(5.dp).background(if (healthy) EvimColors.Online else EvimColors.Warning, CircleShape))
         }
         Spacer(Modifier.width(8.dp))
-        ShortcutsChip(vm = vm)
+        ShortcutsChip(vm = vm, onGeniusSettings = onGeniusSettings)
         Spacer(Modifier.width(8.dp))
         RamChip(vm = vm)
     }
@@ -101,7 +102,7 @@ fun TopBar(vm: LauncherViewModel) {
 
 /** Google TV'deki gibi hızlı ayar kısayolları; Wi-Fi ve Bluetooth simgeleri durumu da gösterir. */
 @Composable
-private fun ShortcutsChip(vm: LauncherViewModel) {
+private fun ShortcutsChip(vm: LauncherViewModel, onGeniusSettings: () -> Unit) {
     val status = vm.status
     val wifiIcon = when (status.wifiLevel) {
         null -> Icons.Rounded.WifiOff
@@ -119,6 +120,7 @@ private fun ShortcutsChip(vm: LauncherViewModel) {
             ) { vm.openAccessorySettings() }
             IconButton(Icons.Rounded.Tv, stringResource(R.string.shortcut_display_sound)) { vm.openSettings(Settings.ACTION_SOUND_SETTINGS) }
             IconButton(Icons.Rounded.Settings, stringResource(R.string.shortcut_settings)) { vm.openSettings(Settings.ACTION_SETTINGS) }
+            IconButton(Icons.Rounded.Tune, stringResource(R.string.settings_title), onGeniusSettings)
         }
     }
 }

@@ -69,7 +69,6 @@
     <string name="menu_pick_color">Renk seç</string>
     <string name="menu_hide">Gizle</string>
     <string name="menu_app_info">Uygulama bilgisi</string>
-    <string name="menu_hidden_apps">Gizli uygulamalar (%d)</string>
     <string name="color_title">Kart ve vitrin rengi</string>
     <string name="color_auto">Otomatik renk (simgeden)</string>
     <string name="done">Tamam</string>
@@ -108,4 +107,26 @@
     <string name="city_hint">örn. Bodrum</string>
     <string name="city_searching">Aranıyor…</string>
     <string name="city_no_results">Sonuç bulunamadı</string>
+
+    <string name="settings_title">Genius ayarları</string>
+    <string name="settings_city">Hava durumu şehri</string>
+    <string name="settings_home">Home tuşu</string>
+    <string name="settings_about">Hakkında</string>
+    <string name="settings_uninstall">Kaldır ve eski hâline dön</string>
+    <string name="home_to_genius_title">Genius Launcher ana ekran olsun mu?</string>
+    <string name="home_to_genius_body">Google TV ana ekranı ve kurulum sihirbazı kapatılır, kaldırılmaz. Ekran koruyucu yerinde kalır.</string>
+    <string name="home_erases_networks">Google TV kurulumunun kaydettiği bazı Wi-Fi ağları silinecek. Bağlı olduğunuz ağ kalır.</string>
+    <string name="home_blocked">Bağlı olduğunuz Wi-Fi ağını Google TV kurulumu kaydetmiş; kapatılırsa ağ silinir. Ayarlar\'da ağı unutup yeniden bağlanın, sonra tekrar deneyin.</string>
+    <string name="home_to_google_title">Home tuşu Google TV\'ye dönsün mü?</string>
+    <string name="home_to_google_body">Google TV ana ekranı ve kurulum sihirbazı yeniden açılır.</string>
+    <string name="switch_confirm">Değiştir</string>
+    <string name="uninstall_title">Genius Launcher kaldırılsın mı?</string>
+    <string name="uninstall_body">Home tuşu Google TV\'ye döner, ardından uygulama ve verileri (cihaz anahtarları, adlar, sıralama) silinir. TV, uygulamanın USB hata ayıklama iznini saklar; Geliştirici seçeneklerinden kaldırabilirsiniz.</string>
+    <string name="uninstall_confirm">Kaldır</string>
+    <string name="adb_needs_permission">TV\'deki USB hata ayıklama iznini onaylayıp tekrar deneyin.</string>
+    <string name="adb_off">USB hata ayıklama kapalı. Geliştirici seçeneklerinden açın.</string>
+    <string name="action_failed">Tamamlanamadı. Tekrar deneyin.</string>
+    <string name="working">Yapılıyor…</string>
+    <string name="about_version">Sürüm %s</string>
+    <string name="about_body">Açık kaynak Android TV launcher\'ı. Home tuşu yöntemi Free My TV\'den (MIT) esinlenildi.</string>
 </resources>

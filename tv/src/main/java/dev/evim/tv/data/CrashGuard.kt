@@ -13,13 +13,6 @@ object CrashGuard {
     private const val LIMIT = 3
     private const val REVERT_TIMEOUT_MS = 8_000L
 
-    // Önce ana ekran açılır ki kurulum sihirbazının kurtarma ekranı Home'u almasın
-    private val REVERT = listOf(
-        "pm enable com.google.android.apps.tv.launcherx",
-        "cmd package set-home-activity com.google.android.apps.tv.launcherx/.home.HomeActivity",
-        "pm enable com.google.android.tungsten.setupwraith",
-    )
-
     @Volatile private var installed = false
 
     fun install(context: Context) {
@@ -40,7 +33,7 @@ object CrashGuard {
         val worker = Thread {
             runCatching {
                 val adb = LocalAdb(context)
-                REVERT.forEach(adb::shell)
+                HomeSwitch.REVERT.forEach(adb::shell)
             }
             file(context).delete()
         }

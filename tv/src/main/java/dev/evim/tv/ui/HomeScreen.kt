@@ -73,6 +73,9 @@ fun HomeScreen(vm: LauncherViewModel) {
     var movingPackage by remember { mutableStateOf<String?>(null) }
     var showWeather by remember { mutableStateOf(false) }
     var pickingCity by remember { mutableStateOf(false) }
+    var showSettings by remember { mutableStateOf(false) }
+    // Şehir ayarlardan seçildiyse sonunda hava paneline değil ayarlara dönülür
+    var cityFromSettings by remember { mutableStateOf(false) }
     val firstCard = remember { FocusRequester() }
 
     // Odaktaki uygulama listede değiştiyse (renk, sıra) güncel halini kullan
@@ -108,7 +111,7 @@ fun HomeScreen(vm: LauncherViewModel) {
 
         // Alt boşluk dar: uygulama kartları ekranın altına yakın dursun
         Column(Modifier.fillMaxSize().padding(start = 48.dp, end = 48.dp, top = 30.dp, bottom = 14.dp)) {
-            TopBar(vm = vm)
+            TopBar(vm = vm, onGeniusSettings = { showSettings = true })
             Spacer(Modifier.weight(1f))
             Hero(app = current, accent = accent, weather = vm.weather, city = vm.city.name, onWeatherClick = { showWeather = true })
 
@@ -154,14 +157,21 @@ fun HomeScreen(vm: LauncherViewModel) {
         menuFor?.let { app ->
             AppMenu(
                 app = app,
-                hiddenCount = vm.hiddenApps.size,
                 onDismiss = { menuFor = null },
                 onOpen = { menuFor = null; vm.launch(app) },
                 onMove = { menuFor = null; movingPackage = app.packageName },
                 onHide = { menuFor = null; vm.hide(app) },
                 onColor = { vm.setColor(app, it) },
                 onInfo = { menuFor = null; vm.openAppInfo(app) },
-                onShowHidden = { menuFor = null; showHidden = true },
+            )
+        }
+        // Gizli uygulamalar ve şehir seçimi bu panelin üstünde açılır; kapanınca panele dönülür
+        if (showSettings) {
+            SettingsDialog(
+                vm = vm,
+                onHiddenApps = { showHidden = true },
+                onCity = { cityFromSettings = true; pickingCity = true },
+                onDismiss = { showSettings = false },
             )
         }
         if (showWeather) {
@@ -180,10 +190,15 @@ fun HomeScreen(vm: LauncherViewModel) {
                 onSelect = { city ->
                     vm.selectCity(city)
                     pickingCity = false
-                    showWeather = true
+                    if (!cityFromSettings) showWeather = true
+                    cityFromSettings = false
                 },
-                // Vazgeçilirse hava paneline geri dön
-                onDismiss = { pickingCity = false; showWeather = true },
+                // Vazgeçilirse açıldığı panele geri dön
+                onDismiss = {
+                    pickingCity = false
+                    if (!cityFromSettings) showWeather = true
+                    cityFromSettings = false
+                },
             )
         }
         if (showHidden) {

@@ -13,6 +13,8 @@ import dadb.AdbAuthException
 import dadb.AdbConnectException
 import dev.evim.tv.data.AppRepository
 import dev.evim.tv.data.City
+import dev.evim.tv.data.HomeSwitch
+import dev.evim.tv.data.SwitchCheck
 import dev.evim.tv.data.Forecast
 import dev.evim.tv.data.LauncherApp
 import dev.evim.tv.data.LauncherPrefs
@@ -39,6 +41,7 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     private val repo = AppRepository(app)
     private val prefs = LauncherPrefs(app)
     private val home = SmartHome(app)
+    private val homeSwitch = HomeSwitch(app)
     // Tuya cihazları aynı anda tek yerel bağlantı kabul edebiliyor; sorgu ve komutlar sırayla gider
     private val homeLock = Mutex()
     private var installed: List<LauncherApp> = emptyList()
@@ -63,6 +66,10 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     var citySearchResults by mutableStateOf<List<City>>(emptyList())
         private set
     var citySearching by mutableStateOf(false)
+        private set
+
+    /** Home tuşu Genius Launcher'ı mı açıyor; ekrana dönülünce yenilenir. */
+    var geniusIsHome by mutableStateOf(false)
         private set
 
     var homeDevices by mutableStateOf<List<HomeDevice>>(emptyList())
@@ -189,6 +196,40 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
             publish()
         }
         refreshRam()
+        geniusIsHome = homeSwitch.isGeniusHome
+    }
+
+    /** Genius Launcher'a geçmeden önce Wi-Fi denetimi; hata olursa ikinci parametrede gösterilecek metin. */
+    fun checkHomeSwitch(onResult: (SwitchCheck?, Int?) -> Unit) {
+        viewModelScope.launch {
+            val result = runCatching { withContext(Dispatchers.IO) { homeSwitch.check() } }
+            onResult(result.getOrNull(), result.exceptionOrNull()?.let(::errorText))
+        }
+    }
+
+    fun setGeniusHome(enabled: Boolean, onDone: (Int?) -> Unit) {
+        viewModelScope.launch {
+            val result = runCatching {
+                withContext(Dispatchers.IO) { if (enabled) homeSwitch.toGenius() else homeSwitch.toGoogle() }
+            }
+            geniusIsHome = homeSwitch.isGeniusHome
+            onDone(result.exceptionOrNull()?.let(::errorText))
+        }
+    }
+
+    /** Başarılı olursa uygulama kaldırılır ve bu süreç sonlanır; yalnızca hata geri bildirilir. */
+    fun uninstall(onError: (Int) -> Unit) {
+        viewModelScope.launch {
+            runCatching { withContext(Dispatchers.IO) { homeSwitch.uninstall() } }
+                .onFailure { onError(errorText(it)) }
+        }
+    }
+
+    @StringRes
+    private fun errorText(error: Throwable): Int = when (error) {
+        is AdbAuthException -> R.string.adb_needs_permission
+        is AdbConnectException -> R.string.adb_off
+        else -> R.string.action_failed
     }
 
     fun refreshRam() {

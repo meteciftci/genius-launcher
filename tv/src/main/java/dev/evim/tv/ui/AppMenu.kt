@@ -49,14 +49,12 @@ import dev.evim.tv.data.LauncherApp
 @Composable
 fun AppMenu(
     app: LauncherApp,
-    hiddenCount: Int,
     onDismiss: () -> Unit,
     onOpen: () -> Unit,
     onMove: () -> Unit,
     onHide: () -> Unit,
     onColor: (Color?) -> Unit,
     onInfo: () -> Unit,
-    onShowHidden: () -> Unit,
 ) {
     var pickingColor by remember { mutableStateOf(false) }
     val first = remember { FocusRequester() }
@@ -76,7 +74,6 @@ fun AppMenu(
                 MenuItem(stringResource(R.string.menu_pick_color), onClick = { pickingColor = true })
                 MenuItem(stringResource(R.string.menu_hide), onClick = onHide)
                 MenuItem(stringResource(R.string.menu_app_info), onClick = onInfo)
-                if (hiddenCount > 0) MenuItem(stringResource(R.string.menu_hidden_apps, hiddenCount), onClick = onShowHidden)
             } else {
                 Text(stringResource(R.string.color_title), color = EvimColors.TextDim, fontSize = 11.sp)
                 Spacer(Modifier.height(10.dp))
