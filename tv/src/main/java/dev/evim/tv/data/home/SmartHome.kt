@@ -152,6 +152,8 @@ class SmartHome(private val context: Context) {
 
     fun streamUrl(key: String): String? = cameras[key]?.camera?.streamUrl
 
+    fun cameraIp(key: String): String? = cameras[key]?.camera?.ip
+
     /** Hangi Tuya cihazlarının eklendiği; yeniden bağlanırken seçili gelirler. */
     val tuyaIds: Set<String> get() = tuya.keys
 

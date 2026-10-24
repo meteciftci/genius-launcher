@@ -9,7 +9,7 @@ Android TV / Google TV için reklamsız, sade bir ana ekran (launcher) ve evdeki
 - **Vitrin:** Odaktaki uygulamanın simgesinden çıkarılan renkle boyanan büyük bir karşılama alanı.
 - **Uygulamalar:** Kumandada OK'a basılı tutunca açılan menüden sıralama, gizleme ve renk seçme. Yeni yüklenen uygulamaların kartı kendiliğinden gelir.
 - **Evim widget'ı:** Tuya (priz, röle, mama kabı), Dyson hava temizleyiciler ve Eufy kameralar, buluta gitmeden yerel ağdan. Kartlar sıralanabilir ve yeniden adlandırılabilir; kaç kart görüneceği ayarlardan seçilir (3–6), fazlası "Diğer" panelinde.
-- **Kamera:** Eufy kameranın karta basınca tam ekran canlı görüntüsü (RTSP, 1080p, sesli).
+- **Kamera:** Eufy kameranın karta basınca tam ekran canlı görüntüsü (RTSP, 1080p, sesli). Pan & Tilt kameralar yön tuşlarıyla döndürülür (yerel P2P, hesap gerekmez).
 - **Kurulum sihirbazı:** Tam ekran, görselli adımlarla ADB izni, Home tuşu, gereksiz uygulama temizliği ve "uyanık tut"; hepsi geri alınabilir.
 - **Üst şerit:** Saat ve hava durumu (Open-Meteo, şehir seçilebilir, saatlik ve 7 günlük panel), Evim kutusu, Wi-Fi/Bluetooth/ayar kısayolları, Genius ayarları, RAM kullanımı ve "Boşalt" düğmesi (TV'nin kendi ADB'siyle).
 - **Dil:** Sistem dilini izler; İngilizce ve Türkçe.
@@ -71,7 +71,7 @@ Eufy'nin P2P yerel aramasıyla kendisi bulur, bulamazsa IP adresini sorar. Adres
 - Tuya: yerel protokolün 3.3 ve 3.4 sürümleri desteklenir; 3.5 henüz desteklenmez. Tam kontrol yalnızca denenmiş
   tiplerde (priz/röle, Xenon X8605 mama kabı); bilinmeyen cihazlarda aç/kapa ya da yalnızca durum gösterilir.
 - Dyson: ısıtmalı hava temizleyici (527K) ile denendi; diğer modellerde bazı değerler eksik görünebilir.
-- Eufy: yalnızca RTSP veren kameralar; döndürme henüz yok. RTSP açıkken Eufy görüntüyü 1080p'ye düşürür.
+- Eufy: yalnızca RTSP veren kameralar; döndürme Indoor Cam Pan & Tilt (T8410) ile denendi. RTSP açıkken Eufy görüntüyü 1080p'ye düşürür.
 
 ## İlk kurulum sihirbazı
 
@@ -109,6 +109,7 @@ Bu repoda **hiçbir cihaz anahtarı, hesap bilgisi ya da IP adresi bulunmaz.** T
 - Google TV'de ana ekranı değiştirme yaklaşımı için [Free My TV](https://github.com/simbasjungles/free-my-tv) (MIT) projesinden ilham alındı.
 - Tuya QR girişi [tuya-device-sharing-sdk](https://github.com/tuya/tuya-device-sharing-sdk)'nın, Dyson bulut girişi
   [libdyson-neon](https://github.com/libdyson-wg/libdyson-neon)'un Kotlin'e taşınmış hâlidir.
+- Eufy P2P yerel arama ve döndürme komutu [eufy-security-client](https://github.com/bropat/eufy-security-client)'tan (MIT) alındı.
 - Kullanılan kütüphaneler: [dadb](https://github.com/mobile-dev-inc/dadb), [ZXing](https://github.com/zxing/zxing),
   [Media3](https://github.com/androidx/media) (hepsi Apache-2.0).
 

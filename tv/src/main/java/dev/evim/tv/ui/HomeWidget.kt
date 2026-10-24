@@ -164,7 +164,7 @@ fun HomeWidget(vm: LauncherViewModel, modifier: Modifier = Modifier) {
         )
     }
     camera?.let { device ->
-        vm.cameraStream(device)?.let { url -> CameraDialog(device.name, url, onDismiss = { camera = null }) }
+        vm.cameraStream(device)?.let { url -> CameraDialog(device.name, url, vm.cameraIp(device), onDismiss = { camera = null }) }
     }
     feeder?.let { device ->
         FeederDialog(device, onFeed = { vm.feed(device, it); feeder = null }, onDismiss = { feeder = null })

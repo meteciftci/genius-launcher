@@ -296,6 +296,8 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
 
     fun cameraStream(device: HomeDevice.Camera): String? = home.streamUrl(device.key)
 
+    fun cameraIp(device: HomeDevice.Camera): String? = home.cameraIp(device.key)
+
     suspend fun addDyson(devices: List<DysonAccountDevice>, ips: Map<String, String>) {
         homeIo { home.addDyson(devices, ips) }
         homeConfigured = home.isConfigured

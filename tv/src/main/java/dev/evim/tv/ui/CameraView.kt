@@ -22,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,14 +53,19 @@ import androidx.media3.ui.PlayerView
 import androidx.tv.material3.Icon
 import androidx.tv.material3.Text
 import dev.evim.tv.R
+import dev.evim.tv.data.home.EufyP2p
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Kameranın canlı görüntüsü, tam ekran. Yayın ev ağından RTSP ile gelir (TCP üzerinden; Wi-Fi'de UDP'den
  * daha az kare kaybeder). Ses kapalı başlar, OK ile açılıp kapanır; Geri kapatır ve oynatıcı bırakılır.
+ * [ip] verilirse kamerayla P2P oturumu açılır ve yön tuşları kamerayı döndürür (Pan & Tilt modelleri).
  */
 @OptIn(UnstableApi::class)
 @Composable
-fun CameraDialog(name: String, url: String, onDismiss: () -> Unit) {
+fun CameraDialog(name: String, url: String, ip: String?, onDismiss: () -> Unit) {
     val context = LocalContext.current
     var muted by remember { mutableStateOf(true) }
     var state by remember { mutableStateOf(Player.STATE_BUFFERING) }
@@ -89,6 +95,16 @@ fun CameraDialog(name: String, url: String, onDismiss: () -> Unit) {
             player.release()
         }
     }
+    val p2p = remember(ip) { ip?.let { EufyP2p(it) } }
+    var canTurn by remember { mutableStateOf(false) }
+    var lastTurn by remember { mutableStateOf(0L) }
+    val scope = rememberCoroutineScope()
+    DisposableEffect(p2p) {
+        onDispose { p2p?.let { scope.launch(Dispatchers.IO) { it.close() } } }
+    }
+    LaunchedEffect(p2p) {
+        if (p2p != null) canTurn = withContext(Dispatchers.IO) { p2p.connect() }
+    }
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
 
@@ -100,6 +116,22 @@ fun CameraDialog(name: String, url: String, onDismiss: () -> Unit) {
                 .focusRequester(focus)
                 .focusable()
                 .onKeyEvent { event ->
+                    val turn = when (event.key) {
+                        Key.DirectionLeft -> EufyP2p.Direction.LEFT
+                        Key.DirectionRight -> EufyP2p.Direction.RIGHT
+                        Key.DirectionUp -> EufyP2p.Direction.UP
+                        Key.DirectionDown -> EufyP2p.Direction.DOWN
+                        else -> null
+                    }
+                    if (turn != null) {
+                        // Basılı tutunca tekrar eden tuşlar kamerayı adım adım döndürür; komutlar yığılmasın
+                        val now = System.currentTimeMillis()
+                        if (canTurn && event.type == KeyEventType.KeyDown && now - lastTurn >= TURN_INTERVAL_MS) {
+                            lastTurn = now
+                            p2p?.let { scope.launch(Dispatchers.IO) { it.rotate(turn) } }
+                        }
+                        return@onKeyEvent true
+                    }
                     val ok = event.key == Key.DirectionCenter || event.key == Key.Enter || event.key == Key.NumPadEnter
                     // Kartı açan OK'in bırakılması sesi açmasın: önce bu ekranda basılmış olmalı
                     if (ok && event.type == KeyEventType.KeyDown) armed = true
@@ -143,6 +175,15 @@ fun CameraDialog(name: String, url: String, onDismiss: () -> Unit) {
                 Spacer(Modifier.width(8.dp))
                 Text(stringResource(if (muted) R.string.camera_unmute_hint else R.string.camera_mute_hint), color = Color.White, fontSize = 12.sp)
             }
+            if (canTurn) {
+                Text(
+                    stringResource(R.string.camera_pan_hint),
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    modifier = Modifier.align(Alignment.BottomCenter).padding(28.dp)
+                        .background(Color(0x99000000), RoundedCornerShape(50)).padding(horizontal = 14.dp, vertical = 7.dp),
+                )
+            }
             when {
                 failed -> CenterNote(stringResource(R.string.camera_stream_failed))
                 state != Player.STATE_READY -> CenterNote(stringResource(R.string.camera_connecting))
@@ -160,3 +201,5 @@ private fun androidx.compose.foundation.layout.BoxScope.CenterNote(text: String)
         modifier = Modifier.align(Alignment.Center).background(Color(0x99000000), RoundedCornerShape(14.dp)).padding(horizontal = 20.dp, vertical = 12.dp),
     )
 }
+
+private const val TURN_INTERVAL_MS = 300L

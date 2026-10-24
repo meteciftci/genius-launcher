@@ -41,6 +41,7 @@
     <string name="camera_stream_failed">The stream couldn\'t be played. Back closes this.</string>
     <string name="camera_unmute_hint">OK: sound on</string>
     <string name="camera_mute_hint">OK: sound off</string>
+    <string name="camera_pan_hint">Arrows: turn the camera</string>
     <string name="smart_home_add_subtitle">Pick the kind of device; you\'ll sign in to its app next</string>
     <string name="brand_tuya" translatable="false">Tuya · Smart Life</string>
     <string name="brand_dyson" translatable="false">Dyson</string>

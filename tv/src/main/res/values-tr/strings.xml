@@ -38,6 +38,7 @@
     <string name="camera_stream_failed">Yayın oynatılamadı. Geri ile kapatabilirsiniz.</string>
     <string name="camera_unmute_hint">OK: sesi aç</string>
     <string name="camera_mute_hint">OK: sesi kapat</string>
+    <string name="camera_pan_hint">Yön tuşları: kamerayı döndür</string>
     <string name="smart_home_add_subtitle">Cihaz türünü seçin; sonra uygulamasının hesabıyla bağlanacaksınız</string>
     <string name="menu_remove">Kaldır</string>
     <string name="remove_device_title">%s kaldırılsın mı?</string>
