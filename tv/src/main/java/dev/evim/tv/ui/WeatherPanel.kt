@@ -21,6 +21,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -231,9 +233,7 @@ fun CityPickerDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Panel(width = 420.dp) {
-            Text(stringResource(R.string.city_title), color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Text(stringResource(R.string.city_subtitle), color = EvimColors.TextDim, fontSize = 11.sp)
-            Spacer(Modifier.height(12.dp))
+            PanelHeader(stringResource(R.string.city_title), stringResource(R.string.city_subtitle), Icons.Rounded.LocationOn)
             BasicTextField(
                 value = query,
                 onValueChange = {

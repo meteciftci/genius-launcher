@@ -27,6 +27,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.Locale
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.Air
+import androidx.compose.material.icons.rounded.Wifi
 
 private sealed interface DysonStep {
     data object Choice : DysonStep
@@ -69,12 +73,28 @@ internal fun DysonAddFlow(vm: LauncherViewModel, focus: FocusRequester, onDone: 
         }
     }
 
-    PanelTitle(stringResource(R.string.brand_dyson), null)
+    PanelHeader(
+        stringResource(R.string.card_dyson_title),
+        if (step == DysonStep.Choice) stringResource(R.string.dyson_choice_body) else stringResource(R.string.brand_dyson),
+        Icons.Rounded.Air,
+        EvimColors.Dyson,
+    )
     when (val current = step) {
-        DysonStep.Choice -> {
-            PanelBody(stringResource(R.string.dyson_choice_body))
-            MenuItem(stringResource(R.string.dyson_with_account), Modifier.focusRequester(focus)) { step = DysonStep.Email }
-            MenuItem(stringResource(R.string.dyson_with_sticker)) { step = DysonStep.Ssid }
+        DysonStep.Choice -> CardRow {
+            ChoiceCard(
+                Icons.Rounded.AccountCircle,
+                stringResource(R.string.dyson_with_account),
+                stringResource(R.string.dyson_with_account_hint),
+                Modifier.weight(1f).focusRequester(focus),
+                EvimColors.Dyson,
+            ) { step = DysonStep.Email }
+            ChoiceCard(
+                Icons.Rounded.Wifi,
+                stringResource(R.string.dyson_with_sticker),
+                stringResource(R.string.dyson_with_sticker_hint),
+                Modifier.weight(1f),
+                EvimColors.Dyson,
+            ) { step = DysonStep.Ssid }
         }
         DysonStep.Email -> Field(stringResource(R.string.dyson_email_body), email, KeyboardType.Email, secret = false, focus) { value ->
             email = value
@@ -101,16 +121,18 @@ internal fun DysonAddFlow(vm: LauncherViewModel, focus: FocusRequester, onDone: 
             }
         }
         DysonStep.Loading -> {
-            PanelBody(stringResource(R.string.dyson_loading))
-            MenuItem(stringResource(R.string.cancel), Modifier.focusRequester(focus)) {
-                job?.cancel()
-                step = DysonStep.Choice
+            PanelNote(stringResource(R.string.dyson_loading), EvimColors.Accent)
+            PanelActions {
+                PillButton(stringResource(R.string.cancel), Modifier.focusRequester(focus)) {
+                    job?.cancel()
+                    step = DysonStep.Choice
+                }
             }
         }
         is DysonStep.Select -> SelectDevices(vm, current, focus, onDone)
         is DysonStep.Failed -> {
-            PanelBody(stringResource(current.message))
-            MenuItem(stringResource(R.string.tuya_retry), Modifier.focusRequester(focus)) { step = DysonStep.Choice }
+            PanelNote(stringResource(current.message), EvimColors.Danger)
+            PanelActions { PillButton(stringResource(R.string.tuya_retry), Modifier.focusRequester(focus), primary = true) { step = DysonStep.Choice } }
         }
     }
 }
@@ -121,12 +143,13 @@ private fun Field(body: String, initial: String, type: KeyboardType, secret: Boo
     key(body) {
         var value by remember { mutableStateOf(TextFieldValue(initial, androidx.compose.ui.text.TextRange(initial.length))) }
         val keyboard = LocalSoftwareKeyboardController.current
-        PanelBody(body)
+        PanelText(body)
         TextInput(value, { value = it }, Modifier.focusRequester(focus), keyboardType = type, secret = secret)
-        Spacer(Modifier.height(10.dp))
-        MenuItem(stringResource(R.string.tuya_continue)) {
-            keyboard?.hide()
-            if (value.text.isNotBlank()) onNext(value.text.trim())
+        PanelActions {
+            PillButton(stringResource(R.string.tuya_continue), primary = true) {
+                keyboard?.hide()
+                if (value.text.isNotBlank()) onNext(value.text.trim())
+            }
         }
     }
 }
@@ -139,30 +162,36 @@ private fun SelectDevices(vm: LauncherViewModel, select: DysonStep.Select, focus
     val scope = rememberCoroutineScope()
 
     if (select.devices.isEmpty()) {
-        PanelBody(stringResource(R.string.dyson_no_devices))
-        MenuItem(stringResource(R.string.done), Modifier.focusRequester(focus), onDone)
+        PanelNote(stringResource(R.string.dyson_no_devices))
+        PanelActions { PillButton(stringResource(R.string.done), Modifier.focusRequester(focus), onClick = onDone) }
         return
     }
-    PanelBody(stringResource(R.string.dyson_select_body))
+    PanelText(stringResource(R.string.dyson_select_body))
     select.devices.forEachIndexed { index, device ->
-        val mark = if (device.serial in checked) "☑" else "☐"
         val notes = listOfNotNull(
             if (device.serial !in select.ips) stringResource(R.string.tuya_not_on_lan) else null,
             if (device.serial in added) stringResource(R.string.tuya_added) else null,
         ).joinToString("  ·  ")
-        val text = "$mark  ${device.name}" + if (notes.isEmpty()) "" else "  ·  $notes"
-        MenuItem(text, if (index == 0) Modifier.focusRequester(focus) else Modifier) {
+        ListRow(
+            device.name,
+            notes.ifEmpty { device.serial },
+            Icons.Rounded.Air,
+            EvimColors.Dyson,
+            trailing = Trailing.Check(device.serial in checked),
+            modifier = if (index == 0) Modifier.focusRequester(focus) else Modifier,
+        ) {
             checked = if (device.serial in checked) checked - device.serial else checked + device.serial
         }
     }
-    Spacer(Modifier.height(8.dp))
-    MenuItem(stringResource(R.string.tuya_add_selected, checked.size)) {
-        if (saving || checked.isEmpty()) return@MenuItem
-        saving = true
-        scope.launch {
-            vm.addDyson(select.devices.filter { it.serial in checked }, select.ips)
-            onDone()
+    PanelActions {
+        PillButton(stringResource(R.string.tuya_add_selected, checked.size), primary = true) {
+            if (saving || checked.isEmpty()) return@PillButton
+            saving = true
+            scope.launch {
+                vm.addDyson(select.devices.filter { it.serial in checked }, select.ips)
+                onDone()
+            }
         }
     }
-    if (saving) PanelBody(stringResource(R.string.working))
+    if (saving) PanelNote(stringResource(R.string.working), EvimColors.Accent)
 }

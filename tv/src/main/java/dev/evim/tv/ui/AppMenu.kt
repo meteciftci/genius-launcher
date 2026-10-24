@@ -17,6 +17,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.OpenInNew
+import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.SwapHoriz
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -65,15 +71,15 @@ fun AppMenu(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(app.icon, null, Modifier.size(28.dp).clip(RoundedCornerShape(7.dp)))
                 Spacer(Modifier.width(10.dp))
-                Text(app.label, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(app.label, color = Color.White, fontSize = 17.sp, fontWeight = FontWeight.Bold)
             }
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(16.dp))
             if (!pickingColor) {
-                MenuItem(stringResource(R.string.menu_open), Modifier.focusRequester(first), onOpen)
-                MenuItem(stringResource(R.string.menu_move), onClick = onMove)
-                MenuItem(stringResource(R.string.menu_pick_color), onClick = { pickingColor = true })
-                MenuItem(stringResource(R.string.menu_hide), onClick = onHide)
-                MenuItem(stringResource(R.string.menu_app_info), onClick = onInfo)
+                ListRow(stringResource(R.string.menu_open), icon = Icons.Rounded.OpenInNew, modifier = Modifier.focusRequester(first), onClick = onOpen)
+                ListRow(stringResource(R.string.menu_move), icon = Icons.Rounded.SwapHoriz, onClick = onMove)
+                ListRow(stringResource(R.string.menu_pick_color), icon = Icons.Rounded.Palette, onClick = { pickingColor = true })
+                ListRow(stringResource(R.string.menu_hide), icon = Icons.Rounded.VisibilityOff, onClick = onHide)
+                ListRow(stringResource(R.string.menu_app_info), icon = Icons.Rounded.Info, onClick = onInfo)
             } else {
                 Text(stringResource(R.string.color_title), color = EvimColors.TextDim, fontSize = 11.sp)
                 Spacer(Modifier.height(10.dp))
@@ -105,9 +111,7 @@ fun HiddenAppsDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Panel {
-            Text(stringResource(R.string.hidden_apps_title), color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Text(stringResource(R.string.hidden_apps_subtitle), color = EvimColors.TextDim, fontSize = 11.sp)
-            Spacer(Modifier.height(14.dp))
+            PanelHeader(stringResource(R.string.hidden_apps_title), stringResource(R.string.hidden_apps_subtitle), Icons.Rounded.VisibilityOff)
             if (apps.isEmpty()) {
                 MenuItem(stringResource(R.string.hidden_apps_empty), Modifier.focusRequester(first), onDismiss)
             }
@@ -138,9 +142,9 @@ internal fun Panel(width: Dp = 320.dp, content: @Composable () -> Unit) {
                 }
             }
             .width(width)
-            .background(Color(0xF2141419), RoundedCornerShape(18.dp))
-            .border(1.dp, EvimColors.ChipBorder, RoundedCornerShape(18.dp))
-            .padding(20.dp),
+            .background(Color(0xF717171E), RoundedCornerShape(26.dp))
+            .border(1.dp, EvimColors.ChipBorder, RoundedCornerShape(26.dp))
+            .padding(horizontal = 26.dp, vertical = 24.dp),
     ) { content() }
 }
 
@@ -148,17 +152,17 @@ internal fun Panel(width: Dp = 320.dp, content: @Composable () -> Unit) {
 internal fun MenuItem(text: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth().padding(vertical = 2.dp),
-        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(10.dp)),
+        modifier = modifier.fillMaxWidth().padding(vertical = 3.dp),
+        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(14.dp)),
         scale = ClickableSurfaceDefaults.scale(focusedScale = 1.02f),
         colors = ClickableSurfaceDefaults.colors(
-            containerColor = Color.Transparent,
-            contentColor = EvimColors.TextDim,
+            containerColor = Color(0x0DFFFFFF),
+            contentColor = Color.White,
             focusedContainerColor = Color.White,
             focusedContentColor = Color(0xFF111111),
         ),
     ) {
-        Text(text, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp))
+        Text(text, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(horizontal = 14.dp, vertical = 11.dp))
     }
 }
 

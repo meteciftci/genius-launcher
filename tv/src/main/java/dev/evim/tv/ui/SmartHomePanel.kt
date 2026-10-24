@@ -1,6 +1,22 @@
 package dev.evim.tv.ui
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Air
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.DevicesOther
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Outlet
+import androidx.compose.material.icons.rounded.Pets
+import androidx.compose.material.icons.rounded.Sync
+import androidx.compose.material.icons.rounded.Undo
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -55,19 +71,47 @@ fun SmartHomeDialog(vm: LauncherViewModel, startAtAdd: Boolean, onDismiss: () ->
     }
 
     Dialog(onDismissRequest = ::back, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Panel(width = 440.dp) {
+        Panel(width = 540.dp) {
             when (val current = step) {
                 HomeStep.List -> {
-                    PanelTitle(stringResource(R.string.smart_home_title), stringResource(R.string.smart_home_subtitle))
-                    MenuItem("+  ${stringResource(R.string.smart_home_add)}", Modifier.focusRequester(first)) { step = HomeStep.Add }
-                    vm.homeDevices.forEach { device ->
-                        MenuItem("${device.name}  ·  ${stringResource(device.brand())}") { step = HomeStep.Device(device.key) }
+                    PanelHeader(stringResource(R.string.smart_home_title), stringResource(R.string.smart_home_subtitle), Icons.Rounded.Home)
+                    Column(Modifier.heightIn(max = 300.dp).verticalScroll(rememberScrollState())) {
+                        ListRow(
+                            stringResource(R.string.smart_home_add),
+                            stringResource(R.string.smart_home_add_hint),
+                            Icons.Rounded.Add,
+                            trailing = Trailing.Chevron,
+                            modifier = Modifier.focusRequester(first),
+                        ) { step = HomeStep.Add }
+                        vm.homeDevices.forEach { device ->
+                            ListRow(
+                                device.name,
+                                "${stringResource(device.brand())}  ·  ${stringResource(if (device.reachable) R.string.home_online else R.string.home_unreachable)}",
+                                device.icon(),
+                                device.tint(),
+                                trailing = Trailing.Chevron,
+                            ) { step = HomeStep.Device(device.key) }
+                        }
                     }
                 }
                 HomeStep.Add -> {
-                    PanelTitle(stringResource(R.string.smart_home_add), stringResource(R.string.smart_home_add_subtitle))
-                    MenuItem("${stringResource(R.string.brand_tuya)}  ·  ${stringResource(R.string.brand_tuya_kinds)}", Modifier.focusRequester(first)) { step = HomeStep.Tuya }
-                    MenuItem("${stringResource(R.string.brand_dyson)}  ·  ${stringResource(R.string.brand_dyson_kinds)}") { step = HomeStep.Dyson }
+                    PanelHeader(stringResource(R.string.smart_home_add_question), stringResource(R.string.smart_home_add_subtitle), Icons.Rounded.Add)
+                    CardRow {
+                        ChoiceCard(
+                            Icons.Rounded.Outlet,
+                            stringResource(R.string.card_tuya_title),
+                            stringResource(R.string.brand_tuya),
+                            Modifier.weight(1f).focusRequester(first),
+                            EvimColors.Tuya,
+                        ) { step = HomeStep.Tuya }
+                        ChoiceCard(
+                            Icons.Rounded.Air,
+                            stringResource(R.string.card_dyson_title),
+                            stringResource(R.string.brand_dyson),
+                            Modifier.weight(1f),
+                            EvimColors.Dyson,
+                        ) { step = HomeStep.Dyson }
+                    }
                 }
                 HomeStep.Tuya -> TuyaAddFlow(vm, first, onDone = { step = HomeStep.List })
                 HomeStep.Dyson -> DysonAddFlow(vm, first, onDone = { step = HomeStep.List })
@@ -77,16 +121,21 @@ fun SmartHomeDialog(vm: LauncherViewModel, startAtAdd: Boolean, onDismiss: () ->
                         step = HomeStep.List
                         return@Panel
                     }
-                    PanelTitle(device.name, stringResource(device.brand()))
-                    MenuItem(stringResource(R.string.menu_rename), Modifier.focusRequester(first)) { renaming = device }
+                    PanelHeader(device.name, stringResource(device.brand()), device.icon(), device.tint())
+                    CardRow {
+                        ChoiceCard(Icons.Rounded.Edit, stringResource(R.string.menu_rename), null, Modifier.weight(1f).focusRequester(first)) { renaming = device }
+                        // Anahtar değiştiyse (cihaz yeniden kurulduysa) hesapla yeniden alınır
+                        ChoiceCard(Icons.Rounded.Sync, stringResource(R.string.menu_reconnect), stringResource(R.string.reconnect_hint), Modifier.weight(1f)) {
+                            step = if (device is HomeDevice.Purifier) HomeStep.Dyson else HomeStep.Tuya
+                        }
+                        ChoiceCard(Icons.Rounded.Delete, stringResource(R.string.menu_remove), null, Modifier.weight(1f), EvimColors.Danger) {
+                            step = HomeStep.Remove(device.key)
+                        }
+                    }
                     if (vm.hasCustomName(device)) {
-                        MenuItem(stringResource(R.string.menu_reset_name)) { vm.renameDevice(device, null) }
+                        Spacer(Modifier.height(6.dp))
+                        ListRow(stringResource(R.string.menu_reset_name), icon = Icons.Rounded.Undo) { vm.renameDevice(device, null) }
                     }
-                    // Anahtar değiştiyse (cihaz yeniden kurulduysa) hesapla yeniden alınır
-                    MenuItem(stringResource(R.string.menu_reconnect)) {
-                        step = if (device is HomeDevice.Purifier) HomeStep.Dyson else HomeStep.Tuya
-                    }
-                    MenuItem(stringResource(R.string.menu_remove)) { step = HomeStep.Remove(device.key) }
                 }
                 is HomeStep.Remove -> {
                     val device = vm.homeDevices.firstOrNull { it.key == current.key }
@@ -94,14 +143,16 @@ fun SmartHomeDialog(vm: LauncherViewModel, startAtAdd: Boolean, onDismiss: () ->
                         step = HomeStep.List
                         return@Panel
                     }
+                    PanelHeader(stringResource(R.string.remove_device_title, device.name), null, Icons.Rounded.Delete, EvimColors.Danger)
+                    PanelText(stringResource(R.string.remove_device_body, stringResource(device.brand())))
                     // Geri alınamaz: odak "Vazgeç"te başlar
-                    PanelTitle(stringResource(R.string.remove_device_title, device.name), null)
-                    PanelBody(stringResource(R.string.remove_device_body, stringResource(device.brand())))
-                    MenuItem(stringResource(R.string.remove_confirm)) {
-                        vm.removeDevice(device)
-                        step = if (vm.homeDevices.size <= 1) HomeStep.Add else HomeStep.List
+                    PanelActions {
+                        PillButton(stringResource(R.string.cancel), Modifier.focusRequester(first), onClick = ::back)
+                        PillButton(stringResource(R.string.remove_confirm), danger = true) {
+                            vm.removeDevice(device)
+                            step = if (vm.homeDevices.size <= 1) HomeStep.Add else HomeStep.List
+                        }
                     }
-                    MenuItem(stringResource(R.string.cancel), Modifier.focusRequester(first), ::back)
                 }
             }
         }
@@ -118,14 +169,18 @@ fun SmartHomeDialog(vm: LauncherViewModel, startAtAdd: Boolean, onDismiss: () ->
 
 private fun HomeDevice.brand() = if (this is HomeDevice.Purifier) R.string.brand_dyson else R.string.brand_tuya
 
-@Composable
-internal fun PanelTitle(title: String, subtitle: String?) {
-    Text(title, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-    if (subtitle != null) Text(subtitle, color = EvimColors.TextDim, fontSize = 11.sp)
-    Spacer(Modifier.height(14.dp))
+/** Cihaz türünün simgesi ve rengi; panellerde ve menülerde aynı. */
+internal fun HomeDevice.icon(): ImageVector = when (this) {
+    is HomeDevice.Purifier -> Icons.Rounded.Air
+    is HomeDevice.Feeder -> Icons.Rounded.Pets
+    is HomeDevice.Relay -> Icons.Rounded.Outlet
+    is HomeDevice.Other -> Icons.Rounded.DevicesOther
 }
 
-@Composable
-internal fun PanelBody(text: String) {
-    Text(text, color = EvimColors.TextDim, fontSize = 12.sp, lineHeight = 17.sp, modifier = Modifier.padding(bottom = 10.dp))
+internal fun HomeDevice.tint(): Color = when (this) {
+    is HomeDevice.Purifier -> EvimColors.Dyson
+    is HomeDevice.Feeder -> EvimColors.Feeder
+    is HomeDevice.Relay, is HomeDevice.Other -> EvimColors.Tuya
 }
+
+

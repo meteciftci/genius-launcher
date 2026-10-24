@@ -18,7 +18,12 @@
     <string name="smart_home_title">Smart home</string>
     <string name="smart_home_subtitle">Devices are controlled over your home network, not the cloud.</string>
     <string name="smart_home_add">Add device</string>
-    <string name="smart_home_add_subtitle">Choose the app your device uses</string>
+    <string name="smart_home_add_hint">Tuya plugs, relays and feeders or Dyson purifiers</string>
+    <string name="smart_home_add_question">What are you adding?</string>
+    <string name="card_tuya_title">Plug, relay, pet feeder</string>
+    <string name="card_dyson_title">Air purifier</string>
+    <string name="reconnect_hint">if the device was set up again</string>
+    <string name="smart_home_add_subtitle">Pick the kind of device; you\'ll sign in to its app next</string>
     <string name="brand_tuya" translatable="false">Tuya · Smart Life</string>
     <string name="brand_dyson" translatable="false">Dyson</string>
     <string name="brand_tuya_kinds">smart plugs, relays, pet feeders</string>
@@ -30,6 +35,8 @@
     <string name="dyson_choice_body">Add a Dyson air purifier: sign in with your MyDyson account, or use the Wi-Fi name and password on the sticker on the device (no account needed).</string>
     <string name="dyson_with_account">MyDyson account</string>
     <string name="dyson_with_sticker">Wi-Fi sticker on the device</string>
+    <string name="dyson_with_account_hint">email code and password</string>
+    <string name="dyson_with_sticker_hint">no account, from the device</string>
     <string name="dyson_email_body">Your MyDyson email address</string>
     <string name="dyson_code_body">Type the code Dyson sent to %s.</string>
     <string name="dyson_password_body">Your MyDyson password. It\'s only used for this login and isn\'t stored.</string>
@@ -46,6 +53,8 @@
     <string name="menu_reconnect">Reconnect</string>
     <string name="home_online">online</string>
     <string name="tuya_unavailable">This build has no Tuya client id. Add tuya.clientId to local.properties and rebuild (see README).</string>
+    <string name="tuya_code_title">Your Smart Life user code</string>
+    <string name="tuya_qr_title">Scan with the Smart Life app</string>
     <string name="tuya_code_body">In the Smart Life or Tuya Smart app: Me → Settings (top right) → Account and Security → User Code. Type that code here.</string>
     <string name="tuya_continue">Continue</string>
     <string name="tuya_qr_body">In the app, tap the scan icon at the top right, scan this code and confirm the login.</string>
@@ -169,6 +178,9 @@
     <string name="settings_home">Home button</string>
     <string name="settings_home_genius" translatable="false">Genius Launcher</string>
     <string name="settings_home_google" translatable="false">Google TV</string>
+    <string name="settings_subtitle">The launcher\'s own settings; the TV\'s settings stay in the gear icon</string>
+    <string name="settings_hidden_count">%d hidden</string>
+    <string name="settings_undo_setup_hint">Bring back removed apps and old sleep settings</string>
     <string name="settings_wizard">Setup wizard</string>
     <string name="settings_undo_setup">Undo the setup wizard\'s changes</string>
     <string name="undo_setup_title">Undo the setup wizard\'s changes?</string>
@@ -177,6 +189,11 @@
     <string name="uninstall_restore_body">The setup wizard removed apps or changed settings on this TV. You can bring those back too.</string>
     <string name="uninstall_restore_confirm">Bring them back and uninstall</string>
     <string name="uninstall_only_confirm">Only uninstall</string>
+    <string name="art_settings">Settings → System</string>
+    <string name="art_about">About</string>
+    <string name="art_build">Android TV OS build</string>
+    <string name="art_developer">Developer options</string>
+    <string name="art_usb_debugging">USB debugging</string>
     <string name="wizard_progress">Setup · step %1$d of %2$d</string>
     <string name="wizard_skip">Skip</string>
     <string name="wizard_check_again">Check again</string>

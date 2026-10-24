@@ -53,13 +53,14 @@ import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import dev.evim.tv.LauncherViewModel
+import dev.evim.tv.data.weatherDescription
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 @Composable
-fun TopBar(vm: LauncherViewModel, onSmartHome: () -> Unit, onGeniusSettings: () -> Unit) {
+fun TopBar(vm: LauncherViewModel, onWeatherClick: () -> Unit, onSmartHome: () -> Unit, onGeniusSettings: () -> Unit) {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -78,10 +79,18 @@ fun TopBar(vm: LauncherViewModel, onSmartHome: () -> Unit, onGeniusSettings: () 
     val dateFormat = remember(locale) { SimpleDateFormat(DateFormat.getBestDateTimePattern(locale, "EEEdMMM"), locale) }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Chip {
+        Chip(endPadding = 4.dp) {
             Text(timeFormat.format(Date(now)), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.width(8.dp))
             Text(dateFormat.format(Date(now)), color = EvimColors.TextDim, fontSize = 11.sp)
+            Spacer(Modifier.width(8.dp))
+            // Basınca saatlik ve 7 günlük hava durumu paneli açılır
+            val weather = vm.weather
+            val description = weather?.let { w -> weatherDescription(w.code)?.let { stringResource(it) } }
+            ChipButton(
+                text = if (weather == null) vm.city.name else listOfNotNull("${weather.symbol}  ${weather.temperature}°", description, vm.city.name).joinToString("  ·  "),
+                onClick = onWeatherClick,
+            )
         }
         Spacer(Modifier.weight(1f))
         HomeChip(vm = vm, onClick = onSmartHome)
@@ -210,6 +219,24 @@ private fun RamChip(vm: LauncherViewModel) {
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
             )
         }
+    }
+}
+
+/** Kutucuğun içinde kumandayla seçilebilen küçük düğme; odakta beyazlaşır. */
+@Composable
+private fun ChipButton(text: String, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(50)),
+        scale = ClickableSurfaceDefaults.scale(focusedScale = 1.05f),
+        colors = ClickableSurfaceDefaults.colors(
+            containerColor = Color(0x1AFFFFFF),
+            contentColor = Color.White,
+            focusedContainerColor = Color.White,
+            focusedContentColor = Color(0xFF111111),
+        ),
+    ) {
+        Text(text, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp))
     }
 }
 

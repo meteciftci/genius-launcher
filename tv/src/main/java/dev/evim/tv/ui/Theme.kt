@@ -16,6 +16,13 @@ object EvimColors {
     val TextFaint = Color(0x73FFFFFF)
     val Online = Color(0xFF34D399)
     val Warning = Color(0xFFFBBF24)
+    val Danger = Color(0xFFE5484D)
+    /** Panellerde birincil düğme ve simgeler. */
+    val Accent = Color(0xFF7AA2FF)
+    // Marka ve cihaz türü renkleri: kartlarda ve satırlarda simge zemini
+    val Tuya = Color(0xFFFF8A5B)
+    val Dyson = Color(0xFF3CCFB0)
+    val Feeder = Color(0xFFF5B83D)
 
     /** Kartlarda ve renk menüsünde sunulan elle seçilebilir renkler. */
     val Picks = listOf(

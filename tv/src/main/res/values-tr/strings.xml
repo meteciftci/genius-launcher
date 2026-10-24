@@ -16,7 +16,12 @@
     <string name="smart_home_add">Cihaz ekle</string>
     <string name="brand_tuya_kinds">akıllı prizler, röleler, mama kapları</string>
     <string name="brand_dyson_kinds">hava temizleyiciler (Pure Cool, Hot+Cool, Humidify+Cool)</string>
-    <string name="smart_home_add_subtitle">Cihazınızın kullandığı uygulamayı seçin</string>
+    <string name="smart_home_add_hint">Tuya priz, röle ve mama kapları ya da Dyson hava temizleyiciler</string>
+    <string name="smart_home_add_question">Hangi cihazı ekliyorsunuz?</string>
+    <string name="card_tuya_title">Priz, röle, mama kabı</string>
+    <string name="card_dyson_title">Hava temizleyici</string>
+    <string name="reconnect_hint">cihaz yeniden kurulduysa</string>
+    <string name="smart_home_add_subtitle">Cihaz türünü seçin; sonra uygulamasının hesabıyla bağlanacaksınız</string>
     <string name="menu_remove">Kaldır</string>
     <string name="remove_device_title">%s kaldırılsın mı?</string>
     <string name="remove_device_body">Cihaz ve anahtarı bu TV\'den silinir. %s hesabınızda kalır; yeniden ekleyebilirsiniz.</string>
@@ -24,6 +29,8 @@
     <string name="dyson_choice_body">Dyson hava temizleyicinizi ekleyin: MyDyson hesabınızla giriş yapın ya da cihazın üstündeki etiketteki Wi-Fi adı ve parolasını kullanın (hesap gerekmez).</string>
     <string name="dyson_with_account">MyDyson hesabı</string>
     <string name="dyson_with_sticker">Cihazdaki Wi-Fi etiketi</string>
+    <string name="dyson_with_account_hint">e-posta kodu ve şifre</string>
+    <string name="dyson_with_sticker_hint">hesapsız, cihazın üstünden</string>
     <string name="dyson_email_body">MyDyson e-posta adresiniz</string>
     <string name="dyson_code_body">Dyson\'ın %s adresine gönderdiği kodu yazın.</string>
     <string name="dyson_password_body">MyDyson şifreniz. Yalnızca bu giriş için kullanılır, saklanmaz.</string>
@@ -40,6 +47,8 @@
     <string name="menu_reconnect">Yeniden bağlan</string>
     <string name="home_online">çevrimiçi</string>
     <string name="tuya_unavailable">Bu sürümde Tuya istemci kimliği yok. local.properties\'e tuya.clientId ekleyip yeniden derleyin (README\'ye bakın).</string>
+    <string name="tuya_code_title">Smart Life kullanıcı kodunuz</string>
+    <string name="tuya_qr_title">Smart Life uygulamasıyla okutun</string>
     <string name="tuya_code_body">Smart Life ya da Tuya Smart uygulamasında: Ben → Ayarlar (sağ üst) → Hesap ve Güvenlik → Kullanıcı Kodu. O kodu buraya yazın.</string>
     <string name="tuya_continue">Devam</string>
     <string name="tuya_qr_body">Uygulamada sağ üstteki tarama simgesine basın, bu kodu okutun ve girişi onaylayın.</string>
@@ -156,6 +165,9 @@
     <string name="settings_title">Genius ayarları</string>
     <string name="settings_city">Hava durumu şehri</string>
     <string name="settings_home">Home tuşu</string>
+    <string name="settings_subtitle">Launcher\'ın kendi ayarları; TV\'nin ayarları dişli simgesinde</string>
+    <string name="settings_hidden_count">%d gizli</string>
+    <string name="settings_undo_setup_hint">Kaldırılan uygulamaları ve eski uyku ayarlarını geri getir</string>
     <string name="settings_wizard">Kurulum sihirbazı</string>
     <string name="settings_undo_setup">Sihirbazın değişikliklerini geri al</string>
     <string name="undo_setup_title">Sihirbazın değişiklikleri geri alınsın mı?</string>
@@ -164,6 +176,11 @@
     <string name="uninstall_restore_body">Kurulum sihirbazı bu TV\'de uygulama kaldırdı ya da ayar değiştirdi. Onları da geri getirebilirsiniz.</string>
     <string name="uninstall_restore_confirm">Geri getir ve kaldır</string>
     <string name="uninstall_only_confirm">Sadece kaldır</string>
+    <string name="art_settings">Ayarlar → Sistem</string>
+    <string name="art_about">Hakkında</string>
+    <string name="art_build">Android TV OS derlemesi</string>
+    <string name="art_developer">Geliştirici seçenekleri</string>
+    <string name="art_usb_debugging">USB hata ayıklama</string>
     <string name="wizard_progress">Kurulum · adım %1$d / %2$d</string>
     <string name="wizard_skip">Atla</string>
     <string name="wizard_check_again">Tekrar kontrol et</string>

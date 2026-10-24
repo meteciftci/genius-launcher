@@ -17,6 +17,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.AutoMode
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.LocalFireDepartment
+import androidx.compose.material.icons.rounded.OpenInNew
+import androidx.compose.material.icons.rounded.PowerSettingsNew
+import androidx.compose.material.icons.rounded.Remove
+import androidx.compose.material.icons.rounded.Restaurant
+import androidx.compose.material.icons.rounded.SwapVert
+import androidx.compose.material.icons.rounded.Undo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -177,7 +189,7 @@ private fun AllDevicesDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Panel(width = 420.dp) {
-            DialogTitle(stringResource(R.string.all_devices_title), null)
+            PanelHeader(stringResource(R.string.all_devices_title), null, Icons.Rounded.Home)
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 devices.forEachIndexed { i, device ->
                     key(device.key) {
@@ -212,11 +224,11 @@ private fun DeviceMenu(
     LaunchedEffect(Unit) { runCatching { first.requestFocus() } }
     Dialog(onDismissRequest = onDismiss) {
         Panel {
-            DialogTitle(device.name, null)
-            MenuItem(stringResource(R.string.menu_open), Modifier.focusRequester(first), onOpen)
-            MenuItem(stringResource(R.string.menu_move), onClick = onMove)
-            MenuItem(stringResource(R.string.menu_rename), onClick = onRename)
-            if (customName) MenuItem(stringResource(R.string.menu_reset_name), onClick = onResetName)
+            PanelHeader(device.name, null, device.icon(), device.tint())
+            ListRow(stringResource(R.string.menu_open), icon = Icons.Rounded.OpenInNew, modifier = Modifier.focusRequester(first), onClick = onOpen)
+            ListRow(stringResource(R.string.menu_move), icon = Icons.Rounded.SwapVert, onClick = onMove)
+            ListRow(stringResource(R.string.menu_rename), icon = Icons.Rounded.Edit, onClick = onRename)
+            if (customName) ListRow(stringResource(R.string.menu_reset_name), icon = Icons.Rounded.Undo, onClick = onResetName)
         }
     }
 }
@@ -233,11 +245,12 @@ internal fun RenameDialog(current: String, onSave: (String) -> Unit, onDismiss: 
     }
     Dialog(onDismissRequest = onDismiss) {
         Panel(width = 420.dp) {
-            DialogTitle(stringResource(R.string.rename_title), stringResource(R.string.rename_subtitle))
+            PanelHeader(stringResource(R.string.rename_title), stringResource(R.string.rename_subtitle), Icons.Rounded.Edit)
             TextInput(name, { name = it }, Modifier.focusRequester(field))
-            Spacer(Modifier.height(10.dp))
-            MenuItem(stringResource(R.string.rename_save)) { onSave(name.text) }
-            MenuItem(stringResource(R.string.cancel), onClick = onDismiss)
+            PanelActions {
+                PillButton(stringResource(R.string.cancel), onClick = onDismiss)
+                PillButton(stringResource(R.string.rename_save), primary = true) { onSave(name.text) }
+            }
         }
     }
 }
@@ -456,14 +469,17 @@ private fun FeederDialog(device: HomeDevice.Feeder, onFeed: (Int) -> Unit, onDis
 
     Dialog(onDismissRequest = onDismiss) {
         Panel {
-            DialogTitle(device.name, device.nextMeal?.let { stringResource(R.string.feeder_next_meal, it.time(), it.portions) })
+            PanelHeader(device.name, device.nextMeal?.let { stringResource(R.string.feeder_next_meal, it.time(), it.portions) }, device.icon(), device.tint())
             if (device.reachable) {
+                CardRow {
+                    ChoiceCard(Icons.Rounded.Restaurant, stringResource(R.string.feed_one), null, Modifier.weight(1f), EvimColors.Feeder) { feed(1) }
+                    ChoiceCard(Icons.Rounded.Restaurant, stringResource(R.string.feed_two), null, Modifier.weight(1f), EvimColors.Feeder) { feed(2) }
+                }
                 // Yanlışlıkla OK'e basınca mama dökülmesin diye odak "Vazgeç"te başlar
-                MenuItem(stringResource(R.string.feed_one)) { feed(1) }
-                MenuItem(stringResource(R.string.feed_two)) { feed(2) }
-                MenuItem(stringResource(R.string.cancel), Modifier.focusRequester(first), onDismiss)
+                PanelActions { PillButton(stringResource(R.string.cancel), Modifier.focusRequester(first), onClick = onDismiss) }
             } else {
-                MenuItem(stringResource(R.string.home_unreachable), Modifier.focusRequester(first), onDismiss)
+                PanelNote(stringResource(R.string.home_unreachable))
+                PanelActions { PillButton(stringResource(R.string.done), Modifier.focusRequester(first), onClick = onDismiss) }
             }
         }
     }
@@ -475,8 +491,8 @@ private fun PurifierDialog(device: HomeDevice.Purifier, onSet: (Map<String, Stri
     LaunchedEffect(Unit) { runCatching { first.requestFocus() } }
     val state = device.state
 
-    Dialog(onDismissRequest = onDismiss) {
-        Panel {
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        Panel(width = 520.dp) {
             val humidity = state?.humidity?.let { stringResource(R.string.purifier_humidity, it) }
             val air = state?.airQuality?.let { stringResource(R.string.purifier_air, stringResource(it.label)) }
             val summary = listOfNotNull(
@@ -485,29 +501,43 @@ private fun PurifierDialog(device: HomeDevice.Purifier, onSet: (Map<String, Stri
                 air,
                 state?.pm25?.let { "PM2.5 $it" },
             ).joinToString("  ·  ")
-            DialogTitle(device.name, summary)
+            PanelHeader(device.name, summary, device.icon(), device.tint())
             if (state == null) {
-                MenuItem(stringResource(R.string.home_unreachable), Modifier.focusRequester(first), onDismiss)
+                PanelNote(stringResource(R.string.home_unreachable))
+                PanelActions { PillButton(stringResource(R.string.done), Modifier.focusRequester(first), onClick = onDismiss) }
                 return@Panel
             }
-            MenuItem(
-                stringResource(if (state.power) R.string.purifier_turn_off else R.string.purifier_turn_on),
-                Modifier.focusRequester(first),
-            ) { onSet(mapOf("fpwr" to if (state.power) "OFF" else "ON")) }
+            val on = stringResource(R.string.relay_on)
+            val off = stringResource(R.string.relay_off)
+            CardRow {
+                ChoiceCard(
+                    Icons.Rounded.PowerSettingsNew,
+                    stringResource(if (state.power) R.string.purifier_turn_off else R.string.purifier_turn_on),
+                    if (state.power) on else off,
+                    Modifier.weight(1f).focusRequester(first),
+                    if (state.power) EvimColors.Online else EvimColors.TextDim,
+                ) { onSet(mapOf("fpwr" to if (state.power) "OFF" else "ON")) }
+                if (state.power) {
+                    ChoiceCard(Icons.Rounded.AutoMode, stringResource(R.string.purifier_auto), if (state.auto) on else off, Modifier.weight(1f), EvimColors.Dyson) {
+                        onSet(mapOf("auto" to if (state.auto) "OFF" else "ON"))
+                    }
+                    ChoiceCard(Icons.Rounded.LocalFireDepartment, stringResource(R.string.purifier_heating), if (state.heating) on else off, Modifier.weight(1f), EvimColors.Tuya) {
+                        onSet(mapOf("hmod" to if (state.heating) "OFF" else "HEAT"))
+                    }
+                }
+            }
             if (state.power) {
-                ToggleItem(R.string.purifier_auto, state.auto) { onSet(mapOf("auto" to if (state.auto) "OFF" else "ON")) }
                 val speed = state.fanSpeed
                 if (speed != null) {
                     // Elle hız seçmek otomatik modu kapatır
-                    if (speed > 1) MenuItem(stringResource(R.string.purifier_fan_down, speed)) { onSet(fanSpeed(speed - 1)) }
-                    if (speed < 10) MenuItem(stringResource(R.string.purifier_fan_up, speed)) { onSet(fanSpeed(speed + 1)) }
+                    if (speed > 1) ListRow(stringResource(R.string.purifier_fan_down, speed), icon = Icons.Rounded.Remove, tint = EvimColors.Dyson) { onSet(fanSpeed(speed - 1)) }
+                    if (speed < 10) ListRow(stringResource(R.string.purifier_fan_up, speed), icon = Icons.Rounded.Add, tint = EvimColors.Dyson) { onSet(fanSpeed(speed + 1)) }
                 }
-                ToggleItem(R.string.purifier_heating, state.heating) { onSet(mapOf("hmod" to if (state.heating) "OFF" else "HEAT")) }
                 val target = state.targetCelsius
                 if (state.heating && target != null) {
                     // Dyson ısıtıcının kabul ettiği aralık 1-37 °C
-                    if (target > 1) MenuItem(stringResource(R.string.purifier_temp_down, target)) { onSet(mapOf("hmax" to celsiusToDyson(target - 1))) }
-                    if (target < 37) MenuItem(stringResource(R.string.purifier_temp_up, target)) { onSet(mapOf("hmax" to celsiusToDyson(target + 1))) }
+                    if (target > 1) ListRow(stringResource(R.string.purifier_temp_down, target), icon = Icons.Rounded.Remove, tint = EvimColors.Tuya) { onSet(mapOf("hmax" to celsiusToDyson(target - 1))) }
+                    if (target < 37) ListRow(stringResource(R.string.purifier_temp_up, target), icon = Icons.Rounded.Add, tint = EvimColors.Tuya) { onSet(mapOf("hmax" to celsiusToDyson(target + 1))) }
                 }
             }
         }
@@ -516,15 +546,3 @@ private fun PurifierDialog(device: HomeDevice.Purifier, onSet: (Map<String, Stri
 
 private fun fanSpeed(speed: Int) = mapOf("auto" to "OFF", "fnsp" to "%04d".format(speed))
 
-@Composable
-private fun ToggleItem(@StringRes label: Int, on: Boolean, onClick: () -> Unit) {
-    val value = stringResource(if (on) R.string.relay_on else R.string.relay_off)
-    MenuItem("${stringResource(label)}: $value", onClick = onClick)
-}
-
-@Composable
-private fun DialogTitle(title: String, subtitle: String?) {
-    Text(title, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-    if (!subtitle.isNullOrEmpty()) Text(subtitle, color = EvimColors.TextDim, fontSize = 11.sp)
-    Spacer(Modifier.height(14.dp))
-}

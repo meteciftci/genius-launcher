@@ -34,6 +34,9 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Outlet
+import androidx.compose.material.icons.rounded.Pets
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.common.BitMatrix
 import com.google.zxing.qrcode.QRCodeWriter
@@ -85,40 +88,49 @@ internal fun TuyaAddFlow(vm: LauncherViewModel, focus: FocusRequester, onDone: (
         }
     }
 
-    PanelTitle(stringResource(R.string.brand_tuya), null)
+    val header = @Composable { subtitle: String? -> PanelHeader(stringResource(R.string.brand_tuya), subtitle, Icons.Rounded.Outlet, EvimColors.Tuya) }
     if (!vm.tuyaAvailable) {
-        PanelBody(stringResource(R.string.tuya_unavailable))
-        MenuItem(stringResource(R.string.done), Modifier.focusRequester(focus), onDone)
+        header(null)
+        PanelNote(stringResource(R.string.tuya_unavailable))
+        PanelActions { PillButton(stringResource(R.string.done), Modifier.focusRequester(focus), onClick = onDone) }
         return
     }
     when (val current = step) {
         TuyaStep.Code -> {
             var code by remember { mutableStateOf(vm.tuyaUserCode.let { TextFieldValue(it, TextRange(it.length)) }) }
             val keyboard = LocalSoftwareKeyboardController.current
-            PanelBody(stringResource(R.string.tuya_code_body))
+            header(stringResource(R.string.tuya_code_title))
+            PanelText(stringResource(R.string.tuya_code_body))
             TextInput(code, { code = it }, Modifier.focusRequester(focus))
-            Spacer(Modifier.height(10.dp))
-            MenuItem(stringResource(R.string.tuya_continue)) {
-                keyboard?.hide()
-                if (code.text.isNotBlank()) start(code.text.trim())
+            PanelActions {
+                PillButton(stringResource(R.string.tuya_continue), primary = true) {
+                    keyboard?.hide()
+                    if (code.text.isNotBlank()) start(code.text.trim())
+                }
             }
         }
         is TuyaStep.Qr -> {
-            PanelBody(stringResource(R.string.tuya_qr_body))
+            header(stringResource(R.string.tuya_qr_title))
+            PanelText(stringResource(R.string.tuya_qr_body))
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { QrCode(current.content) }
-            Spacer(Modifier.height(10.dp))
-            PanelBody(stringResource(R.string.tuya_waiting))
-            MenuItem(stringResource(R.string.cancel), Modifier.focusRequester(focus), ::cancel)
+            Spacer(Modifier.height(12.dp))
+            PanelText(stringResource(R.string.tuya_waiting))
+            PanelActions { PillButton(stringResource(R.string.cancel), Modifier.focusRequester(focus), onClick = ::cancel) }
         }
         TuyaStep.Loading -> {
-            PanelBody(stringResource(R.string.tuya_loading))
+            header(null)
+            PanelNote(stringResource(R.string.tuya_loading), EvimColors.Accent)
             // Odak bir yerde dursun diye; Geri ile akış bırakılabilir
-            MenuItem(stringResource(R.string.cancel), Modifier.focusRequester(focus), ::cancel)
+            PanelActions { PillButton(stringResource(R.string.cancel), Modifier.focusRequester(focus), onClick = ::cancel) }
         }
-        is TuyaStep.Select -> SelectDevices(vm, current, focus, onDone)
+        is TuyaStep.Select -> {
+            header(stringResource(R.string.tuya_select_body))
+            SelectDevices(vm, current, focus, onDone)
+        }
         is TuyaStep.Failed -> {
-            PanelBody(current.message?.let { stringResource(R.string.tuya_failed, it) } ?: stringResource(R.string.tuya_timeout))
-            MenuItem(stringResource(R.string.tuya_retry), Modifier.focusRequester(focus), ::cancel)
+            header(null)
+            PanelNote(current.message?.let { stringResource(R.string.tuya_failed, it) } ?: stringResource(R.string.tuya_timeout), EvimColors.Danger)
+            PanelActions { PillButton(stringResource(R.string.tuya_retry), Modifier.focusRequester(focus), primary = true, onClick = ::cancel) }
         }
     }
 }
@@ -131,34 +143,40 @@ private fun SelectDevices(vm: LauncherViewModel, select: TuyaStep.Select, focus:
     val scope = rememberCoroutineScope()
 
     if (select.devices.isEmpty()) {
-        PanelBody(stringResource(R.string.tuya_no_devices))
-        MenuItem(stringResource(R.string.done), Modifier.focusRequester(focus), onDone)
+        PanelNote(stringResource(R.string.tuya_no_devices))
+        PanelActions { PillButton(stringResource(R.string.done), Modifier.focusRequester(focus), onClick = onDone) }
         return
     }
-    PanelBody(stringResource(R.string.tuya_select_body))
-    Column(Modifier.heightIn(max = 300.dp).verticalScroll(rememberScrollState())) {
+    Column(Modifier.heightIn(max = 260.dp).verticalScroll(rememberScrollState())) {
         select.devices.forEachIndexed { index, device ->
-            val mark = if (device.id in checked) "☑" else "☐"
             val notes = listOfNotNull(
                 stringResource(device.kind.label),
                 if (device.id !in select.lan) stringResource(R.string.tuya_not_on_lan) else null,
                 if (device.id in added) stringResource(R.string.tuya_added) else null,
             ).joinToString("  ·  ")
-            MenuItem("$mark  ${device.name}  ·  $notes", if (index == 0) Modifier.focusRequester(focus) else Modifier) {
+            ListRow(
+                device.name,
+                notes,
+                if (device.kind == TuyaKind.FEEDER) Icons.Rounded.Pets else Icons.Rounded.Outlet,
+                if (device.kind == TuyaKind.FEEDER) EvimColors.Feeder else EvimColors.Tuya,
+                trailing = Trailing.Check(device.id in checked),
+                modifier = if (index == 0) Modifier.focusRequester(focus) else Modifier,
+            ) {
                 checked = if (device.id in checked) checked - device.id else checked + device.id
             }
         }
     }
-    Spacer(Modifier.height(8.dp))
-    MenuItem(stringResource(R.string.tuya_add_selected, checked.size)) {
-        if (saving || checked.isEmpty()) return@MenuItem
+    PanelActions {
+        PillButton(stringResource(R.string.tuya_add_selected, checked.size), primary = true) {
+        if (saving || checked.isEmpty()) return@PillButton
         saving = true
         scope.launch {
             vm.addTuya(select.devices.filter { it.id in checked }, select.lan)
             onDone()
         }
+        }
     }
-    if (saving) PanelBody(stringResource(R.string.working))
+    if (saving) PanelNote(stringResource(R.string.working), EvimColors.Accent)
 }
 
 private val TuyaKind.label: Int

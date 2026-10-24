@@ -1,6 +1,16 @@
 package dev.evim.tv.ui
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AutoFixHigh
+import androidx.compose.material.icons.rounded.DeleteForever
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Restore
+import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material.icons.rounded.VisibilityOff
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -64,53 +74,67 @@ fun SettingsDialog(
         onDismissRequest = { if (step != Step.MENU) go(Step.MENU) else onDismiss() },
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
-        Panel(width = 440.dp) {
+        Panel(width = 600.dp) {
             when (step) {
                 Step.MENU -> {
-                    Title(stringResource(R.string.settings_title), null)
+                    PanelHeader(stringResource(R.string.settings_title), stringResource(R.string.settings_subtitle), Icons.Rounded.Tune)
                     val home = stringResource(if (vm.geniusIsHome) R.string.settings_home_genius else R.string.settings_home_google)
-                    MenuItem(
-                        "${stringResource(R.string.hidden_apps_title)}  ·  ${vm.hiddenApps.size}",
-                        Modifier.focusRequester(first),
-                        onHiddenApps,
-                    )
-                    MenuItem("${stringResource(R.string.settings_city)}  ·  ${vm.city.name}", onClick = onCity)
-                    MenuItem("${stringResource(R.string.settings_home)}  ·  $home") {
-                        if (busy) return@MenuItem
-                        if (vm.geniusIsHome) {
-                            go(Step.TO_GOOGLE)
-                        } else {
-                            // Önce Wi-Fi denetimi: geçiş bağlı olunan ağı silecekse onay bile istenmez
-                            busy = true
-                            vm.checkHomeSwitch { check, failure ->
-                                busy = false
-                                when {
-                                    failure != null -> error = failure
-                                    check is SwitchCheck.Blocked -> error = R.string.home_blocked
-                                    check is SwitchCheck.Ready -> {
-                                        erasesNetworks = check.erasesOtherNetworks
-                                        go(Step.TO_GENIUS)
+                    CardRow {
+                        ChoiceCard(
+                            Icons.Rounded.VisibilityOff,
+                            stringResource(R.string.hidden_apps_title),
+                            stringResource(R.string.settings_hidden_count, vm.hiddenApps.size),
+                            Modifier.weight(1f).focusRequester(first),
+                            onClick = onHiddenApps,
+                        )
+                        ChoiceCard(Icons.Rounded.LocationOn, stringResource(R.string.settings_city), vm.city.name, Modifier.weight(1f), onClick = onCity)
+                        ChoiceCard(Icons.Rounded.Home, stringResource(R.string.settings_home), home, Modifier.weight(1f)) {
+                            if (busy) return@ChoiceCard
+                            if (vm.geniusIsHome) {
+                                go(Step.TO_GOOGLE)
+                            } else {
+                                // Önce Wi-Fi denetimi: geçiş bağlı olunan ağı silecekse onay bile istenmez
+                                busy = true
+                                vm.checkHomeSwitch { check, failure ->
+                                    busy = false
+                                    when {
+                                        failure != null -> error = failure
+                                        check is SwitchCheck.Blocked -> error = R.string.home_blocked
+                                        check is SwitchCheck.Ready -> {
+                                            erasesNetworks = check.erasesOtherNetworks
+                                            go(Step.TO_GENIUS)
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                    MenuItem(stringResource(R.string.settings_wizard), onClick = onWizard)
-                    if (setupChanged) MenuItem(stringResource(R.string.settings_undo_setup), onClick = { go(Step.UNDO_SETUP) })
-                    MenuItem(stringResource(R.string.settings_about), onClick = { go(Step.ABOUT) })
-                    MenuItem(stringResource(R.string.settings_uninstall), onClick = { go(Step.UNINSTALL) })
+                    CardRow {
+                        ChoiceCard(Icons.Rounded.AutoFixHigh, stringResource(R.string.settings_wizard), null, Modifier.weight(1f), onClick = onWizard)
+                        ChoiceCard(Icons.Rounded.Info, stringResource(R.string.settings_about), null, Modifier.weight(1f)) { go(Step.ABOUT) }
+                        ChoiceCard(Icons.Rounded.DeleteForever, stringResource(R.string.settings_uninstall), null, Modifier.weight(1f), EvimColors.Danger) {
+                            go(Step.UNINSTALL)
+                        }
+                    }
+                    if (setupChanged) {
+                        Spacer(Modifier.height(6.dp))
+                        ListRow(stringResource(R.string.settings_undo_setup), stringResource(R.string.settings_undo_setup_hint), Icons.Rounded.Restore, trailing = Trailing.Chevron) {
+                            go(Step.UNDO_SETUP)
+                        }
+                    }
                 }
                 Step.ABOUT -> {
                     val context = LocalContext.current
                     val version = remember {
                         runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull().orEmpty()
                     }
-                    Title(stringResource(R.string.app_name), stringResource(R.string.about_version, version))
-                    Body(stringResource(R.string.about_body))
-                    Body(stringResource(R.string.about_source))
-                    MenuItem(stringResource(R.string.done), Modifier.focusRequester(first)) { go(Step.MENU) }
+                    PanelHeader(stringResource(R.string.app_name), stringResource(R.string.about_version, version), Icons.Rounded.Info)
+                    PanelText(stringResource(R.string.about_body))
+                    PanelText(stringResource(R.string.about_source))
+                    PanelActions { PillButton(stringResource(R.string.done), Modifier.focusRequester(first)) { go(Step.MENU) } }
                 }
                 Step.TO_GENIUS -> Confirm(
+                    icon = Icons.Rounded.Home,
                     title = stringResource(R.string.home_to_genius_title),
                     body = listOfNotNull(
                         stringResource(R.string.home_to_genius_body),
@@ -129,6 +153,7 @@ fun SettingsDialog(
                     onCancel = { go(Step.MENU) },
                 )
                 Step.TO_GOOGLE -> Confirm(
+                    icon = Icons.Rounded.Home,
                     title = stringResource(R.string.home_to_google_title),
                     body = listOf(stringResource(R.string.home_to_google_body)),
                     confirm = stringResource(R.string.switch_confirm),
@@ -144,6 +169,7 @@ fun SettingsDialog(
                     onCancel = { go(Step.MENU) },
                 )
                 Step.UNDO_SETUP -> Confirm(
+                    icon = Icons.Rounded.Restore,
                     title = stringResource(R.string.undo_setup_title),
                     body = listOf(stringResource(R.string.undo_setup_body)),
                     confirm = stringResource(R.string.undo_setup_confirm),
@@ -169,21 +195,23 @@ fun SettingsDialog(
                             }
                         }
                     }
-                    Title(stringResource(R.string.uninstall_title), null)
-                    Body(stringResource(R.string.uninstall_body))
+                    PanelHeader(stringResource(R.string.uninstall_title), null, Icons.Rounded.DeleteForever, EvimColors.Danger)
+                    PanelText(stringResource(R.string.uninstall_body))
                     // Sihirbaz bir şey kaldırdıysa ya da değiştirdiyse onların da geri getirilmesi önerilir
-                    if (setupChanged) {
-                        Body(stringResource(R.string.uninstall_restore_body))
-                        MenuItem(stringResource(R.string.uninstall_restore_confirm)) { uninstall(true) }
-                        MenuItem(stringResource(R.string.uninstall_only_confirm)) { uninstall(false) }
-                    } else {
-                        MenuItem(stringResource(R.string.uninstall_confirm)) { uninstall(false) }
+                    if (setupChanged) PanelText(stringResource(R.string.uninstall_restore_body))
+                    PanelActions {
+                        PillButton(stringResource(R.string.cancel), Modifier.focusRequester(first)) { go(Step.MENU) }
+                        if (setupChanged) {
+                            PillButton(stringResource(R.string.uninstall_only_confirm)) { uninstall(false) }
+                            PillButton(stringResource(R.string.uninstall_restore_confirm), danger = true) { uninstall(true) }
+                        } else {
+                            PillButton(stringResource(R.string.uninstall_confirm), danger = true) { uninstall(false) }
+                        }
                     }
-                    MenuItem(stringResource(R.string.cancel), Modifier.focusRequester(first)) { go(Step.MENU) }
                 }
             }
-            if (busy) Body(stringResource(R.string.working))
-            error?.let { Text(stringResource(it), color = EvimColors.Warning, fontSize = 11.sp, modifier = Modifier.padding(top = 8.dp)) }
+            if (busy) PanelNote(stringResource(R.string.working), EvimColors.Accent)
+            error?.let { PanelNote(stringResource(it)) }
         }
     }
 }
@@ -191,6 +219,7 @@ fun SettingsDialog(
 /** Geri alınması zor işlemler için: odak "Vazgeç"te başlar ki yanlışlıkla OK onaylamasın. */
 @Composable
 private fun Confirm(
+    icon: ImageVector,
     title: String,
     body: List<String>,
     confirm: String,
@@ -199,20 +228,10 @@ private fun Confirm(
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
 ) {
-    Title(title, null)
-    body.forEach { Body(it) }
-    MenuItem(confirm) { if (!busy) onConfirm() }
-    MenuItem(stringResource(R.string.cancel), Modifier.focusRequester(focus), onCancel)
-}
-
-@Composable
-private fun Title(title: String, subtitle: String?) {
-    Text(title, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-    if (subtitle != null) Text(subtitle, color = EvimColors.TextDim, fontSize = 11.sp)
-    Spacer(Modifier.height(14.dp))
-}
-
-@Composable
-private fun Body(text: String) {
-    Text(text, color = EvimColors.TextDim, fontSize = 12.sp, lineHeight = 17.sp, modifier = Modifier.padding(bottom = 10.dp))
+    PanelHeader(title, null, icon)
+    body.forEach { PanelText(it) }
+    PanelActions {
+        PillButton(stringResource(R.string.cancel), Modifier.focusRequester(focus), onClick = onCancel)
+        PillButton(confirm, primary = true) { if (!busy) onConfirm() }
+    }
 }
