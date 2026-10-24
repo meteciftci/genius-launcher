@@ -6,10 +6,11 @@ Android TV / Google TV için reklamsız, sade bir ana ekran (launcher) ve evdeki
 
 ## Neler var
 
-- **Vitrin:** Odaktaki uygulamanın simgesinden çıkarılan renkle boyanan büyük bir karşılama alanı.
+- **Vitrin:** Odaktaki uygulamanın simgesinden çıkarılan renkle boyanan büyük bir karşılama alanı; yanında hava durumu (Open-Meteo, şehir seçilebilir, saatlik ve 7 günlük panel).
 - **Uygulamalar:** Kumandada OK'a basılı tutunca açılan menüden sıralama, gizleme ve renk seçme.
-- **Üst şerit:** Saat, tarih, hava durumu (Open-Meteo, varsayılan şehir Muğla), RAM kullanımı ve "Boşalt" düğmesi.
-- **Evim şeridi:** Akıllı cihazlar (Tuya, Dyson, eufy…). Şimdilik yer tutucu; protokoller sonraki aşamada eklenecek.
+- **Evim widget'ı:** Tuya (röle, mama kabı) ve Dyson cihazları buluta gitmeden, yerel ağdan. Kartlar sıralanabilir ve yeniden adlandırılabilir; dördü aşkın cihaz "Diğer" panelinde.
+- **Üst şerit:** Saat, Wi-Fi/Bluetooth/ayar kısayolları, RAM kullanımı ve "Boşalt" düğmesi (TV'nin kendi ADB'siyle).
+- **Dil:** Sistem dilini izler; İngilizce ve Türkçe.
 
 ## Derleme
 
@@ -40,6 +41,27 @@ zsh tools/install.sh
 ```
 
 Akıcılığı ölçmek için `zsh tools/perf.sh`. Mi Box temizliği ve uyku ayarları için yardımcı betikler `tools/mibox/` altında.
+
+## Akıllı ev kurulumu
+
+Anahtarlar bir kez Mac'ten alınır ve TV'ye gönderilir (Python 3, `pip install -r tools/smarthome/requirements.txt`):
+
+```bash
+python tools/smarthome/tuya_keys.py    # Tuya Smart / Smart Life uygulamasıyla QR okutarak
+python tools/smarthome/dyson_keys.py   # MyDyson hesabıyla (e-postaya kod gelir)
+python tools/smarthome/push_to_tv.py   # TV'ye gönderir; launcher açılınca içeri alır
+```
+
+## Ana ekran (Home tuşu)
+
+Google TV kendi ana ekranı açıkken başka launcher'ları yok sayar. Bu betik önce kurulum sihirbazını, sonra Google TV ana ekranını kapatır (kaldırmaz) ve Home tuşunu Genius Launcher'a bağlar; bağlı olunan Wi-Fi ağını kaydeden uygulama kapatılacaksa hiçbir şey yapmaz:
+
+```bash
+zsh tools/mibox/ana_ekran.sh genius   # Genius Launcher
+zsh tools/mibox/ana_ekran.sh google   # Google TV'ye geri dön
+```
+
+Launcher 5 dakikada 3 kez çökerse Google TV ana ekranını kendiliğinden geri açar. Ekran koruyucu Google'ınki olarak kalır.
 
 ## Gizli bilgiler
 
