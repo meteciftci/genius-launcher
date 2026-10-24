@@ -28,7 +28,7 @@ private sealed interface HomeStep {
     data object List : HomeStep
     data object Add : HomeStep
     data object Tuya : HomeStep
-    data class Brand(val label: Int) : HomeStep
+    data object Dyson : HomeStep
     data class Device(val key: String) : HomeStep
     data class Remove(val key: String) : HomeStep
 }
@@ -48,7 +48,7 @@ fun SmartHomeDialog(vm: LauncherViewModel, startAtAdd: Boolean, onDismiss: () ->
         step = when (val current = step) {
             HomeStep.List -> return onDismiss()
             HomeStep.Add -> if (startAtAdd) return onDismiss() else HomeStep.List
-            is HomeStep.Brand, HomeStep.Tuya -> HomeStep.Add
+            HomeStep.Tuya, HomeStep.Dyson -> HomeStep.Add
             is HomeStep.Device -> HomeStep.List
             is HomeStep.Remove -> HomeStep.Device(current.key)
         }
@@ -67,15 +67,10 @@ fun SmartHomeDialog(vm: LauncherViewModel, startAtAdd: Boolean, onDismiss: () ->
                 HomeStep.Add -> {
                     PanelTitle(stringResource(R.string.smart_home_add), stringResource(R.string.smart_home_add_subtitle))
                     MenuItem(stringResource(R.string.brand_tuya), Modifier.focusRequester(first)) { step = HomeStep.Tuya }
-                    MenuItem(stringResource(R.string.brand_dyson)) { step = HomeStep.Brand(R.string.brand_dyson) }
+                    MenuItem(stringResource(R.string.brand_dyson)) { step = HomeStep.Dyson }
                 }
                 HomeStep.Tuya -> TuyaAddFlow(vm, first, onDone = { step = HomeStep.List })
-                is HomeStep.Brand -> {
-                    // Hesapla giriş akışları sonraki parçalarda gelecek
-                    PanelTitle(stringResource(current.label), null)
-                    PanelBody(stringResource(R.string.smart_home_coming))
-                    MenuItem(stringResource(R.string.done), Modifier.focusRequester(first), ::back)
-                }
+                HomeStep.Dyson -> DysonAddFlow(vm, first, onDone = { step = HomeStep.List })
                 is HomeStep.Device -> {
                     val device = vm.homeDevices.firstOrNull { it.key == current.key }
                     if (device == null) {
@@ -87,9 +82,9 @@ fun SmartHomeDialog(vm: LauncherViewModel, startAtAdd: Boolean, onDismiss: () ->
                     if (vm.hasCustomName(device)) {
                         MenuItem(stringResource(R.string.menu_reset_name)) { vm.renameDevice(device, null) }
                     }
-                    // Anahtar değiştiyse (cihaz yeniden kurulduysa) hesapla yeniden alınır; Dyson 4. parçada
-                    if (device !is HomeDevice.Purifier) {
-                        MenuItem(stringResource(R.string.menu_reconnect)) { step = HomeStep.Tuya }
+                    // Anahtar değiştiyse (cihaz yeniden kurulduysa) hesapla yeniden alınır
+                    MenuItem(stringResource(R.string.menu_reconnect)) {
+                        step = if (device is HomeDevice.Purifier) HomeStep.Dyson else HomeStep.Tuya
                     }
                     MenuItem(stringResource(R.string.menu_remove)) { step = HomeStep.Remove(device.key) }
                 }

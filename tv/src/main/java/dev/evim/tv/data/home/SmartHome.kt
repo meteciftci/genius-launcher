@@ -44,7 +44,9 @@ class SmartHome(private val context: Context) {
     private var tuya: Map<String, TuyaEntry> = emptyMap()
     private var dyson: Map<String, DysonEntry> = emptyMap()
     private val discovery = TuyaDiscovery(context)
+    private val dysonDiscovery = DysonDiscovery(context)
     private var lastScan = 0L
+    private var lastDysonScan = 0L
 
     val isConfigured: Boolean get() = tuya.isNotEmpty() || dyson.isNotEmpty()
 
@@ -72,7 +74,7 @@ class SmartHome(private val context: Context) {
         dyson = json.optJSONArray("dyson").objects().associate { d ->
             d.getString("serial") to DysonEntry(
                 name = d.getString("name"),
-                device = DysonDevice(d.getString("serial"), d.getString("credential"), d.getString("product_type"), d.getString("ip")),
+                device = DysonDevice(d.getString("serial"), d.getString("credential"), d.getString("product_type"), d.optString("ip")),
             )
         }
     }
@@ -111,6 +113,23 @@ class SmartHome(private val context: Context) {
         load()
     }
 
+    /** Dyson cihazlarını ekler ya da parolasını yeniler; [ips] ev ağında bulunanların adresleri. */
+    fun addDyson(devices: List<DysonAccountDevice>, ips: Map<String, String>) {
+        val json = if (stored.exists()) JSONObject(stored.readText()) else JSONObject()
+        val bySerial = json.optJSONArray("dyson").objects().associateBy { it.getString("serial") }.toMutableMap()
+        for (device in devices) {
+            val entry = bySerial[device.serial] ?: JSONObject().put("serial", device.serial).put("name", device.name)
+            entry.put("credential", device.credential).put("product_type", device.productType)
+            ips[device.serial]?.let { entry.put("ip", it) }
+            bySerial[device.serial] = entry
+        }
+        json.put("dyson", JSONArray(bySerial.values))
+        stored.writeText(json.toString())
+        load()
+    }
+
+    val dysonSerials: Set<String> get() = dyson.keys
+
     /** Hangi Tuya cihazlarının eklendiği; yeniden bağlanırken seçili gelirler. */
     val tuyaIds: Set<String> get() = tuya.keys
 
@@ -123,7 +142,12 @@ class SmartHome(private val context: Context) {
             val again = pollTuya(tuya.filterKeys { it in unreachable }).associateBy { it.key }
             tuyaDevices = tuyaDevices.map { again[it.key] ?: it }
         }
-        val purifiers = dyson.map { (key, entry) -> purifier(key, entry) { entry.device.state() } }
+        var purifiers = dyson.map { (key, entry) -> purifier(key, entry) { entry.device.state() } }
+        val lost = purifiers.filter { !it.reachable }.map { it.key }.toSet()
+        if (lost.isNotEmpty() && rediscoverDyson(lost)) {
+            val again = dyson.filterKeys { it in lost }.map { (key, entry) -> purifier(key, entry) { entry.device.state() } }.associateBy { it.key }
+            purifiers = purifiers.map { again[it.key] ?: it }
+        }
         return purifiers + tuyaDevices
     }
 
@@ -147,6 +171,27 @@ class SmartHome(private val context: Context) {
             val lan = found[entry.getString("id")] ?: return@forEach
             if (lan.ip != entry.optString("ip") || lan.version != entry.optString("version")) {
                 entry.put("ip", lan.ip).put("version", lan.version)
+                changed = true
+            }
+        }
+        if (changed) {
+            stored.writeText(json.toString())
+            load()
+        }
+        return changed
+    }
+
+    private fun rediscoverDyson(serials: Set<String>): Boolean {
+        val now = System.currentTimeMillis()
+        if (now - lastDysonScan < RESCAN_MS) return false
+        lastDysonScan = now
+        val found = runCatching { dysonDiscovery.scan(serials) }.getOrDefault(emptyMap())
+        val json = JSONObject(stored.readText())
+        var changed = false
+        json.optJSONArray("dyson").objects().filter { it.getString("serial") in serials }.forEach { entry ->
+            val ip = found[entry.getString("serial")] ?: return@forEach
+            if (ip != entry.optString("ip")) {
+                entry.put("ip", ip)
                 changed = true
             }
         }

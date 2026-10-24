@@ -24,6 +24,10 @@ import dev.evim.tv.data.Weather
 import dev.evim.tv.data.WeatherClient
 import dev.evim.tv.data.home.HomeDevice
 import dev.evim.tv.data.home.SmartHome
+import dev.evim.tv.data.home.DysonAccountDevice
+import dev.evim.tv.data.home.DysonChallenge
+import dev.evim.tv.data.home.DysonCloud
+import dev.evim.tv.data.home.DysonDiscovery
 import dev.evim.tv.data.home.TuyaAccountDevice
 import dev.evim.tv.data.home.TuyaCloud
 import dev.evim.tv.data.home.TuyaDiscovery
@@ -51,6 +55,7 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     private val homeSwitch = HomeSwitch(app)
     private val tuyaCloud = TuyaCloud(BuildConfig.TUYA_CLIENT_ID, BuildConfig.TUYA_SCHEMA)
     private val tuyaDiscovery = TuyaDiscovery(app)
+    private val dysonDiscovery = DysonDiscovery(app)
     // Tuya cihazları aynı anda tek yerel bağlantı kabul edebiliyor; sorgu ve komutlar sırayla gider
     private val homeLock = Mutex()
     private var installed: List<LauncherApp> = emptyList()
@@ -222,6 +227,33 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
 
     suspend fun addTuya(devices: List<TuyaAccountDevice>, lan: Map<String, TuyaLanDevice>) {
         homeIo { home.addTuya(devices, lan) }
+        homeConfigured = home.isConfigured
+        startHomeUpdates()
+    }
+
+    suspend fun dysonRequestCode(email: String, country: String): DysonChallenge =
+        withContext(Dispatchers.IO) { DysonCloud.requestCode(email, country) }
+
+    /** Giriş ve ev ağı taraması; ağda bulunan cihazların adresleriyle döner. */
+    suspend fun dysonVerify(challenge: DysonChallenge, code: String, password: String): Pair<List<DysonAccountDevice>, Map<String, String>> =
+        withContext(Dispatchers.IO) {
+            val devices = DysonCloud.verify(challenge, code, password)
+            devices to dysonScan(devices)
+        }
+
+    suspend fun dysonFromSticker(ssid: String, password: String): Pair<List<DysonAccountDevice>, Map<String, String>>? =
+        withContext(Dispatchers.IO) {
+            val device = DysonCloud.fromSticker(ssid, password) ?: return@withContext null
+            listOf(device) to dysonScan(listOf(device))
+        }
+
+    private fun dysonScan(devices: List<DysonAccountDevice>) =
+        runCatching { dysonDiscovery.scan(devices.map { it.serial }.toSet()) }.getOrDefault(emptyMap())
+
+    val dysonAddedSerials: Set<String> get() = home.dysonSerials
+
+    suspend fun addDyson(devices: List<DysonAccountDevice>, ips: Map<String, String>) {
+        homeIo { home.addDyson(devices, ips) }
         homeConfigured = home.isConfigured
         startHomeUpdates()
     }

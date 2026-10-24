@@ -21,11 +21,26 @@
     <string name="smart_home_add_subtitle">Choose the app your device uses</string>
     <string name="brand_tuya" translatable="false">Tuya · Smart Life</string>
     <string name="brand_dyson" translatable="false">Dyson</string>
-    <string name="smart_home_coming">Adding devices from the TV is coming in the next version.</string>
     <string name="menu_remove">Remove</string>
     <string name="remove_device_title">Remove %s?</string>
     <string name="remove_device_body">The device and its key are deleted from this TV. It stays in your %s account; you can add it again.</string>
     <string name="remove_confirm">Remove</string>
+    <string name="dyson_choice_body">Sign in with your MyDyson account, or use the Wi-Fi name and password on the sticker on the device (no account needed).</string>
+    <string name="dyson_with_account">MyDyson account</string>
+    <string name="dyson_with_sticker">Wi-Fi sticker on the device</string>
+    <string name="dyson_email_body">Your MyDyson email address</string>
+    <string name="dyson_code_body">Type the code Dyson sent to %s.</string>
+    <string name="dyson_password_body">Your MyDyson password. It\'s only used for this login and isn\'t stored.</string>
+    <string name="dyson_ssid_body">The Wi-Fi name on the sticker, e.g. DYSON-X4N-EU-ABC1234A-527K</string>
+    <string name="dyson_sticker_password_body">The Wi-Fi password on the same sticker</string>
+    <string name="dyson_loading">Signing in and searching the home network…</string>
+    <string name="dyson_no_account">No active MyDyson account was found for this email.</string>
+    <string name="dyson_too_frequent">Too many codes were requested. Wait a few minutes and try again.</string>
+    <string name="dyson_wrong_login">The code or password is wrong.</string>
+    <string name="dyson_network">Couldn\'t reach Dyson. Check the internet connection and try again.</string>
+    <string name="dyson_bad_ssid">That doesn\'t look like a Dyson Wi-Fi name. It starts with DYSON- and ends with the model, like -527K.</string>
+    <string name="dyson_no_devices">No purifiers were found in this account.</string>
+    <string name="dyson_select_body">Choose the devices to add.</string>
     <string name="menu_reconnect">Reconnect</string>
     <string name="home_online">online</string>
     <string name="tuya_unavailable">This build has no Tuya client id. Add tuya.clientId to local.properties and rebuild (see README).</string>

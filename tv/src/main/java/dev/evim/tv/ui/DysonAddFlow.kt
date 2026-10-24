@@ -1,0 +1,168 @@
+package dev.evim.tv.ui
+
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.dp
+import dev.evim.tv.LauncherViewModel
+import dev.evim.tv.R
+import dev.evim.tv.data.home.DysonAccountDevice
+import dev.evim.tv.data.home.DysonChallenge
+import dev.evim.tv.data.home.DysonCloudException
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import java.util.Locale
+
+private sealed interface DysonStep {
+    data object Choice : DysonStep
+    data object Email : DysonStep
+    data class Code(val challenge: DysonChallenge) : DysonStep
+    data class Password(val challenge: DysonChallenge, val code: String) : DysonStep
+    data object Ssid : DysonStep
+    data class StickerPassword(val ssid: String) : DysonStep
+    data object Loading : DysonStep
+    data class Select(val devices: List<DysonAccountDevice>, val ips: Map<String, String>) : DysonStep
+    data class Failed(val message: Int) : DysonStep
+}
+
+/**
+ * Dyson ekleme ve yeniden bağlanma: MyDyson hesabıyla (e-postaya gelen kod ve şifre) ya da cihazın
+ * Wi-Fi etiketinden. Şifre yalnızca giriş isteğinde kullanılır; şifre de jeton da saklanmaz.
+ */
+@Composable
+internal fun DysonAddFlow(vm: LauncherViewModel, focus: FocusRequester, onDone: () -> Unit) {
+    var step by remember { mutableStateOf<DysonStep>(DysonStep.Choice) }
+    var email by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+    var job by remember { mutableStateOf<Job?>(null) }
+    LaunchedEffect(step) { runCatching { focus.requestFocus() } }
+
+    fun run(block: suspend () -> DysonStep) {
+        job = scope.launch {
+            step = DysonStep.Loading
+            step = runCatching { block() }.getOrElse { error ->
+                if (error is CancellationException) throw error
+                DysonStep.Failed(
+                    when ((error as? DysonCloudException)?.reason) {
+                        DysonCloudException.Reason.NO_ACCOUNT -> R.string.dyson_no_account
+                        DysonCloudException.Reason.TOO_FREQUENT -> R.string.dyson_too_frequent
+                        DysonCloudException.Reason.WRONG_LOGIN -> R.string.dyson_wrong_login
+                        else -> R.string.dyson_network
+                    },
+                )
+            }
+        }
+    }
+
+    PanelTitle(stringResource(R.string.brand_dyson), null)
+    when (val current = step) {
+        DysonStep.Choice -> {
+            PanelBody(stringResource(R.string.dyson_choice_body))
+            MenuItem(stringResource(R.string.dyson_with_account), Modifier.focusRequester(focus)) { step = DysonStep.Email }
+            MenuItem(stringResource(R.string.dyson_with_sticker)) { step = DysonStep.Ssid }
+        }
+        DysonStep.Email -> Field(stringResource(R.string.dyson_email_body), email, KeyboardType.Email, secret = false, focus) { value ->
+            email = value
+            // Hesabın bölgesi TV'nin bölgesinden; Dyson e-posta girişinde ülke kodunu da istiyor
+            val country = Locale.getDefault().country.ifEmpty { "TR" }
+            run { DysonStep.Code(vm.dysonRequestCode(value, country)) }
+        }
+        is DysonStep.Code -> Field(stringResource(R.string.dyson_code_body, email), "", KeyboardType.Number, secret = false, focus) { code ->
+            step = DysonStep.Password(current.challenge, code)
+        }
+        is DysonStep.Password -> Field(stringResource(R.string.dyson_password_body), "", KeyboardType.Password, secret = true, focus) { password ->
+            run {
+                val (devices, ips) = vm.dysonVerify(current.challenge, current.code, password)
+                DysonStep.Select(devices, ips)
+            }
+        }
+        DysonStep.Ssid -> Field(stringResource(R.string.dyson_ssid_body), "DYSON-", KeyboardType.Ascii, secret = false, focus) { ssid ->
+            step = DysonStep.StickerPassword(ssid)
+        }
+        is DysonStep.StickerPassword -> Field(stringResource(R.string.dyson_sticker_password_body), "", KeyboardType.Password, secret = true, focus) { password ->
+            run {
+                val (devices, ips) = vm.dysonFromSticker(current.ssid, password) ?: return@run DysonStep.Failed(R.string.dyson_bad_ssid)
+                DysonStep.Select(devices, ips)
+            }
+        }
+        DysonStep.Loading -> {
+            PanelBody(stringResource(R.string.dyson_loading))
+            MenuItem(stringResource(R.string.cancel), Modifier.focusRequester(focus)) {
+                job?.cancel()
+                step = DysonStep.Choice
+            }
+        }
+        is DysonStep.Select -> SelectDevices(vm, current, focus, onDone)
+        is DysonStep.Failed -> {
+            PanelBody(stringResource(current.message))
+            MenuItem(stringResource(R.string.tuya_retry), Modifier.focusRequester(focus)) { step = DysonStep.Choice }
+        }
+    }
+}
+
+/** Tek alanlı adım: açıklama, yazı alanı ve "Devam". Her adımda alan sıfırdan başlar. */
+@Composable
+private fun Field(body: String, initial: String, type: KeyboardType, secret: Boolean, focus: FocusRequester, onNext: (String) -> Unit) {
+    key(body) {
+        var value by remember { mutableStateOf(TextFieldValue(initial, androidx.compose.ui.text.TextRange(initial.length))) }
+        val keyboard = LocalSoftwareKeyboardController.current
+        PanelBody(body)
+        TextInput(value, { value = it }, Modifier.focusRequester(focus), keyboardType = type, secret = secret)
+        Spacer(Modifier.height(10.dp))
+        MenuItem(stringResource(R.string.tuya_continue)) {
+            keyboard?.hide()
+            if (value.text.isNotBlank()) onNext(value.text.trim())
+        }
+    }
+}
+
+@Composable
+private fun SelectDevices(vm: LauncherViewModel, select: DysonStep.Select, focus: FocusRequester, onDone: () -> Unit) {
+    val added = remember { vm.dysonAddedSerials }
+    var checked by remember { mutableStateOf(select.devices.map { it.serial }.toSet()) }
+    var saving by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    if (select.devices.isEmpty()) {
+        PanelBody(stringResource(R.string.dyson_no_devices))
+        MenuItem(stringResource(R.string.done), Modifier.focusRequester(focus), onDone)
+        return
+    }
+    PanelBody(stringResource(R.string.dyson_select_body))
+    select.devices.forEachIndexed { index, device ->
+        val mark = if (device.serial in checked) "☑" else "☐"
+        val notes = listOfNotNull(
+            if (device.serial !in select.ips) stringResource(R.string.tuya_not_on_lan) else null,
+            if (device.serial in added) stringResource(R.string.tuya_added) else null,
+        ).joinToString("  ·  ")
+        val text = "$mark  ${device.name}" + if (notes.isEmpty()) "" else "  ·  $notes"
+        MenuItem(text, if (index == 0) Modifier.focusRequester(focus) else Modifier) {
+            checked = if (device.serial in checked) checked - device.serial else checked + device.serial
+        }
+    }
+    Spacer(Modifier.height(8.dp))
+    MenuItem(stringResource(R.string.tuya_add_selected, checked.size)) {
+        if (saving || checked.isEmpty()) return@MenuItem
+        saving = true
+        scope.launch {
+            vm.addDyson(select.devices.filter { it.serial in checked }, select.ips)
+            onDone()
+        }
+    }
+    if (saving) PanelBody(stringResource(R.string.working))
+}

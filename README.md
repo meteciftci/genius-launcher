@@ -55,8 +55,12 @@ Akıcılığı ölçmek için `zsh tools/perf.sh`. Mi Box temizliği ve uyku aya
 Ana ekranın üstündeki **Evim** kutusuna basın → **Cihaz ekle** → **Tuya · Smart Life**. Uygulamadaki kullanıcı
 kodunu yazıp TV'de çıkan QR kodu Smart Life uygulamasıyla okutun; hesaptaki cihazlardan eklemek istediklerinizi
 seçin. TV cihazları ev ağında kendisi bulur, adresleri değişirse yeniden arar. Hesap şifresi ya da bulut jetonu
-saklanmaz; cihaz yeniden kurulursa paneldeki **Yeniden bağlan** anahtarını yeniler. Dyson için TV'den ekleme
-sonraki sürümde; o zamana kadar Mac'teki eski yol:
+saklanmaz; cihaz yeniden kurulursa paneldeki **Yeniden bağlan** anahtarını yeniler.
+
+Dyson için **Cihaz ekle** → **Dyson**: MyDyson hesabıyla (e-postaya gelen kod ve şifre) ya da hesap olmadan
+cihazın üstündeki Wi-Fi etiketinden. TV hava temizleyiciyi ev ağında mDNS ile bulur.
+
+Eski yol (Mac'ten, sonraki sürümde kaldırılacak):
 
 Anahtarlar bir kez Mac'ten alınır ve TV'ye gönderilir (Python 3, `pip install -r tools/smarthome/requirements.txt`):
 

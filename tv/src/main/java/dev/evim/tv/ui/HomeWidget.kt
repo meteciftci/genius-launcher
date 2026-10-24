@@ -45,6 +45,9 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -239,9 +242,15 @@ internal fun RenameDialog(current: String, onSave: (String) -> Unit, onDismiss: 
     }
 }
 
-/** Tek satırlık yazı alanı; OK'e basınca ekran klavyesi kapanır. */
+/** Tek satırlık yazı alanı; OK'e basınca ekran klavyesi kapanır. [secret] ise yazılan gizlenir. */
 @Composable
-internal fun TextInput(value: TextFieldValue, onValueChange: (TextFieldValue) -> Unit, modifier: Modifier = Modifier) {
+internal fun TextInput(
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
+    modifier: Modifier = Modifier,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    secret: Boolean = false,
+) {
     val keyboard = LocalSoftwareKeyboardController.current
     BasicTextField(
         value = value,
@@ -249,8 +258,9 @@ internal fun TextInput(value: TextFieldValue, onValueChange: (TextFieldValue) ->
         singleLine = true,
         textStyle = TextStyle(color = Color.White, fontSize = 15.sp),
         cursorBrush = SolidColor(Color.White),
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = ImeAction.Done, autoCorrectEnabled = false),
         keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }),
+        visualTransformation = if (secret) PasswordVisualTransformation() else VisualTransformation.None,
         modifier = modifier.fillMaxWidth(),
         decorationBox = { inner ->
             Box(
