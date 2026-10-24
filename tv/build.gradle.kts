@@ -25,12 +25,26 @@ android {
         buildConfigField("String", "TUYA_SCHEMA", "\"${local.getProperty("tuya.schema", "")}\"")
     }
 
+    // Yayın anahtarı repo dışında durur, parolası macOS Anahtar Zinciri'nden okunur. Anahtarı olmayanlar
+    // (başka geliştiriciler) release derlemesini debug anahtarıyla imzalar.
+    val releaseKey = File(System.getProperty("user.home"), ".android/genius-release.jks")
+    if (releaseKey.exists()) {
+        signingConfigs.create("release") {
+            val password = providers.exec {
+                commandLine("security", "find-generic-password", "-s", "genius-launcher-release", "-w")
+            }.standardOutput.asText.get().trim()
+            storeFile = releaseKey
+            storePassword = password
+            keyAlias = "genius"
+            keyPassword = password
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
-            // Şimdilik debug anahtarıyla imzalanır; yayınlamadan önce kendi anahtarımızı ekleyeceğiz.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
 
