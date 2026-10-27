@@ -29,6 +29,7 @@ class DysonCloudException(val reason: Reason) : Exception(reason.name) {
 object DysonCloud {
     private const val HOST = "https://appapi.cp.dyson.com"
     private const val TIMEOUT_MS = 15_000
+    private const val USER_AGENT = "okhttp/4.12.0"
     // Robot süpürgeler başka bir protokol konuşur; bu launcher yalnızca hava temizleyicileri yönetir
     private val VACUUMS = setOf("N223", "276", "277")
     private val PRODUCT_TYPE = Regex("^[0-9]{3}[A-Z]?$")
@@ -96,7 +97,8 @@ object DysonCloud {
             connection.requestMethod = method
             connection.connectTimeout = TIMEOUT_MS
             connection.readTimeout = TIMEOUT_MS
-            connection.setRequestProperty("User-Agent", "android client")
+            // Cloudflare "android client" ile gelen girişleri 429/1015 ile kesiyor; uygulamanın HTTP kütüphanesi gibi görün
+            connection.setRequestProperty("User-Agent", USER_AGENT)
             token?.let { connection.setRequestProperty("Authorization", "Bearer $it") }
             if (body != null) {
                 connection.doOutput = true
