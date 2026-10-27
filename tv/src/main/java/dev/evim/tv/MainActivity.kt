@@ -27,6 +27,8 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (intent.getBooleanExtra("demo", false)) viewModel.enterDemo()
+        // Home tuşu: Dosyalar ya da ayarlar açıkken de ana ekrana dönülür
+        if (intent.hasCategory(Intent.CATEGORY_HOME)) viewModel.homePressed()
     }
 
     override fun onStart() {

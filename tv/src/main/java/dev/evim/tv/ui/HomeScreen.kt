@@ -94,6 +94,22 @@ fun HomeScreen(vm: LauncherViewModel) {
         if (vm.apps.isNotEmpty()) runCatching { firstCard.requestFocus() }
     }
 
+    // Home tuşu açık olan her şeyi kapatır; kurulum sihirbazı bitmediyse açık kalır
+    LaunchedEffect(vm.homePresses) {
+        if (vm.homePresses == 0) return@LaunchedEffect
+        menuFor = null
+        showHidden = false
+        movingPackage = null
+        showWeather = false
+        pickingCity = false
+        cityFromSettings = false
+        showSettings = false
+        showSmartHome = false
+        showWizard = false
+        showFiles = false
+        runCatching { firstCard.requestFocus() }
+    }
+
     // Ana ekranda geri tuşu hiçbir yere gitmez: taşıma modundaysa modu bitirir,
     // Google TV'deki gibi art arda iki basış ekran koruyucuyu başlatır
     var lastBack by remember { mutableLongStateOf(0L) }

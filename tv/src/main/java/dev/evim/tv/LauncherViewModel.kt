@@ -3,6 +3,7 @@ package dev.evim.tv
 import android.app.Application
 import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
@@ -97,6 +98,10 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     /** Home tuşu Genius Launcher'ı mı açıyor; ekrana dönülünce yenilenir. */
     var geniusIsHome by mutableStateOf(false)
         private set
+
+    /** Home tuşuna her basışta artar; ana ekran açık panelleri kapatıp başa döner. */
+    var homePresses by mutableIntStateOf(0)
+        private set
     var widgetLimit by mutableStateOf(prefs.widgetLimit)
         private set
 
@@ -164,6 +169,10 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
                 else -> errorText(error)
             }
         }
+
+    fun homePressed() {
+        homePresses++
+    }
 
     /** README ekran görüntüleri için örnek veriye geçer; süreç kapanana kadar sürer, ayar yazılmaz. */
     fun enterDemo() {
