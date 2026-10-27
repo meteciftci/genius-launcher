@@ -1,7 +1,10 @@
 package dev.evim.tv.ui
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
 import android.view.ViewGroup
@@ -255,9 +258,10 @@ fun ImageViewerDialog(images: List<File>, start: Int, onDismiss: () -> Unit) {
     }
 }
 
-/** Ekrandan büyük resimler okunurken küçültülür; EXIF yönü ImageDecoder tarafından uygulanır (Android 8'de uygulanmaz). */
+/** Ekrandan büyük resimler okunurken küçültülür; EXIF yönü ImageDecoder tarafından uygulanır. */
 private fun decode(file: File): ImageBitmap {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return decodeLegacy(file)
+    // Android 9'un ImageDecoder'ı döndürülmüş büyük JPEG'leri küçültürken "invalid scale" hatası veriyor
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return decodeLegacy(file)
     val source = ImageDecoder.createSource(file)
     return ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
         val scale = minOf(1f, MAX_W / info.size.width, MAX_H / info.size.height)
@@ -265,6 +269,7 @@ private fun decode(file: File): ImageBitmap {
     }.asImageBitmap()
 }
 
+/** Android 10 öncesi: ikinin katlarıyla küçültülerek okunur, EXIF yönü elle uygulanır. */
 private fun decodeLegacy(file: File): ImageBitmap {
     val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
     BitmapFactory.decodeFile(file.path, bounds)
@@ -272,7 +277,23 @@ private fun decodeLegacy(file: File): ImageBitmap {
     while (bounds.outWidth / (sample * 2) >= MAX_W || bounds.outHeight / (sample * 2) >= MAX_H) sample *= 2
     val bitmap = BitmapFactory.decodeFile(file.path, BitmapFactory.Options().apply { inSampleSize = sample })
         ?: error("'${file.name}' okunamadı")
-    return bitmap.asImageBitmap()
+    val orientation = runCatching {
+        ExifInterface(file.path).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+    }.getOrDefault(ExifInterface.ORIENTATION_NORMAL)
+    val matrix = Matrix()
+    when (orientation) {
+        ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.setScale(-1f, 1f)
+        ExifInterface.ORIENTATION_ROTATE_180 -> matrix.setRotate(180f)
+        ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.setScale(1f, -1f)
+        ExifInterface.ORIENTATION_TRANSPOSE -> { matrix.setRotate(90f); matrix.postScale(-1f, 1f) }
+        ExifInterface.ORIENTATION_ROTATE_90 -> matrix.setRotate(90f)
+        ExifInterface.ORIENTATION_TRANSVERSE -> { matrix.setRotate(270f); matrix.postScale(-1f, 1f) }
+        ExifInterface.ORIENTATION_ROTATE_270 -> matrix.setRotate(270f)
+        else -> return bitmap.asImageBitmap()
+    }
+    val oriented = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+    if (oriented !== bitmap) bitmap.recycle()
+    return oriented.asImageBitmap()
 }
 
 private const val MAX_W = 1920f
