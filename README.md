@@ -6,7 +6,12 @@ Android TV ve Google TV için reklamsız, sade bir ana ekran. Evdeki akıllı ci
 
 ![Ana ekran](docs/screenshots/tr/home.png)
 
-> Denenen cihazlar: Xiaomi Mi Box S 2. nesil (Google TV, Android 14) ve Mi Box S 1. nesil (Android TV, Android 9). Diğer Android TV cihazlarında da çalışması beklenir, ama denenmedi.
+> Denenen cihazlar:
+> - Xiaomi Mi Box S 2. nesil (Google TV, Android 14)
+> - Xiaomi Mi Box S 1. nesil (Android TV, Android 9)
+> - Xiaomi Mi TV (MiTV-AESP0, Android TV, Android 9)
+>
+> Android 8.0 ve üzeri diğer Android TV cihazlarında da çalışması beklenir, ama denenmedi.
 
 ## Özellikler
 
@@ -19,7 +24,7 @@ Android TV ve Google TV için reklamsız, sade bir ana ekran. Evdeki akıllı ci
 - **Kamera**: Eufy kameranın karta basınca tam ekran, sesli canlı görüntüsü (RTSP). Pan & Tilt kameralar kumandanın yön tuşlarıyla döndürülür.
 - **Kurulum sihirbazı**: Tam ekran, görselli adımlarla TV'nin ADB izni, Home tuşu, gereksiz uygulamaların temizliği ve "uyanık tut". Hepsi geri alınabilir.
 - **Bellek**: Üst şeritte RAM kullanımı; **Boşalt** arka plandaki uygulamaları kapatır.
-- **Güncelleme**: Uygulama Play Store'da olmadığı için yeni sürümleri GitHub'dan kendisi bulur; Genius ayarları simgesinde bir nokta çıkar. **Güncelle**'ye basınca APK indirilir, GitHub'ın verdiği SHA-256 özetiyle doğrulanır ve TV'nin ADB'siyle kurulur; ayarlar ve cihazlar yerinde kalır.
+- **Güncelleme**: Uygulama Play Store'da olmadığı için yeni sürümleri GitHub'dan kendisi bulur; günde üç kez bakar, yeni sürüm varsa Genius ayarları simgesinde bir nokta çıkar. **Güncelle**'ye basınca APK indirilir, GitHub'ın verdiği SHA-256 özetiyle doğrulanır ve TV'nin ADB'siyle kurulur; ayarlar ve cihazlar yerinde kalır.
 - **Ekran koruyucu**: Google TV'deki gibi ana ekranda Geri tuşuna art arda iki kez basınca başlar.
 - Türkçe ve İngilizce; sistem dilini izler.
 
@@ -67,6 +72,7 @@ Cihazlar üst şeritteki **Evim** kutusundan eklenir: **Evim → Cihaz ekle**.
    adb connect 192.168.1.50:5555
    adb install genius-launcher-x.y.z.apk
    ```
+   Bilgisayara birden fazla cihaz bağlıysa cihazı belirtin: `adb -s 192.168.1.50:5555 install -r genius-launcher-x.y.z.apk`
 3. Uygulamalar listesinden **Genius Launcher**'ı açın. İlk açılışta kurulum sihirbazı çıkar.
 
 ### Kaynak koddan derleme
@@ -123,7 +129,8 @@ adb shell cmd locale set-app-locales dev.evim.tv --locales en-US   # İngilizce 
 | Kumanda | İşlem |
 | --- | --- |
 | OK | Uygulamayı, cihazı ya da dosyayı aç |
-| OK'e basılı tut | Menü: taşı, gizle, renk seç, yeniden adlandır, sil |
+| OK'e basılı tut | Menü: taşı, gizle, renk seç, kilitle, yeniden adlandır, sil |
+| Home | Açık panelleri kapatıp ana ekrana dön (Dosyalar ve ayarlar dahil) |
 | Geri | Paneli kapat; Dosyalar'da bir üst klasöre çık |
 | Ana ekranda Geri iki kez | Ekran koruyucuyu başlat |
 | Kamerada yön tuşları | Pan & Tilt kamerayı döndür |
@@ -139,9 +146,9 @@ adb shell cmd locale set-app-locales dev.evim.tv --locales en-US   # İngilizce 
 
 Launcher ilk açıldığında bir sihirbaz çıkar; her adım atlanabilir ve Genius ayarlarından yeniden çalıştırılabilir:
 
-1. **TV'nin kendi ADB'si**: USB hata ayıklamanın nasıl açılacağını anlatır ve TV'nin izin penceresini çıkarır.
+1. **TV'nin kendi ADB'si**: USB hata ayıklamanın nasıl açılacağını anlatır ve TV'nin izin penceresini çıkarır. İzin verilince birkaç saniye içinde kendiliğinden fark eder.
 2. **Home tuşu**: Genius Launcher'ı ana ekran yapar (aşağıya bakın).
-3. **Temizlik**: Markaya göre bilinen gereksiz uygulamaları listeler (önce Xiaomi Mi Box); önerilenler seçili gelir. Uygulamalar silinmez, kullanıcı için kaldırılır. Bağlı olunan Wi-Fi ağını kaydetmiş bir uygulama seçilemez.
+3. **Temizlik**: Markaya göre bilinen gereksiz uygulamaları listeler (Xiaomi Mi Box ve Mi TV'ler; PatchWall, Mi Wallpaper, analiz ve reklam servisleri, ayrıca Netflix ve Play Filmler gibi hazır gelenler); önerilenler seçili gelir. Uygulamalar silinmez, kullanıcı için kaldırılır. Bağlı olunan Wi-Fi ağını kaydetmiş bir uygulama seçilemez.
 4. **Uyanık tut (isteğe bağlı)**: TV kapanınca kutu uyumaz, ev ağında kalır.
 
 Sihirbaz neyi değiştirdiğini (ayarların eski değerleriyle) kaydeder. Genius ayarlarındaki **Sihirbazın değişikliklerini geri al** yalnızca bunları eski hâline getirir; **Kaldır** da önce bunları geri getirmeyi sorar.
@@ -155,7 +162,7 @@ zsh tools/mibox/ana_ekran.sh genius   # Genius Launcher
 zsh tools/mibox/ana_ekran.sh google   # Google TV'ye geri dön
 ```
 
-Launcher 5 dakikada 3 kez çökerse Google TV ana ekranını kendiliğinden geri açar.
+Launcher 5 dakikada 3 kez çökerse sistemin ana ekranını kendiliğinden geri açar.
 
 ## Bilinen kısıtlar
 

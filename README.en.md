@@ -6,7 +6,12 @@ A clean, ad-free home screen for Android TV and Google TV. It also controls the 
 
 ![Home screen](docs/screenshots/en/home.png)
 
-> Tried on: Xiaomi Mi Box S 2nd gen (Google TV, Android 14) and Mi Box S 1st gen (Android TV, Android 9). It should work on other Android TV devices too, but they haven't been tried.
+> Tried on:
+> - Xiaomi Mi Box S 2nd gen (Google TV, Android 14)
+> - Xiaomi Mi Box S 1st gen (Android TV, Android 9)
+> - Xiaomi Mi TV (MiTV-AESP0, Android TV, Android 9)
+>
+> It should work on other Android TV devices with Android 8.0 or later too, but they haven't been tried.
 
 ## Features
 
@@ -19,7 +24,7 @@ A clean, ad-free home screen for Android TV and Google TV. It also controls the 
 - **Camera**: Press an Eufy camera's card for a full-screen live view with sound (RTSP). Pan & Tilt cameras turn with the remote's arrow keys.
 - **Setup wizard**: Full-screen illustrated steps for the TV's ADB permission, the Home button, removing bloatware and "stay awake". Everything can be undone.
 - **Memory**: RAM use in the top bar; **Free up** closes apps running in the background.
-- **Updates**: Since the app isn't on the Play Store, it finds new versions on GitHub by itself and shows a dot on the Genius settings icon. Pressing **Update** downloads the APK, checks it against GitHub's SHA-256 digest and installs it over the TV's ADB; settings and devices stay.
+- **Updates**: Since the app isn't on the Play Store, it checks GitHub for new versions three times a day and shows a dot on the Genius settings icon when there is one. Pressing **Update** downloads the APK, checks it against GitHub's SHA-256 digest and installs it over the TV's ADB; settings and devices stay.
 - **Screensaver**: As on Google TV, pressing Back twice on the home screen starts it.
 - English and Turkish; follows the system language.
 
@@ -67,6 +72,7 @@ Devices are added from the **Home** chip in the top bar: **Home → Add device**
    adb connect 192.168.1.50:5555
    adb install genius-launcher-x.y.z.apk
    ```
+   If more than one device is connected, name it: `adb -s 192.168.1.50:5555 install -r genius-launcher-x.y.z.apk`
 3. Open **Genius Launcher** from the apps list. The setup wizard appears on first launch.
 
 ### Building from source
@@ -123,7 +129,8 @@ adb shell cmd locale set-app-locales dev.evim.tv --locales en-US   # for English
 | Remote | Action |
 | --- | --- |
 | OK | Open the app, device or file |
-| Hold OK | Menu: move, hide, pick a color, rename, delete |
+| Hold OK | Menu: move, hide, pick a color, lock, rename, delete |
+| Home | Close any open panel and go back to the home screen (Files and settings too) |
 | Back | Close the panel; in Files, go up a folder |
 | Back twice on the home screen | Start the screensaver |
 | Arrow keys on a camera | Turn a Pan & Tilt camera |
@@ -139,9 +146,9 @@ adb shell cmd locale set-app-locales dev.evim.tv --locales en-US   # for English
 
 A wizard appears the first time the launcher opens; every step can be skipped and it can be run again from Genius settings:
 
-1. **The TV's own ADB**: Explains how to turn on USB debugging and brings up the TV's permission prompt.
+1. **The TV's own ADB**: Explains how to turn on USB debugging and brings up the TV's permission prompt. It notices within a few seconds when you allow it.
 2. **Home button**: Makes Genius Launcher the home screen (see below).
-3. **Cleanup**: Lists known bloatware for the brand (Xiaomi Mi Box first); recommended ones are selected. Apps aren't deleted, they're removed for the TV's user. An app that saved the Wi-Fi network you're connected to can't be selected.
+3. **Cleanup**: Lists known bloatware for the brand (Xiaomi Mi Box and Mi TVs: PatchWall, Mi Wallpaper, analytics and ad services, plus preinstalled apps such as Netflix and Play Movies); recommended ones are selected. Apps aren't deleted, they're removed for the TV's user. An app that saved the Wi-Fi network you're connected to can't be selected.
 4. **Stay awake (optional)**: The box doesn't sleep when the TV turns off and stays on your home network.
 
 The wizard records what it changed (with the old setting values). **Undo the setup wizard's changes** in Genius settings restores only those; **Uninstall** offers to restore them first too.
@@ -155,7 +162,7 @@ zsh tools/mibox/ana_ekran.sh genius   # Genius Launcher
 zsh tools/mibox/ana_ekran.sh google   # back to Google TV
 ```
 
-If the launcher crashes 3 times in 5 minutes, it turns Google TV's home screen back on by itself.
+If the launcher crashes 3 times in 5 minutes, it turns the system home screen back on by itself.
 
 ## Known limitations
 
