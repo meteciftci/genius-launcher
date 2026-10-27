@@ -16,10 +16,6 @@ import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Lock
-import androidx.compose.material.icons.rounded.PowerSettingsNew
-import androidx.compose.material.icons.rounded.RestartAlt
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.Tune
@@ -55,11 +51,10 @@ import kotlinx.coroutines.launch
 // Widget'ın sığdığı aralık: Dyson büyük kart, gerisi tek satır
 private val WIDGET_LIMITS = listOf(3, 4, 5, 6)
 
-private enum class Step { MENU, WIDGET, LOCK, ABOUT, UPDATE, TO_GENIUS, TO_GOOGLE, UNDO_SETUP, UNINSTALL, RESTART, SHUTDOWN }
+private enum class Step { MENU, WIDGET, LOCK, ABOUT, UPDATE, TO_GENIUS, TO_GOOGLE, UNDO_SETUP, UNINSTALL }
 
 /**
- * Launcher'ın kendi ayarları: gizli uygulamalar, hava durumu şehri, Home tuşu, hakkında, kutuyu
- * yeniden başlatma ya da kapatma ve kaldırma.
+ * Launcher'ın kendi ayarları: gizli uygulamalar, hava durumu şehri, Home tuşu, hakkında ve kaldırma.
  * Onay ve bilgi adımları ayrı pencere açmadan aynı panelin içinde gösterilir.
  */
 @Composable
@@ -159,13 +154,6 @@ fun SettingsDialog(
                         }
                     }
                     Spacer(Modifier.height(6.dp))
-                    // Panel TV ekranına sığsın diye ikisi yan yana
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        ListRow(stringResource(R.string.power_restart), null, Icons.Rounded.RestartAlt, modifier = Modifier.weight(1f)) { go(Step.RESTART) }
-                        ListRow(stringResource(R.string.power_shutdown), null, Icons.Rounded.PowerSettingsNew, EvimColors.Danger, modifier = Modifier.weight(1f)) {
-                            go(Step.SHUTDOWN)
-                        }
-                    }
                     ListRow(stringResource(R.string.settings_uninstall), stringResource(R.string.settings_uninstall_hint), Icons.Rounded.DeleteForever, EvimColors.Danger, trailing = Trailing.Chevron) {
                         go(Step.UNINSTALL)
                     }
@@ -299,25 +287,6 @@ fun SettingsDialog(
                     },
                     onCancel = { go(Step.MENU) },
                 )
-                Step.RESTART, Step.SHUTDOWN -> {
-                    val restart = step == Step.RESTART
-                    Confirm(
-                        icon = if (restart) Icons.Rounded.RestartAlt else Icons.Rounded.PowerSettingsNew,
-                        title = stringResource(if (restart) R.string.power_restart_title else R.string.power_shutdown_title),
-                        body = listOf(stringResource(if (restart) R.string.power_restart_body else R.string.power_shutdown_body)),
-                        confirm = stringResource(if (restart) R.string.power_restart else R.string.power_shutdown),
-                        busy = busy,
-                        focus = first,
-                        onConfirm = {
-                            busy = true
-                            vm.power(restart) { failure ->
-                                busy = false
-                                error = failure
-                            }
-                        },
-                        onCancel = { go(Step.MENU) },
-                    )
-                }
                 Step.UNINSTALL -> {
                     val uninstall = { restore: Boolean ->
                         if (!busy) {

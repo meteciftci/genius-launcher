@@ -233,12 +233,10 @@
     <string name="wizard_done_body">Sihirbazı yeniden çalıştırabilir ya da yaptıklarını Genius ayarlarından geri alabilirsiniz. Akıllı ev cihazlarını üstteki Evim kutusundan ekleyin.</string>
     <string name="wizard_done_no_adb">Hata ayıklama bağlantısı olmadan diğer adımlar atlandı. Sihirbazı Genius ayarlarından yeniden çalıştırabilirsiniz.</string>
     <string name="settings_about">Hakkında</string>
+    <string name="power_title">Güç</string>
+    <string name="power_body">Yeniden başlatınca açık uygulamalar kapanır ve kutu bir dakika içinde yeniden açılır. Kapatınca kutu tamamen kapanır; kumandanın güç tuşu açmaya yetmeyebilir, o zaman adaptörü çıkarıp yeniden takın.</string>
     <string name="power_restart">Yeniden başlat</string>
     <string name="power_shutdown">Kapat</string>
-    <string name="power_restart_title">Kutu yeniden başlatılsın mı?</string>
-    <string name="power_restart_body">Açık uygulamalar kapanır, kutu bir dakika içinde yeniden açılır.</string>
-    <string name="power_shutdown_title">Kutu kapatılsın mı?</string>
-    <string name="power_shutdown_body">Kutu tamamen kapanır. Kumandanın güç tuşu açmaya yetmeyebilir; o zaman adaptörü çıkarıp yeniden takın.</string>
     <string name="settings_uninstall">Kaldır ve eski hâline dön</string>
     <string name="home_to_genius_title">Genius Launcher ana ekran olsun mu?</string>
     <string name="home_to_genius_body">Google TV ana ekranı ve kurulum sihirbazı kapatılır, kaldırılmaz. Ekran koruyucu yerinde kalır.</string>

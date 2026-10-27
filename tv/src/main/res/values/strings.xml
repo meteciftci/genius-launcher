@@ -247,12 +247,10 @@
     <string name="wizard_done_body">You can run this again or undo what it changed from Genius settings. Add smart home devices from the Home chip at the top.</string>
     <string name="wizard_done_no_adb">Without the debugging connection the other steps were skipped. You can run the wizard again from Genius settings.</string>
     <string name="settings_about">About</string>
+    <string name="power_title">Power</string>
+    <string name="power_body">Restarting closes open apps and the box starts again within a minute. Shutting down powers the box off completely; the remote\'s power button may not turn it back on, so unplug the adapter and plug it back in.</string>
     <string name="power_restart">Restart</string>
     <string name="power_shutdown">Shut down</string>
-    <string name="power_restart_title">Restart the box?</string>
-    <string name="power_restart_body">Open apps close and the box starts again within a minute.</string>
-    <string name="power_shutdown_title">Shut down the box?</string>
-    <string name="power_shutdown_body">The box powers off completely. The remote\'s power button may not turn it back on; if so, unplug the adapter and plug it back in.</string>
     <string name="settings_uninstall">Uninstall and restore</string>
     <string name="home_to_genius_title">Make Genius Launcher the home screen?</string>
     <string name="home_to_genius_body">Google TV\'s home screen and its setup app are turned off, not removed. The screensaver stays.</string>

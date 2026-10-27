@@ -78,6 +78,7 @@ fun HomeScreen(vm: LauncherViewModel) {
     var showSmartHome by remember { mutableStateOf(false) }
     var showWizard by remember { mutableStateOf(false) }
     var showFiles by remember { mutableStateOf(false) }
+    var showPower by remember { mutableStateOf(false) }
     // PIN doğru girilince yapılacak iş; PIN yoksa önce oluşturulup sonra yapılacak iş
     var afterPin by remember { mutableStateOf<(() -> Unit)?>(null) }
     var afterNewPin by remember { mutableStateOf<(() -> Unit)?>(null) }
@@ -113,6 +114,7 @@ fun HomeScreen(vm: LauncherViewModel) {
         showSmartHome = false
         showWizard = false
         showFiles = false
+        showPower = false
         afterPin = null
         afterNewPin = null
         runCatching { firstCard.requestFocus() }
@@ -141,7 +143,7 @@ fun HomeScreen(vm: LauncherViewModel) {
 
         // Alt boşluk dar: uygulama kartları ekranın altına yakın dursun
         Column(Modifier.fillMaxSize().padding(start = 48.dp, end = 48.dp, top = 30.dp, bottom = 14.dp)) {
-            TopBar(vm = vm, onWeatherClick = { showWeather = true }, onSmartHome = { showSmartHome = true }, onGeniusSettings = { withPin { showSettings = true } })
+            TopBar(vm = vm, onWeatherClick = { showWeather = true }, onSmartHome = { showSmartHome = true }, onGeniusSettings = { withPin { showSettings = true } }, onPower = { showPower = true })
             Spacer(Modifier.weight(1f))
             Hero(app = current, accent = accent)
 
@@ -211,6 +213,9 @@ fun HomeScreen(vm: LauncherViewModel) {
         }
         if (showFiles) {
             FilesDialog(onInstalled = vm::refresh, onDismiss = { showFiles = false })
+        }
+        if (showPower) {
+            PowerDialog(vm = vm, onDismiss = { showPower = false })
         }
         afterPin?.let { action ->
             PinDialog(
