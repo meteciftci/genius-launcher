@@ -124,7 +124,8 @@ class Setup(private val context: Context) {
         const val KEY_SETTINGS = "settings"
         const val KEY_HOME = "home"
 
-        // Paket → önerilir mi. Xiaomi listesi Mi Box S 1. ve 2. nesilde denendi; güncelleme servisi bilerek yok
+        // Paket → önerilir mi. Xiaomi listesi Mi Box S 1. ve 2. nesilde ve bir Mi TV'de (Android 9) denendi;
+        // güncelleme servisi bilerek yok
         val XIAOMI = mapOf(
             "com.xiaomi.statistic" to true,
             "com.miui.tv.analytics" to true,
@@ -137,6 +138,8 @@ class Setup(private val context: Context) {
             "com.mitv.tvhome.mitvplus" to false,
             "com.xiaomi.mimusic2" to false,
             "com.mitv.gallery" to false,
+            // Mi Wallpaper: Xiaomi'nin ekran koruyucusu; seçiliyse kaldırılınca Android varsayılanına döner
+            "com.mitv.dream" to false,
             "com.mitv.videoplayer" to false,
             "com.xiaomi.mitv.mediaexplorer" to false,
         )
