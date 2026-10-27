@@ -321,4 +321,20 @@
     <string name="receive_failed">Interrupted; the file wasn\'t saved.</string>
     <string name="receive_no_space">Not enough space on the TV; the file wasn\'t saved.</string>
     <string name="receive_more">+%d more in Downloads</string>
+    <string name="menu_lock">Lock</string>
+    <string name="menu_unlock">Unlock</string>
+    <string name="pin_enter_title">Enter PIN</string>
+    <string name="pin_create_title">New PIN</string>
+    <string name="pin_create_first">Choose a 4-digit PIN</string>
+    <string name="pin_create_confirm">Enter the same PIN again</string>
+    <string name="pin_mismatch">The PINs didn\'t match. Start again.</string>
+    <string name="pin_wrong">Wrong PIN.</string>
+    <string name="pin_blocked">Too many wrong tries. Try again in 30 seconds.</string>
+    <string name="settings_lock">App lock</string>
+    <string name="settings_lock_off">Off</string>
+    <string name="settings_lock_count">%d locked</string>
+    <string name="lock_body">Locked cards ask for a 4-digit PIN before they open, and Genius settings use the same PIN. To lock a card, hold OK on it and choose Lock. The lock only covers Genius cards: the app can still be opened by voice or from the TV\'s settings.</string>
+    <string name="lock_set">Set PIN</string>
+    <string name="lock_change">Change PIN</string>
+    <string name="lock_remove">Turn off</string>
 </resources>

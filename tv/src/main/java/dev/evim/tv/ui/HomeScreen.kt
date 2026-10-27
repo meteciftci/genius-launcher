@@ -78,8 +78,14 @@ fun HomeScreen(vm: LauncherViewModel) {
     var showSmartHome by remember { mutableStateOf(false) }
     var showWizard by remember { mutableStateOf(false) }
     var showFiles by remember { mutableStateOf(false) }
+    // PIN doğru girilince yapılacak iş; PIN yoksa önce oluşturulup sonra yapılacak iş
+    var afterPin by remember { mutableStateOf<(() -> Unit)?>(null) }
+    var afterNewPin by remember { mutableStateOf<(() -> Unit)?>(null) }
+    // PIN belirlenmişse Genius ayarları da PIN ister; yoksa kilit kaldırılabilirdi
+    val withPin: (() -> Unit) -> Unit = { action -> if (vm.hasPin) afterPin = action else action() }
     // Dosyalar kartı bir uygulama değil, launcher'ın kendi ekranını açar
-    val open: (LauncherApp) -> Unit = { app -> if (app.packageName == FILES_APP) showFiles = true else vm.launch(app) }
+    val launch: (LauncherApp) -> Unit = { app -> if (app.packageName == FILES_APP) showFiles = true else vm.launch(app) }
+    val open: (LauncherApp) -> Unit = { app -> if (vm.isLocked(app)) afterPin = { launch(app) } else launch(app) }
     // Şehir ayarlardan seçildiyse sonunda hava paneline değil ayarlara dönülür
     var cityFromSettings by remember { mutableStateOf(false) }
     val firstCard = remember { FocusRequester() }
@@ -107,6 +113,8 @@ fun HomeScreen(vm: LauncherViewModel) {
         showSmartHome = false
         showWizard = false
         showFiles = false
+        afterPin = null
+        afterNewPin = null
         runCatching { firstCard.requestFocus() }
     }
 
@@ -133,7 +141,7 @@ fun HomeScreen(vm: LauncherViewModel) {
 
         // Alt boşluk dar: uygulama kartları ekranın altına yakın dursun
         Column(Modifier.fillMaxSize().padding(start = 48.dp, end = 48.dp, top = 30.dp, bottom = 14.dp)) {
-            TopBar(vm = vm, onWeatherClick = { showWeather = true }, onSmartHome = { showSmartHome = true }, onGeniusSettings = { showSettings = true })
+            TopBar(vm = vm, onWeatherClick = { showWeather = true }, onSmartHome = { showSmartHome = true }, onGeniusSettings = { withPin { showSettings = true } })
             Spacer(Modifier.weight(1f))
             Hero(app = current, accent = accent)
 
@@ -155,6 +163,7 @@ fun HomeScreen(vm: LauncherViewModel) {
                     AppCard(
                         app = app,
                         moving = movingPackage == app.packageName,
+                        locked = app.packageName in vm.lockedApps,
                         modifier = if (index == 0) Modifier.focusRequester(firstCard) else Modifier,
                         onFocused = { focused = app },
                         onClick = {
@@ -184,11 +193,42 @@ fun HomeScreen(vm: LauncherViewModel) {
                 onMove = { menuFor = null; movingPackage = app.packageName },
                 onHide = { menuFor = null; vm.hide(app) },
                 onColor = { vm.setColor(app, it) },
-                onInfo = { menuFor = null; vm.openAppInfo(app) }.takeIf { app.packageName != FILES_APP },
+                // Uygulama bilgisi ekranında "Aç" düğmesi var; kilitli kartta o da PIN ister
+                onInfo = {
+                    menuFor = null
+                    if (vm.isLocked(app)) afterPin = { vm.openAppInfo(app) } else vm.openAppInfo(app)
+                }.takeIf { app.packageName != FILES_APP },
+                locked = vm.isLocked(app),
+                onLock = {
+                    menuFor = null
+                    when {
+                        vm.isLocked(app) -> afterPin = { vm.setLocked(app, false) }
+                        vm.hasPin -> vm.setLocked(app, true)
+                        else -> afterNewPin = { vm.setLocked(app, true) }
+                    }
+                },
             )
         }
         if (showFiles) {
             FilesDialog(onInstalled = vm::refresh, onDismiss = { showFiles = false })
+        }
+        afterPin?.let { action ->
+            PinDialog(
+                title = stringResource(R.string.pin_enter_title),
+                subtitle = null,
+                check = vm::checkPin,
+                onSuccess = { afterPin = null; action() },
+                onDismiss = { afterPin = null },
+            )
+        }
+        afterNewPin?.let { action ->
+            PinDialog(
+                title = stringResource(R.string.pin_create_title),
+                subtitle = null,
+                create = true,
+                onSuccess = { pin -> vm.setPin(pin); afterNewPin = null; action() },
+                onDismiss = { afterNewPin = null },
+            )
         }
         // İlk açılışta kendiliğinden, sonra Genius ayarlarından
         if (showWizard || vm.setupPending) {

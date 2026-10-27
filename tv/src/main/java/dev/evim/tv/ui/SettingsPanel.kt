@@ -15,6 +15,7 @@ import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.Tune
@@ -50,7 +51,7 @@ import kotlinx.coroutines.launch
 // Widget'ın sığdığı aralık: Dyson büyük kart, gerisi tek satır
 private val WIDGET_LIMITS = listOf(3, 4, 5, 6)
 
-private enum class Step { MENU, WIDGET, ABOUT, UPDATE, TO_GENIUS, TO_GOOGLE, UNDO_SETUP, UNINSTALL }
+private enum class Step { MENU, WIDGET, LOCK, ABOUT, UPDATE, TO_GENIUS, TO_GOOGLE, UNDO_SETUP, UNINSTALL }
 
 /**
  * Launcher'ın kendi ayarları: gizli uygulamalar, hava durumu şehri, Home tuşu, hakkında ve kaldırma.
@@ -131,6 +132,12 @@ fun SettingsDialog(
                                 Modifier.weight(1f),
                             ) { go(Step.WIDGET) }
                         }
+                        ChoiceCard(
+                            Icons.Rounded.Lock,
+                            stringResource(R.string.settings_lock),
+                            if (vm.hasPin) stringResource(R.string.settings_lock_count, vm.lockedApps.size) else stringResource(R.string.settings_lock_off),
+                            Modifier.weight(1f),
+                        ) { go(Step.LOCK) }
                         ChoiceCard(Icons.Rounded.AutoFixHigh, stringResource(R.string.settings_wizard), null, Modifier.weight(1f), onClick = onWizard)
                         // Yeni sürüm varken "Hakkında" kartı güncellemeye götürür
                         val update = vm.update
@@ -171,6 +178,29 @@ fun SettingsDialog(
                                 go(Step.MENU)
                             }
                         }
+                    }
+                }
+                Step.LOCK -> {
+                    var creating by remember { mutableStateOf(false) }
+                    PanelHeader(stringResource(R.string.settings_lock), null, Icons.Rounded.Lock)
+                    PanelText(stringResource(R.string.lock_body))
+                    PanelActions {
+                        if (vm.hasPin) {
+                            PillButton(stringResource(R.string.lock_change), Modifier.focusRequester(first)) { creating = true }
+                            PillButton(stringResource(R.string.lock_remove), danger = true) { vm.removePin(); go(Step.MENU) }
+                        } else {
+                            PillButton(stringResource(R.string.lock_set), Modifier.focusRequester(first), primary = true) { creating = true }
+                        }
+                        PillButton(stringResource(R.string.done)) { go(Step.MENU) }
+                    }
+                    if (creating) {
+                        PinDialog(
+                            title = stringResource(R.string.pin_create_title),
+                            subtitle = null,
+                            create = true,
+                            onSuccess = { pin -> vm.setPin(pin); creating = false },
+                            onDismiss = { creating = false },
+                        )
                     }
                 }
                 Step.ABOUT -> {

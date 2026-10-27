@@ -20,6 +20,16 @@ class LauncherPrefs(context: Context) {
         get() = sp.getStringSet(KEY_HIDDEN, emptySet()).orEmpty().toSet()
         set(value) = sp.edit { putStringSet(KEY_HIDDEN, value) }
 
+    /** Açılırken PIN sorulan kartlar. */
+    var locked: Set<String>
+        get() = sp.getStringSet(KEY_LOCKED, emptySet()).orEmpty().toSet()
+        set(value) = sp.edit { putStringSet(KEY_LOCKED, value) }
+
+    /** [PinLock.hash] çıktısı; null ise kilit kapalı. */
+    var pinHash: String?
+        get() = sp.getString(KEY_PIN, null)
+        set(value) = sp.edit { if (value == null) remove(KEY_PIN) else putString(KEY_PIN, value) }
+
     fun customColor(packageName: String): Int? =
         if (sp.contains(colorKey(packageName))) sp.getInt(colorKey(packageName), 0) else null
 
@@ -76,6 +86,8 @@ class LauncherPrefs(context: Context) {
     private companion object {
         const val KEY_ORDER = "order"
         const val KEY_HIDDEN = "hidden"
+        const val KEY_LOCKED = "locked"
+        const val KEY_PIN = "pin"
         const val KEY_DEVICE_ORDER = "device_order"
         const val KEY_TUYA_USER_CODE = "tuya_user_code"
         const val KEY_SETUP_SHOWN = "setup_shown"

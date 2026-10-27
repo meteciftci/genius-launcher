@@ -306,4 +306,20 @@
     <string name="receive_failed">Yarıda kaldı, dosya kaydedilmedi.</string>
     <string name="receive_no_space">TV\'de yer yok, dosya kaydedilmedi.</string>
     <string name="receive_more">+%d dosya daha, İndirilenler\'de</string>
+    <string name="menu_lock">Kilitle</string>
+    <string name="menu_unlock">Kilidi kaldır</string>
+    <string name="pin_enter_title">PIN\'i girin</string>
+    <string name="pin_create_title">Yeni PIN</string>
+    <string name="pin_create_first">4 haneli bir PIN seçin</string>
+    <string name="pin_create_confirm">Aynı PIN\'i bir kez daha girin</string>
+    <string name="pin_mismatch">PIN\'ler eşleşmedi, baştan girin.</string>
+    <string name="pin_wrong">Yanlış PIN.</string>
+    <string name="pin_blocked">Çok fazla yanlış deneme. 30 saniye sonra tekrar deneyin.</string>
+    <string name="settings_lock">Uygulama kilidi</string>
+    <string name="settings_lock_off">Kapalı</string>
+    <string name="settings_lock_count">%d kilitli</string>
+    <string name="lock_body">Kilitli kartlar açılırken 4 haneli PIN sorulur; Genius ayarları da aynı PIN\'le korunur. Bir kartı kilitlemek için karta basılı tutup Kilitle\'yi seçin. Kilit yalnızca Genius kartlarını korur: uygulama sesli komutla ya da TV ayarlarından yine açılabilir.</string>
+    <string name="lock_set">PIN belirle</string>
+    <string name="lock_change">PIN\'i değiştir</string>
+    <string name="lock_remove">Kilidi kapat</string>
 </resources>

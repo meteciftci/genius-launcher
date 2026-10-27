@@ -39,7 +39,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Lock
 import androidx.tv.material3.Border
+import androidx.tv.material3.Icon
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
@@ -71,6 +74,7 @@ fun AppCard(
     onLongClick: () -> Unit,
     onMove: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    locked: Boolean = false,
 ) {
     val ring = if (moving) EvimColors.Warning else Color.White
     var isFocused by remember { mutableStateOf(false) }
@@ -129,6 +133,14 @@ fun AppCard(
                     .size(28.dp)
                     .clip(RoundedCornerShape(7.dp)),
             )
+            if (locked) {
+                Icon(
+                    Icons.Rounded.Lock,
+                    contentDescription = null,
+                    tint = Color.White.copy(alpha = 0.85f),
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(end = 9.dp, bottom = 9.dp).size(13.dp),
+                )
+            }
             Text(
                 text = if (moving) "◀  ${app.label}  ▶" else app.label,
                 color = Color.White,
@@ -138,7 +150,7 @@ fun AppCard(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(start = 10.dp, end = 10.dp, bottom = 9.dp),
+                    .padding(start = 10.dp, end = if (locked) 26.dp else 10.dp, bottom = 9.dp),
             )
         }
     }

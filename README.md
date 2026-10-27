@@ -13,6 +13,7 @@ Android TV ve Google TV için reklamsız, sade bir ana ekran. Evdeki akıllı ci
 - **Vitrin**: Odaktaki uygulamanın adı büyük harflerle yazılır; arka plan uygulamanın simgesinden çıkarılan renge boyanır.
 - **Uygulamalar**: Kumandada OK'e basılı tutunca açılan menüden kartlar taşınır, gizlenir ya da rengi değiştirilir. Yeni kurulan uygulamaların kartı kendiliğinden gelir; gizlenenler Genius ayarlarından geri getirilir.
 - **Dosyalar**: Dahili hafıza ve USB bellekteki dosyalar gezilir, yeniden adlandırılır ve silinir. Video, müzik ve resimler launcher'ın içinde açılır (TV'de oynatıcı uygulaması olmasa da). APK'lar onay sorulduktan sonra kurulur. **Telefondan dosya al** bir QR kod gösterir: telefonun kamerasıyla okutup açılan sayfadan dosya seçilir, dosyalar uygulama kurmadan ev ağından İndirilenler klasörüne gelir. Dosyalar da uygulamalar gibi bir karttır, istenirse gizlenir.
+- **Uygulama kilidi**: Kartın menüsünden **Kilitle** seçilen uygulamalar 4 haneli PIN ile açılır; PIN Genius ayarlarından belirlenir ve ayarları da korur. PIN kumandanın yön tuşlarıyla ekrandaki tuş takımından girilir. PIN'in kendisi saklanmaz, yalnızca tuzlu özeti TV'de durur.
 - **Hava durumu**: Saatin yanında anlık hava durumu; basınca saatlik ve 7 günlük tahmin açılır. Veriler [Open-Meteo](https://open-meteo.com)'dan gelir, şehir seçilebilir.
 - **Akıllı ev**: Tuya (priz, röle, mama kabı), Dyson hava temizleyiciler ve Eufy kameralar sağ üstteki kartlarda görünür. Kartlar sıralanır ve yeniden adlandırılır; kaç kartın görüneceği seçilir (3–6), fazlası "Diğer" panelinde.
 - **Kamera**: Eufy kameranın karta basınca tam ekran, sesli canlı görüntüsü (RTSP). Pan & Tilt kameralar kumandanın yön tuşlarıyla döndürülür.
@@ -161,6 +162,7 @@ Launcher 5 dakikada 3 kez çökerse Google TV ana ekranını kendiliğinden geri
 - **Tuya**: Yerel protokolün 3.3 ve 3.4 sürümleri desteklenir, 3.5 henüz desteklenmez. Tam kontrol yalnızca denenmiş tiplerde var (priz/röle, Xenon X8605 mama kabı); bilinmeyen cihazlarda aç/kapa ya da yalnızca durum gösterilir.
 - **Dyson**: Isıtmalı hava temizleyici (527K) ile denendi; diğer modellerde bazı değerler eksik görünebilir.
 - **Eufy**: Yalnızca RTSP veren kameralar. Döndürme Indoor Cam Pan & Tilt (T8410) ile denendi. RTSP açıkken Eufy görüntüyü 1080p'ye düşürür.
+- **Uygulama kilidi**: Yalnızca Genius'taki kartları korur; kilitli uygulama sesli komutla, başka bir uygulamadan ya da TV ayarlarından yine açılabilir. Çocukların kumandayla rastgele açmasını önlemek içindir. PIN unutulursa bilgisayardan `adb shell pm clear dev.evim.tv` ile Genius'un verileri silinir; PIN'le birlikte ayarlar ve akıllı ev cihazları da gider.
 - **Dosyalar**: Video ve müzik, cihazın donanımının çözebildiği biçimlerde oynar. Launcher'ın kendi APK'sı Dosyalar'dan kurulunca launcher yeniden başlar.
 
 ## Teşekkür

@@ -19,6 +19,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.LockOpen
 import androidx.compose.material.icons.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.SwapHoriz
@@ -62,6 +64,8 @@ fun AppMenu(
     onColor: (Color?) -> Unit,
     /** null: "Uygulama bilgisi" gösterilmez (launcher'ın kendi kartları). */
     onInfo: (() -> Unit)?,
+    locked: Boolean,
+    onLock: () -> Unit,
 ) {
     var pickingColor by remember { mutableStateOf(false) }
     val first = remember { FocusRequester() }
@@ -80,6 +84,11 @@ fun AppMenu(
                 ListRow(stringResource(R.string.menu_move), icon = Icons.Rounded.SwapHoriz, onClick = onMove)
                 ListRow(stringResource(R.string.menu_pick_color), icon = Icons.Rounded.Palette, onClick = { pickingColor = true })
                 ListRow(stringResource(R.string.menu_hide), icon = Icons.Rounded.VisibilityOff, onClick = onHide)
+                ListRow(
+                    stringResource(if (locked) R.string.menu_unlock else R.string.menu_lock),
+                    icon = if (locked) Icons.Rounded.LockOpen else Icons.Rounded.Lock,
+                    onClick = onLock,
+                )
                 if (onInfo != null) ListRow(stringResource(R.string.menu_app_info), icon = Icons.Rounded.Info, onClick = onInfo)
             } else {
                 Text(stringResource(R.string.color_title), color = EvimColors.TextDim, fontSize = 11.sp)

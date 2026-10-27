@@ -1,6 +1,7 @@
 package dev.evim.tv
 
 import android.app.Application
+import android.os.SystemClock
 import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -26,6 +27,8 @@ import dev.evim.tv.data.SwitchCheck
 import dev.evim.tv.data.Forecast
 import dev.evim.tv.data.LauncherApp
 import dev.evim.tv.data.LauncherPrefs
+import dev.evim.tv.data.PinCheck
+import dev.evim.tv.data.PinLock
 import dev.evim.tv.data.RamInfo
 import dev.evim.tv.data.SystemStatus
 import dev.evim.tv.data.Weather
@@ -77,6 +80,16 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
         private set
     var hiddenApps by mutableStateOf<List<LauncherApp>>(emptyList())
         private set
+
+    /** Açılırken PIN sorulan kartların paket adları. */
+    var lockedApps by mutableStateOf(prefs.locked)
+        private set
+
+    /** PIN belirlenmişse kilitli kartlar ve Genius ayarları PIN ister. */
+    var hasPin by mutableStateOf(prefs.pinHash != null)
+        private set
+    private var pinFailures = 0
+    private var pinBlockedUntil = 0L
     var ram by mutableStateOf(RamInfo(0f, 0))
         private set
     var status by mutableStateOf(SystemStatus(wifiLevel = null, bluetoothOn = false))
@@ -525,6 +538,41 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
         publish()
     }
 
+    fun isLocked(app: LauncherApp) = app.packageName in lockedApps
+
+    fun setLocked(app: LauncherApp, locked: Boolean) {
+        prefs.locked = if (locked) prefs.locked + app.packageName else prefs.locked - app.packageName
+        lockedApps = prefs.locked
+    }
+
+    fun setPin(pin: String) {
+        prefs.pinHash = PinLock.hash(pin)
+        hasPin = true
+    }
+
+    /** Kilidi tamamen kapatır: PIN de kilitli kart listesi de silinir. */
+    fun removePin() {
+        prefs.pinHash = null
+        prefs.locked = emptySet()
+        hasPin = false
+        lockedApps = emptySet()
+    }
+
+    /** Art arda [PIN_TRIES] yanlış denemeden sonra [PIN_WAIT_MS] boyunca PIN kabul edilmez. */
+    fun checkPin(pin: String): PinCheck {
+        val now = SystemClock.elapsedRealtime()
+        if (now < pinBlockedUntil) return PinCheck.BLOCKED
+        val stored = prefs.pinHash ?: return PinCheck.OK
+        if (PinLock.matches(stored, pin)) {
+            pinFailures = 0
+            return PinCheck.OK
+        }
+        if (++pinFailures < PIN_TRIES) return PinCheck.WRONG
+        pinFailures = 0
+        pinBlockedUntil = now + PIN_WAIT_MS
+        return PinCheck.BLOCKED
+    }
+
     fun hide(app: LauncherApp) {
         prefs.hidden = prefs.hidden + app.packageName
         publish()
@@ -568,5 +616,7 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
         const val TUYA_LOGIN_POLLS = 90
         // ADB izni 7 gün kullanılmazsa düşüyor; günde bir yenilemek yeterli
         const val ADB_KEEPALIVE_MS = 24 * 60 * 60 * 1000L
+        const val PIN_TRIES = 5
+        const val PIN_WAIT_MS = 30_000L
     }
 }
