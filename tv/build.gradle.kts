@@ -14,9 +14,9 @@ android {
         applicationId = "dev.evim.tv"
         minSdk = 26
         targetSdk = 34
-        versionCode = 6
+        versionCode = 7
         // Güncelleme yöneticisini denemek için eski bir sürüm gibi derlenebilir: -PversionName=0.0.9
-        versionName = providers.gradleProperty("versionName").getOrElse("0.2.4")
+        versionName = providers.gradleProperty("versionName").getOrElse("0.2.5")
 
         // Tuya QR girişinin istemci kimliği koda değil git'e girmeyen local.properties'e yazılır
         val local = Properties().apply {
