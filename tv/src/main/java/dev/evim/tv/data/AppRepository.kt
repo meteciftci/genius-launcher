@@ -165,6 +165,18 @@ class AppRepository(private val context: Context) {
         adb.shell("service call dreams 1")
     }
 
+    /**
+     * Kutuyu yeniden başlatır ya da tamamen kapatır. Önce bağlantı denenir ki izin ya da ADB sorunu
+     * bildirilebilsin; komut sırasında bağlantının kopması kapanmanın kendisidir, hata sayılmaz.
+     */
+    fun power(restart: Boolean) {
+        adb.probe()
+        try {
+            adb.shell(if (restart) "svc power reboot" else "svc power shutdown")
+        } catch (_: java.io.IOException) {
+        }
+    }
+
     private fun availableMb(): Long = ActivityManager.MemoryInfo().also(am::getMemoryInfo).availMem / (1024 * 1024)
 
     private fun accentFrom(bitmap: Bitmap): Color {
