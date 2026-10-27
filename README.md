@@ -6,7 +6,7 @@ Android TV ve Google TV için reklamsız, sade bir ana ekran. Evdeki akıllı ci
 
 ![Ana ekran](docs/screenshots/tr/home.png)
 
-> İlk hedef cihaz Xiaomi Mi Box S (2. nesil, Android 14). Diğer Android TV cihazlarında da çalışması beklenir, ama denenmedi.
+> Denenen cihazlar: Xiaomi Mi Box S 2. nesil (Google TV, Android 14) ve Mi Box S 1. nesil (Android TV, Android 9). Diğer Android TV cihazlarında da çalışması beklenir, ama denenmedi.
 
 ## Özellikler
 
@@ -147,7 +147,7 @@ Sihirbaz neyi değiştirdiğini (ayarların eski değerleriyle) kaydeder. Genius
 
 ### Ana ekran (Home tuşu)
 
-Google TV, kendi ana ekranı açıkken başka launcher'ları yok sayar. Bu yüzden önce Google TV'nin kurulum sihirbazı, sonra ana ekranı kapatılır (kaldırılmaz) ve Home tuşu Genius Launcher'a bağlanır. Bağlı olunan Wi-Fi ağını kaydeden uygulama kapatılacaksa hiçbir şey yapılmaz. Bunu kurulum sihirbazı ya da Genius ayarları yapar; geliştirme için aynısı bilgisayardan:
+Google TV, kendi ana ekranı açıkken başka launcher'ları yok sayar; eski Android TV ana ekranı da öyle. Bu yüzden önce kurulum sihirbazı, sonra sistemin ana ekranı kapatılır (kaldırılmaz) ve Home tuşu Genius Launcher'a bağlanır. Bağlı olunan Wi-Fi ağını kaydeden uygulama kapatılacaksa hiçbir şey yapılmaz. Bunu kurulum sihirbazı ya da Genius ayarları yapar; geliştirme için aynısı bilgisayardan:
 
 ```bash
 zsh tools/mibox/ana_ekran.sh genius   # Genius Launcher

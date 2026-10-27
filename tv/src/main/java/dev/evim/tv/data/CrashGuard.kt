@@ -33,7 +33,7 @@ object CrashGuard {
         val worker = Thread {
             runCatching {
                 val adb = LocalAdb(context)
-                HomeSwitch.REVERT.forEach(adb::shell)
+                HomeSwitch.revert(adb)
             }
             file(context).delete()
         }

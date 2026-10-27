@@ -103,7 +103,7 @@ class Setup(private val context: Context) {
                 adb.shell(if (old == "null" || old.isEmpty()) "settings delete $namespace $key" else "settings put $namespace $key $old")
             }
         }
-        if (includeHome && log.optBoolean(KEY_HOME)) HomeSwitch.REVERT.forEach(adb::shell)
+        if (includeHome && log.optBoolean(KEY_HOME)) HomeSwitch.revert(adb)
         // Geri gelemeyen uygulama kalırsa kayıtta durur ki tekrar denenebilsin
         write(JSONObject().apply { if (failed.isNotEmpty()) put(KEY_REMOVED, JSONArray(failed)) })
     }
@@ -124,12 +124,13 @@ class Setup(private val context: Context) {
         const val KEY_SETTINGS = "settings"
         const val KEY_HOME = "home"
 
-        // Paket → önerilir mi. Xiaomi listesi Mi Box S 2. nesilde denendi; güncelleme servisi bilerek yok
+        // Paket → önerilir mi. Xiaomi listesi Mi Box S 1. ve 2. nesilde denendi; güncelleme servisi bilerek yok
         val XIAOMI = mapOf(
             "com.xiaomi.statistic" to true,
             "com.miui.tv.analytics" to true,
             "com.xm.webcontent" to true,
             "com.mitv.tvhome.oemtab" to true,
+            "com.mitv.tvhome.atv" to false,
             "com.xiaomo.tv.milegal" to true,
             "com.xiaomi.mitv.smartshare" to false,
             "com.mitv.tvhome.michannel" to false,
@@ -140,6 +141,9 @@ class Setup(private val context: Context) {
             "com.xiaomi.mitv.mediaexplorer" to false,
         )
         val COMMON = mapOf(
+            "tv.alphonso.alphonso_eula" to true,
+            "com.google.android.videos" to false,
+            "com.netflix.ninja" to false,
             "com.google.android.youtube.tvmusic" to false,
             "com.google.android.play.games" to false,
             "com.amazon.amazonvideo.livingroom" to false,

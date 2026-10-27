@@ -16,6 +16,8 @@ sealed interface SwitchCheck {
 /**
  * Home tuşunu Genius Launcher ile Google TV arasında değiştirir (tools/mibox/ana_ekran.sh'nin uygulama içi hali).
  * Google TV kendi ana ekranı açıkken başka launcher'ları yok sayar; bu yüzden kapatılır (kaldırılmaz).
+ * Eski Android TV'nin (Android 9, Mi Box S 1. nesil) ana ekranı da sistem önceliğiyle her zaman kazanır;
+ * o da aynı şekilde kapatılır. Hangisi yüklüyse yalnızca ona dokunulur.
  * Sıra Free My TV'den: önce kurulum sihirbazı, sonra ana ekran; tersinde sihirbazın kurtarma ekranı
  * Home'u alır ve orada yeniden başlatmak bir Xiaomi'yi fabrika ayarlarına döndürmüş.
  * ADB çağrıları arka plan iş parçacığından yapılmalı.
@@ -49,15 +51,14 @@ class HomeSwitch(private val context: Context) {
 
     fun toGenius() {
         val self = "${context.packageName}/.MainActivity"
+        val installed = installedPackages(adb)
         adb.shell("cmd package set-home-activity $self")
-        adb.shell("pm disable-user --user 0 $SETUP_PACKAGE")
-        adb.shell("pm disable-user --user 0 $GOOGLE_PACKAGE")
+        if (SETUP_PACKAGE in installed) adb.shell("pm disable-user --user 0 $SETUP_PACKAGE")
+        STOCK_HOMES.filter { it.substringBefore('/') in installed }.forEach { adb.shell("pm disable-user --user 0 ${it.substringBefore('/')}") }
         adb.shell("cmd package set-home-activity $self")
     }
 
-    fun toGoogle() {
-        REVERT.forEach(adb::shell)
-    }
+    fun toGoogle() = revert(adb)
 
     /** Home'u Google TV'ye verir ve bu uygulamayı TV'den kaldırır; verileri de onunla birlikte silinir. */
     fun uninstall() {
@@ -67,15 +68,27 @@ class HomeSwitch(private val context: Context) {
     }
 
     companion object {
-        private const val GOOGLE_PACKAGE = "com.google.android.apps.tv.launcherx"
         private const val SETUP_PACKAGE = "com.google.android.tungsten.setupwraith"
-        private val GOOGLE_PACKAGES = setOf(GOOGLE_PACKAGE, SETUP_PACKAGE)
 
-        /** Google TV'ye dönüş; önce ana ekran açılır ki kurulum sihirbazının kurtarma ekranı Home'u almasın. */
-        val REVERT = listOf(
-            "pm enable $GOOGLE_PACKAGE",
-            "cmd package set-home-activity $GOOGLE_PACKAGE/.home.HomeActivity",
-            "pm enable $SETUP_PACKAGE",
+        // Sistemin kendi ana ekranları; ikisi birden varsa sonuncu (Google TV) Home'u geri alır
+        private val STOCK_HOMES = listOf(
+            "com.google.android.tvlauncher/.MainActivity",
+            "com.google.android.apps.tv.launcherx/.home.HomeActivity",
         )
+        private val GOOGLE_PACKAGES = STOCK_HOMES.map { it.substringBefore('/') }.toSet() + SETUP_PACKAGE
+
+        /** Kapatılmış olanlar da dahil yüklü paketler. */
+        private fun installedPackages(adb: LocalAdb): Set<String> =
+            adb.shell("pm list packages --user 0").lines().map { it.removePrefix("package:").trim() }.toSet()
+
+        /** Sistemin ana ekranına dönüş; önce ana ekran açılır ki kurulum sihirbazının kurtarma ekranı Home'u almasın. */
+        fun revert(adb: LocalAdb) {
+            val installed = installedPackages(adb)
+            STOCK_HOMES.filter { it.substringBefore('/') in installed }.forEach { home ->
+                adb.shell("pm enable ${home.substringBefore('/')}")
+                adb.shell("cmd package set-home-activity $home")
+            }
+            if (SETUP_PACKAGE in installed) adb.shell("pm enable $SETUP_PACKAGE")
+        }
     }
 }

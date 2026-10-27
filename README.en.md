@@ -6,7 +6,7 @@ A clean, ad-free home screen for Android TV and Google TV. It also controls the 
 
 ![Home screen](docs/screenshots/en/home.png)
 
-> The first target device is the Xiaomi Mi Box S (2nd gen, Android 14). It should work on other Android TV devices too, but they haven't been tried.
+> Tried on: Xiaomi Mi Box S 2nd gen (Google TV, Android 14) and Mi Box S 1st gen (Android TV, Android 9). It should work on other Android TV devices too, but they haven't been tried.
 
 ## Features
 
@@ -147,7 +147,7 @@ The wizard records what it changed (with the old setting values). **Undo the set
 
 ### Home screen (Home button)
 
-Google TV ignores other launchers while its own home screen is enabled. So Google TV's setup wizard and then its home screen are turned off (not removed) and the Home button goes to Genius Launcher. If the app that saved the connected Wi-Fi network would be turned off, nothing is done. The setup wizard or Genius settings does this; for development, the same from a computer:
+Google TV ignores other launchers while its own home screen is enabled, and so does the older Android TV home screen. So the setup wizard and then the system home screen are turned off (not removed) and the Home button goes to Genius Launcher. If the app that saved the connected Wi-Fi network would be turned off, nothing is done. The setup wizard or Genius settings does this; for development, the same from a computer:
 
 ```bash
 zsh tools/mibox/ana_ekran.sh genius   # Genius Launcher

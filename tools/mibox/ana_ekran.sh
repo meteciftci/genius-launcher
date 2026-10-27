@@ -11,11 +11,17 @@ source ${0:A:h}/../cihaz.sh
 adb connect $DEV >/dev/null
 
 GENIUS=dev.evim.tv/.MainActivity
-GOOGLE_HOME=com.google.android.apps.tv.launcherx/.home.HomeActivity
-GOOGLE_PKG=com.google.android.apps.tv.launcherx
 SETUP_PKG=com.google.android.tungsten.setupwraith
 
 sh() { adb -s $DEV shell "$@" | tr -d '\r' }
+
+# Google TV ya da eski Android TV (Android 9) ana ekranı; hangisi yüklüyse
+if [[ -n $(sh "pm list packages --user 0 com.google.android.apps.tv.launcherx") ]]; then
+  GOOGLE_HOME=com.google.android.apps.tv.launcherx/.home.HomeActivity
+else
+  GOOGLE_HOME=com.google.android.tvlauncher/.MainActivity
+fi
+GOOGLE_PKG=${GOOGLE_HOME%%/*}
 
 case $1 in
   genius)
