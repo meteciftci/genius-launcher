@@ -9,7 +9,7 @@ Android TV ve Google TV için reklamsız, sade bir ana ekran. Evdeki akıllı ci
 > Denenen cihazlar:
 > - Xiaomi Mi Box S 2. nesil (Google TV, Android 14)
 > - Xiaomi Mi Box S 1. nesil (Android TV, Android 9)
-> - Xiaomi Mi TV (MiTV-AESP0, Android TV, Android 9)
+> - Xiaomi Mi TV Stick 1080p (Android TV, Android 9)
 >
 > Android 8.0 ve üzeri diğer Android TV cihazlarında da çalışması beklenir, ama denenmedi.
 
@@ -148,7 +148,7 @@ Launcher ilk açıldığında bir sihirbaz çıkar; her adım atlanabilir ve Gen
 
 1. **TV'nin kendi ADB'si**: USB hata ayıklamanın nasıl açılacağını anlatır ve TV'nin izin penceresini çıkarır. İzin verilince birkaç saniye içinde kendiliğinden fark eder.
 2. **Home tuşu**: Genius Launcher'ı ana ekran yapar (aşağıya bakın).
-3. **Temizlik**: Markaya göre bilinen gereksiz uygulamaları listeler (Xiaomi Mi Box ve Mi TV'ler; PatchWall, Mi Wallpaper, analiz ve reklam servisleri, ayrıca Netflix ve Play Filmler gibi hazır gelenler); önerilenler seçili gelir. Uygulamalar silinmez, kullanıcı için kaldırılır. Bağlı olunan Wi-Fi ağını kaydetmiş bir uygulama seçilemez.
+3. **Temizlik**: Markaya göre bilinen gereksiz uygulamaları listeler (Xiaomi Mi Box ve Mi TV Stick; PatchWall, Mi Wallpaper, analiz ve reklam servisleri, ayrıca Netflix ve Play Filmler gibi hazır gelenler); önerilenler seçili gelir. Uygulamalar silinmez, kullanıcı için kaldırılır. Bağlı olunan Wi-Fi ağını kaydetmiş bir uygulama seçilemez.
 4. **Uyanık tut (isteğe bağlı)**: TV kapanınca kutu uyumaz, ev ağında kalır.
 
 Sihirbaz neyi değiştirdiğini (ayarların eski değerleriyle) kaydeder. Genius ayarlarındaki **Sihirbazın değişikliklerini geri al** yalnızca bunları eski hâline getirir; **Kaldır** da önce bunları geri getirmeyi sorar.

@@ -9,7 +9,7 @@ A clean, ad-free home screen for Android TV and Google TV. It also controls the 
 > Tried on:
 > - Xiaomi Mi Box S 2nd gen (Google TV, Android 14)
 > - Xiaomi Mi Box S 1st gen (Android TV, Android 9)
-> - Xiaomi Mi TV (MiTV-AESP0, Android TV, Android 9)
+> - Xiaomi Mi TV Stick 1080p (Android TV, Android 9)
 >
 > It should work on other Android TV devices with Android 8.0 or later too, but they haven't been tried.
 
@@ -148,7 +148,7 @@ A wizard appears the first time the launcher opens; every step can be skipped an
 
 1. **The TV's own ADB**: Explains how to turn on USB debugging and brings up the TV's permission prompt. It notices within a few seconds when you allow it.
 2. **Home button**: Makes Genius Launcher the home screen (see below).
-3. **Cleanup**: Lists known bloatware for the brand (Xiaomi Mi Box and Mi TVs: PatchWall, Mi Wallpaper, analytics and ad services, plus preinstalled apps such as Netflix and Play Movies); recommended ones are selected. Apps aren't deleted, they're removed for the TV's user. An app that saved the Wi-Fi network you're connected to can't be selected.
+3. **Cleanup**: Lists known bloatware for the brand (Xiaomi Mi Box and Mi TV Stick: PatchWall, Mi Wallpaper, analytics and ad services, plus preinstalled apps such as Netflix and Play Movies); recommended ones are selected. Apps aren't deleted, they're removed for the TV's user. An app that saved the Wi-Fi network you're connected to can't be selected.
 4. **Stay awake (optional)**: The box doesn't sleep when the TV turns off and stays on your home network.
 
 The wizard records what it changed (with the old setting values). **Undo the setup wizard's changes** in Genius settings restores only those; **Uninstall** offers to restore them first too.
