@@ -1,7 +1,9 @@
 package dev.evim.tv.ui
 
+import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
 import android.view.ViewGroup
 import androidx.annotation.OptIn
 import androidx.compose.foundation.Image
@@ -253,13 +255,24 @@ fun ImageViewerDialog(images: List<File>, start: Int, onDismiss: () -> Unit) {
     }
 }
 
-/** Ekrandan büyük resimler okunurken küçültülür; EXIF yönü ImageDecoder tarafından uygulanır. */
+/** Ekrandan büyük resimler okunurken küçültülür; EXIF yönü ImageDecoder tarafından uygulanır (Android 8'de uygulanmaz). */
 private fun decode(file: File): ImageBitmap {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return decodeLegacy(file)
     val source = ImageDecoder.createSource(file)
     return ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
         val scale = minOf(1f, MAX_W / info.size.width, MAX_H / info.size.height)
         if (scale < 1f) decoder.setTargetSize((info.size.width * scale).toInt().coerceAtLeast(1), (info.size.height * scale).toInt().coerceAtLeast(1))
     }.asImageBitmap()
+}
+
+private fun decodeLegacy(file: File): ImageBitmap {
+    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+    BitmapFactory.decodeFile(file.path, bounds)
+    var sample = 1
+    while (bounds.outWidth / (sample * 2) >= MAX_W || bounds.outHeight / (sample * 2) >= MAX_H) sample *= 2
+    val bitmap = BitmapFactory.decodeFile(file.path, BitmapFactory.Options().apply { inSampleSize = sample })
+        ?: error("'${file.name}' okunamadı")
+    return bitmap.asImageBitmap()
 }
 
 private const val MAX_W = 1920f

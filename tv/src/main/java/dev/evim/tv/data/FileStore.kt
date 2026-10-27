@@ -1,10 +1,14 @@
 package dev.evim.tv.data
 
 import android.content.Context
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Environment
 import android.os.StatFs
 import android.os.storage.StorageManager
+import android.os.storage.StorageVolume
 import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import dev.evim.tv.R
@@ -22,16 +26,27 @@ data class FileEntry(val file: File, val kind: FileKind, val size: Long, val mod
 /**
  * Dosyalar ekranının veri katmanı. Tüm dosyalara erişim izni (Android 11+) Google TV'de ayarlardan
  * verilemediği için launcher bu izni kendi ADB bağlantısıyla kendine verir; APK'lar da aynı yolla kurulur.
+ * Android 10 ve öncesinde aynı iş eski depolama izinleriyle yapılır.
  * Dosya işlemleri arka plan iş parçacığından.
  */
 class FileStore(private val context: Context) {
     private val adb = LocalAdb(context)
 
-    val hasAccess: Boolean get() = Environment.isExternalStorageManager()
+    val hasAccess: Boolean
+        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Environment.isExternalStorageManager()
+        } else {
+            context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+        }
 
     /** İzni ADB ile verir; ADB'ye ulaşılamazsa hata fırlatır. */
     fun grantAccess() {
-        adb.shell("appops set --uid ${context.packageName} MANAGE_EXTERNAL_STORAGE allow")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            adb.shell("appops set --uid ${context.packageName} MANAGE_EXTERNAL_STORAGE allow")
+        } else {
+            adb.shell("pm grant ${context.packageName} ${Manifest.permission.READ_EXTERNAL_STORAGE}")
+            adb.shell("pm grant ${context.packageName} ${Manifest.permission.WRITE_EXTERNAL_STORAGE}")
+        }
     }
 
     fun roots(): List<StorageRoot> {
@@ -39,7 +54,7 @@ class FileStore(private val context: Context) {
         return storage.storageVolumes
             .filter { it.state == Environment.MEDIA_MOUNTED }
             .mapNotNull { volume ->
-                val dir = volume.directory ?: return@mapNotNull null
+                val dir = volumeDir(volume) ?: return@mapNotNull null
                 val stat = runCatching { StatFs(dir.path) }.getOrNull()
                 StorageRoot(
                     dir = dir,
@@ -50,6 +65,19 @@ class FileStore(private val context: Context) {
                     totalBytes = stat?.totalBytes ?: 0,
                 )
             }
+    }
+
+    /** StorageVolume.getDirectory Android 11'de geldi; öncesinde birimin kökü uygulamanın o birimdeki klasöründen bulunur. */
+    private fun volumeDir(volume: StorageVolume): File? {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) return volume.directory
+        if (volume.isPrimary) {
+            @Suppress("DEPRECATION")
+            return Environment.getExternalStorageDirectory()
+        }
+        val storage = context.getSystemService(StorageManager::class.java)
+        return context.getExternalFilesDirs(null).filterNotNull()
+            .firstOrNull { storage.getStorageVolume(it) == volume }
+            ?.let { File(it.path.substringBefore("/Android/")) }
     }
 
     /** Klasörler önce, sonra dosyalar; ikisi de ada göre. Gizli (nokta ile başlayan) dosyalar gösterilmez. */

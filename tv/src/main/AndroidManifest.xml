@@ -4,10 +4,13 @@
 
     <uses-feature android:name="android.software.leanback" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-feature android:name="android.hardware.wifi" android:required="false" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Üst şeritteki Wi-Fi ve Bluetooth durum simgeleri için -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Android 9'da Wi-Fi sinyal gücü yalnızca WifiManager'dan okunabiliyor -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
     <!-- Launcher olduğu için yüklü tüm uygulamaları listelemesi gerekiyor -->
@@ -17,6 +20,14 @@
     <!-- Dosyalar: dahili hafıza ve USB bellekteki tüm dosyalar. İzin ADB ile verilir (ayar sayfası Google TV'de yok) -->
     <uses-permission
         android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+    <!-- Android 10 ve öncesinde aynısı; bunlar da ADB ile verilir -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29"
         tools:ignore="ScopedStorage" />
 
     <application

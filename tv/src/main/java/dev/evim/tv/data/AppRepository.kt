@@ -90,9 +90,12 @@ class AppRepository(private val context: Context) {
         val wifiLevel = caps?.takeIf { it.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) }?.let {
             val level = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 context.getSystemService(WifiManager::class.java).calculateSignalLevel(it.signalStrength)
-            } else {
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 @Suppress("DEPRECATION")
                 WifiManager.calculateSignalLevel(it.signalStrength, 5)
+            } else {
+                @Suppress("DEPRECATION")
+                WifiManager.calculateSignalLevel(context.getSystemService(WifiManager::class.java).connectionInfo.rssi, 5)
             }
             level.coerceIn(0, 4)
         }
