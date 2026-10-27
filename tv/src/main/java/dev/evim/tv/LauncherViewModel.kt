@@ -144,7 +144,7 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
                 delay(ADB_KEEPALIVE_MS)
             }
         }
-        // Günde bir kez yeni sürüm var mı diye bakılır; açılışta ağın gelmesi için biraz beklenir
+        // Günde üç kez yeni sürüm var mı diye bakılır; açılışta ağın gelmesi için biraz beklenir
         viewModelScope.launch {
             delay(UPDATE_FIRST_CHECK_MS)
             while (true) {
@@ -610,7 +610,7 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     private companion object {
         const val WEATHER_REFRESH_MS = 30 * 60 * 1000L
         const val UPDATE_FIRST_CHECK_MS = 30_000L
-        const val UPDATE_CHECK_MS = 24 * 60 * 60 * 1000L
+        const val UPDATE_CHECK_MS = 8 * 60 * 60 * 1000L
         const val HOME_REFRESH_MS = 15_000L
         // 2 saniyede bir, 3 dakika
         const val TUYA_LOGIN_POLLS = 90
