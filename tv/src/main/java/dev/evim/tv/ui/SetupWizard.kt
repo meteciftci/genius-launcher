@@ -43,6 +43,7 @@ import dev.evim.tv.R
 import dev.evim.tv.data.AdbState
 import dev.evim.tv.data.CleanupApp
 import dev.evim.tv.data.SwitchCheck
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private enum class WizardStep { ADB, HOME, CLEANUP, AWAKE, DONE }
@@ -163,7 +164,18 @@ private fun AdbStep(vm: LauncherViewModel, focus: FocusRequester, onReady: (Bool
             onReady(state == AdbState.READY)
         }
     }
-    LaunchedEffect(Unit) { check() }
+    // İzin verilince ya da hata ayıklama açılıp geri gelinince kendiliğinden fark edilsin
+    LaunchedEffect(Unit) {
+        while (true) {
+            val next = vm.adbState()
+            if (next != state) {
+                state = next
+                onReady(next == AdbState.READY)
+            }
+            if (next == AdbState.READY) break
+            delay(RECHECK_MS)
+        }
+    }
 
     StepText(stringResource(R.string.wizard_adb_title), stringResource(R.string.wizard_adb_why))
     when (state) {
@@ -325,3 +337,5 @@ private fun AwakeStep(vm: LauncherViewModel, focus: FocusRequester, onNext: () -
         }
     }
 }
+
+private const val RECHECK_MS = 3_000L

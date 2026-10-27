@@ -27,6 +27,16 @@ class LocalAdb(context: Context) {
         }
     }
 
+    /**
+     * Bağlanıp zararsız bir komut çalıştırır. İzin penceresi açıkken bağlantı cevapsız kalabilir;
+     * Android 9'da izin verildikten sonra bile ilk bağlantı tamamlanmayabiliyor. Bu yüzden süre sınırlı.
+     */
+    fun probe() {
+        Dadb.create(HOST, PORT, keyPair(), CONNECT_TIMEOUT_MS, PROBE_TIMEOUT_MS).use { adb ->
+            check(adb.shell("true").exitCode == 0)
+        }
+    }
+
     /** Kullanıcı en az bir kez izin verdiyse anahtar dosyası vardır. */
     val hasKey: Boolean get() = privateKey.exists()
 
@@ -51,5 +61,6 @@ class LocalAdb(context: Context) {
         const val HOST = "127.0.0.1"
         const val PORT = 5555
         const val CONNECT_TIMEOUT_MS = 3000
+        const val PROBE_TIMEOUT_MS = 15_000
     }
 }

@@ -7,6 +7,7 @@ import dadb.AdbAuthException
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.net.SocketTimeoutException
 
 /** Temizlikte önerilen ya da seçilebilen bir sistem uygulaması. */
 data class CleanupApp(
@@ -29,8 +30,9 @@ class Setup(private val context: Context) {
     private val adb = LocalAdb(context)
     private val file = File(context.filesDir, "setup.json")
 
-    fun adbState(): AdbState = runCatching { adb.shell("true"); AdbState.READY }.getOrElse {
-        if (it is AdbAuthException) AdbState.NEEDS_PERMISSION else AdbState.OFF
+    // Bağlantı kurulup cevap gelmiyorsa TV izin soruyordur; hiç bağlanılamıyorsa hata ayıklama kapalıdır
+    fun adbState(): AdbState = runCatching { adb.probe(); AdbState.READY }.getOrElse {
+        if (it is AdbAuthException || it is SocketTimeoutException) AdbState.NEEDS_PERMISSION else AdbState.OFF
     }
 
     val isXiaomi: Boolean get() = Build.MANUFACTURER.equals("Xiaomi", ignoreCase = true)
