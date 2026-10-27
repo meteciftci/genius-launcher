@@ -446,10 +446,10 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /** Başarılı olursa kutu kapanır ya da yeniden başlar; yalnızca hata geri bildirilir. */
-    fun power(restart: Boolean, onError: (Int) -> Unit) {
+    /** Başarılı olursa kutu yeniden başlar; yalnızca hata geri bildirilir. */
+    fun restart(onError: (Int) -> Unit) {
         viewModelScope.launch {
-            runCatching { withContext(Dispatchers.IO) { repo.power(restart) } }.onFailure { onError(errorText(it)) }
+            runCatching { withContext(Dispatchers.IO) { repo.restart() } }.onFailure { onError(errorText(it)) }
         }
     }
 

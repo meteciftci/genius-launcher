@@ -20,7 +20,7 @@ import androidx.compose.material.icons.rounded.BluetoothDisabled
 import androidx.compose.material.icons.rounded.NetworkWifi1Bar
 import androidx.compose.material.icons.rounded.NetworkWifi2Bar
 import androidx.compose.material.icons.rounded.NetworkWifi3Bar
-import androidx.compose.material.icons.rounded.PowerSettingsNew
+import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.Tv
@@ -62,7 +62,7 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun TopBar(vm: LauncherViewModel, onWeatherClick: () -> Unit, onSmartHome: () -> Unit, onGeniusSettings: () -> Unit, onPower: () -> Unit) {
+fun TopBar(vm: LauncherViewModel, onWeatherClick: () -> Unit, onSmartHome: () -> Unit, onGeniusSettings: () -> Unit, onRestart: () -> Unit) {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -99,7 +99,7 @@ fun TopBar(vm: LauncherViewModel, onWeatherClick: () -> Unit, onSmartHome: () ->
             HomeChip(vm = vm, onClick = onSmartHome)
             Spacer(Modifier.width(8.dp))
         }
-        ShortcutsChip(vm = vm, onGeniusSettings = onGeniusSettings, onPower = onPower)
+        ShortcutsChip(vm = vm, onGeniusSettings = onGeniusSettings, onRestart = onRestart)
         Spacer(Modifier.width(8.dp))
         RamChip(vm = vm)
     }
@@ -140,7 +140,7 @@ private fun HomeChip(vm: LauncherViewModel, onClick: () -> Unit) {
 
 /** Google TV'deki gibi hızlı ayar kısayolları; Wi-Fi ve Bluetooth simgeleri durumu da gösterir. */
 @Composable
-private fun ShortcutsChip(vm: LauncherViewModel, onGeniusSettings: () -> Unit, onPower: () -> Unit) {
+private fun ShortcutsChip(vm: LauncherViewModel, onGeniusSettings: () -> Unit, onRestart: () -> Unit) {
     val status = vm.status
     val wifiIcon = when (status.wifiLevel) {
         null -> Icons.Rounded.WifiOff
@@ -159,7 +159,7 @@ private fun ShortcutsChip(vm: LauncherViewModel, onGeniusSettings: () -> Unit, o
             IconButton(Icons.Rounded.Tv, stringResource(R.string.shortcut_display_sound)) { vm.openSettings(Settings.ACTION_SOUND_SETTINGS) }
             IconButton(Icons.Rounded.Settings, stringResource(R.string.shortcut_settings)) { vm.openSettings(Settings.ACTION_SETTINGS) }
             IconButton(Icons.Rounded.Tune, stringResource(R.string.settings_title), badge = vm.update != null, onClick = onGeniusSettings)
-            IconButton(Icons.Rounded.PowerSettingsNew, stringResource(R.string.power_title), onClick = onPower)
+            IconButton(Icons.Rounded.RestartAlt, stringResource(R.string.power_title), onClick = onRestart)
         }
     }
 }

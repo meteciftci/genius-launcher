@@ -166,13 +166,13 @@ class AppRepository(private val context: Context) {
     }
 
     /**
-     * Kutuyu yeniden başlatır ya da tamamen kapatır. Önce bağlantı denenir ki izin ya da ADB sorunu
-     * bildirilebilsin; komut sırasında bağlantının kopması kapanmanın kendisidir, hata sayılmaz.
+     * Kutuyu yeniden başlatır. Önce bağlantı denenir ki izin ya da ADB sorunu bildirilebilsin;
+     * komut sırasında bağlantının kopması yeniden başlamanın kendisidir, hata sayılmaz.
      */
-    fun power(restart: Boolean) {
+    fun restart() {
         adb.probe()
         try {
-            adb.shell(if (restart) "svc power reboot" else "svc power shutdown")
+            adb.shell("svc power reboot")
         } catch (_: java.io.IOException) {
         }
     }
