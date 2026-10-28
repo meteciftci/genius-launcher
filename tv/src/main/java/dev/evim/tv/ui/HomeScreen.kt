@@ -120,6 +120,15 @@ fun HomeScreen(vm: LauncherViewModel) {
         runCatching { firstCard.requestFocus() }
     }
 
+    // Kumanda tuşuyla istenen kilitli uygulama ya da Dosyalar: kartla açılıyormuş gibi
+    LaunchedEffect(vm.openRequest, vm.apps) {
+        val pkg = vm.openRequest ?: return@LaunchedEffect
+        val app = vm.apps.firstOrNull { it.packageName == pkg } ?: (vm.hiddenApps.firstOrNull { it.packageName == pkg })
+        if (app == null && vm.apps.isEmpty()) return@LaunchedEffect
+        vm.openRequest = null
+        if (app != null) open(app)
+    }
+
     // Ana ekranda geri tuşu hiçbir yere gitmez: taşıma modundaysa modu bitirir,
     // Google TV'deki gibi art arda iki basış ekran koruyucuyu başlatır
     var lastBack by remember { mutableLongStateOf(0L) }

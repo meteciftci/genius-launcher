@@ -1,6 +1,15 @@
 package dev.evim.tv.ui
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.SettingsRemote
+import androidx.compose.runtime.DisposableEffect
+import dev.evim.tv.data.KeyTarget
+import dev.evim.tv.data.RemoteKeys
 import androidx.compose.material.icons.Icons
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,7 +60,7 @@ import kotlinx.coroutines.launch
 // Widget'ın sığdığı aralık: Dyson büyük kart, gerisi tek satır
 private val WIDGET_LIMITS = listOf(3, 4, 5, 6)
 
-private enum class Step { MENU, WIDGET, LOCK, ABOUT, UPDATE, TO_GENIUS, TO_GOOGLE, UNDO_SETUP, UNINSTALL }
+private enum class Step { MENU, WIDGET, LOCK, KEYS, KEY_LEARN, KEY_PICK, ABOUT, UPDATE, TO_GENIUS, TO_GOOGLE, UNDO_SETUP, UNINSTALL }
 
 /**
  * Launcher'ın kendi ayarları: gizli uygulamalar, hava durumu şehri, Home tuşu, hakkında ve kaldırma.
@@ -69,6 +78,8 @@ fun SettingsDialog(
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<Int?>(null) }
     var erasesNetworks by remember { mutableStateOf(false) }
+    // Atanan ya da değiştirilen kumanda tuşunun kodu
+    var keyCode by remember { mutableStateOf(0) }
     val first = remember { FocusRequester() }
     LaunchedEffect(step) { runCatching { first.requestFocus() } }
     // Sihirbazın geri alınabilecek bir şey yapıp yapmadığı; geri alma ve kaldırma adımları buna göre değişir
@@ -85,7 +96,13 @@ fun SettingsDialog(
     }
 
     Dialog(
-        onDismissRequest = { if (step != Step.MENU) go(Step.MENU) else onDismiss() },
+        onDismissRequest = {
+            when (step) {
+                Step.MENU -> onDismiss()
+                Step.KEY_LEARN, Step.KEY_PICK -> go(Step.KEYS)
+                else -> go(Step.MENU)
+            }
+        },
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Panel(width = 600.dp) {
@@ -102,6 +119,12 @@ fun SettingsDialog(
                             onClick = onHiddenApps,
                         )
                         ChoiceCard(Icons.Rounded.LocationOn, stringResource(R.string.settings_city), vm.city.name, Modifier.weight(1f), onClick = onCity)
+                        ChoiceCard(
+                            Icons.Rounded.SettingsRemote,
+                            stringResource(R.string.keys_title),
+                            if (vm.keyMappings.isEmpty()) stringResource(R.string.keys_none) else stringResource(R.string.keys_count, vm.keyMappings.size),
+                            Modifier.weight(1f),
+                        ) { go(Step.KEYS) }
                         ChoiceCard(Icons.Rounded.Home, stringResource(R.string.settings_home), home, Modifier.weight(1f)) {
                             if (busy) return@ChoiceCard
                             if (vm.geniusIsHome) {
@@ -201,6 +224,80 @@ fun SettingsDialog(
                             onSuccess = { pin -> vm.setPin(pin); creating = false },
                             onDismiss = { creating = false },
                         )
+                    }
+                }
+                Step.KEYS -> {
+                    PanelHeader(stringResource(R.string.keys_title), stringResource(R.string.keys_body), Icons.Rounded.SettingsRemote)
+                    Column(Modifier.heightIn(max = 260.dp).verticalScroll(rememberScrollState())) {
+                        vm.keyMappings.entries.sortedBy { it.key }.forEachIndexed { index, (code, target) ->
+                            ListRow(
+                                keyName(code),
+                                targetName(vm, target),
+                                trailing = Trailing.Chevron,
+                                modifier = if (index == 0) Modifier.focusRequester(first) else Modifier,
+                            ) {
+                                keyCode = code
+                                go(Step.KEY_PICK)
+                            }
+                        }
+                        ListRow(
+                            stringResource(R.string.keys_add),
+                            stringResource(R.string.keys_add_hint),
+                            Icons.Rounded.Add,
+                            modifier = if (vm.keyMappings.isEmpty()) Modifier.focusRequester(first) else Modifier,
+                        ) { go(Step.KEY_LEARN) }
+                    }
+                    PanelActions { PillButton(stringResource(R.string.done)) { go(Step.MENU) } }
+                }
+                Step.KEY_LEARN -> {
+                    var listening by remember { mutableStateOf(false) }
+                    LaunchedEffect(Unit) {
+                        busy = true
+                        val failure = vm.startKeyLearning()
+                        busy = false
+                        if (failure != null) {
+                            error = failure
+                            return@LaunchedEffect
+                        }
+                        RemoteKeys.learner = { code ->
+                            RemoteKeys.learner = null
+                            keyCode = code
+                            go(Step.KEY_PICK)
+                        }
+                        listening = true
+                    }
+                    // Tuşa basılmadan çıkılırsa servis atanmış tuş yoksa yeniden kapanır
+                    DisposableEffect(Unit) { onDispose { if (RemoteKeys.learner != null) vm.stopKeyLearning() } }
+                    PanelHeader(stringResource(R.string.keys_add), null, Icons.Rounded.SettingsRemote)
+                    PanelText(stringResource(R.string.keys_learn_body))
+                    if (listening) PanelNote(stringResource(R.string.keys_listening), EvimColors.Accent)
+                    PanelActions { PillButton(stringResource(R.string.cancel), Modifier.focusRequester(first)) { go(Step.KEYS) } }
+                }
+                Step.KEY_PICK -> {
+                    val current = vm.keyMappings[keyCode]
+                    // Yeni öğrenilen tuş atanmadan bırakılırsa servis gereksiz açık kalmasın
+                    DisposableEffect(Unit) { onDispose { vm.stopKeyLearning() } }
+                    PanelHeader(keyName(keyCode), stringResource(R.string.keys_pick_body), Icons.Rounded.SettingsRemote)
+                    Column(Modifier.heightIn(max = 300.dp).verticalScroll(rememberScrollState())) {
+                        ListRow(
+                            stringResource(R.string.keys_target_home),
+                            null,
+                            Icons.Rounded.Home,
+                            trailing = Trailing.Check(current == KeyTarget.Home),
+                            modifier = Modifier.focusRequester(first),
+                        ) { vm.assignKey(keyCode, KeyTarget.Home); go(Step.KEYS) }
+                        vm.apps.forEach { app ->
+                            ListRow(app.label, trailing = Trailing.Check(current == KeyTarget.App(app.packageName))) {
+                                vm.assignKey(keyCode, KeyTarget.App(app.packageName))
+                                go(Step.KEYS)
+                            }
+                        }
+                        if (current != null) {
+                            ListRow(stringResource(R.string.keys_clear), null, Icons.Rounded.DeleteForever, EvimColors.Danger) {
+                                vm.assignKey(keyCode, null)
+                                go(Step.KEYS)
+                            }
+                        }
                     }
                 }
                 Step.ABOUT -> {
@@ -316,6 +413,17 @@ fun SettingsDialog(
             error?.let { PanelNote(stringResource(it)) }
         }
     }
+}
+
+@Composable
+private fun keyName(code: Int): String =
+    RemoteKeys.knownName(code)?.let { stringResource(it) } ?: stringResource(R.string.keys_code, RemoteKeys.codeName(code))
+
+@Composable
+private fun targetName(vm: LauncherViewModel, target: KeyTarget): String = when (target) {
+    KeyTarget.Home -> stringResource(R.string.keys_target_home)
+    is KeyTarget.App -> (vm.apps + vm.hiddenApps).firstOrNull { it.packageName == target.packageName }?.label
+        ?: target.packageName
 }
 
 /** Geri alınması zor işlemler için: odak "Vazgeç"te başlar ki yanlışlıkla OK onaylamasın. */

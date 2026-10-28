@@ -16,6 +16,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         CrashGuard.install(this)
         if (intent.getBooleanExtra("demo", false)) viewModel.enterDemo()
+        viewModel.openRequest = intent.getStringExtra(EXTRA_OPEN)
         setContent {
             EvimTheme {
                 HomeScreen(viewModel)
@@ -29,6 +30,12 @@ class MainActivity : ComponentActivity() {
         if (intent.getBooleanExtra("demo", false)) viewModel.enterDemo()
         // Home tuşu: Dosyalar ya da ayarlar açıkken de ana ekrana dönülür
         if (intent.hasCategory(Intent.CATEGORY_HOME)) viewModel.homePressed()
+        // Kumanda tuşuyla istenen kilitli uygulama ya da Dosyalar; Home'un kapattıklarından sonra açılır
+        intent.getStringExtra(EXTRA_OPEN)?.let { viewModel.openRequest = it }
+    }
+
+    companion object {
+        const val EXTRA_OPEN = "dev.evim.tv.OPEN"
     }
 
     override fun onStart() {

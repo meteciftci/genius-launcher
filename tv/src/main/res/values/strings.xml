@@ -345,4 +345,23 @@
     <string name="lock_set">Set PIN</string>
     <string name="lock_change">Change PIN</string>
     <string name="lock_remove">Turn off</string>
+    <string name="keys_title">Remote buttons</string>
+    <string name="keys_none">None set</string>
+    <string name="keys_count">%1$d buttons</string>
+    <string name="keys_body">Give buttons like Netflix, YouTube and Apps the app you want. They work in every app.</string>
+    <string name="keys_add">Assign a button</string>
+    <string name="keys_add_hint">Press the button on the remote</string>
+    <string name="keys_learn_body">Press the remote button you want to give a new job. Arrows, OK, Back, Home, volume and power can\'t be assigned.</string>
+    <string name="keys_listening">Waiting for a button…</string>
+    <string name="keys_pick_body">What should this button open?</string>
+    <string name="keys_target_home">Home screen</string>
+    <string name="keys_clear">Restore the button</string>
+    <string name="keys_code">%1$s button</string>
+    <string name="keys_netflix">Netflix button</string>
+    <string name="keys_youtube">YouTube button</string>
+    <string name="keys_prime">Prime Video button</string>
+    <string name="keys_tvplus">Xiaomi TV+ button</string>
+    <string name="keys_apps">Apps button</string>
+    <string name="keys_service_label">Genius Launcher remote buttons</string>
+    <string name="keys_service_description">Catches the remote buttons you assigned and opens the chosen app. Screen content is not read.</string>
 </resources>

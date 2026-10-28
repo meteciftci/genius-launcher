@@ -26,10 +26,13 @@ import dev.evim.tv.data.Setup
 import dev.evim.tv.data.SwitchCheck
 import dev.evim.tv.data.Forecast
 import dev.evim.tv.data.LauncherApp
+import dev.evim.tv.data.KeyTarget
 import dev.evim.tv.data.LauncherPrefs
+import dev.evim.tv.data.LocalAdb
 import dev.evim.tv.data.PinCheck
 import dev.evim.tv.data.PinLock
 import dev.evim.tv.data.RamInfo
+import dev.evim.tv.data.RemoteKeys
 import dev.evim.tv.data.SystemStatus
 import dev.evim.tv.data.Weather
 import dev.evim.tv.data.WeatherClient
@@ -68,6 +71,8 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     private val home by lazy { SmartHome(app) }
     private val homeSwitch = HomeSwitch(app)
     private val setup = Setup(app)
+    private val remoteKeys = RemoteKeys(app)
+    private val adb = LocalAdb(app)
     private val updater = Updater(app)
     private val tuyaCloud by lazy { TuyaCloud(BuildConfig.TUYA_CLIENT_ID, BuildConfig.TUYA_SCHEMA) }
     private val tuyaDiscovery by lazy { TuyaDiscovery(app) }
@@ -80,6 +85,13 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
         private set
     var hiddenApps by mutableStateOf<List<LauncherApp>>(emptyList())
         private set
+
+    /** Kumandada başka işe atanmış tuşlar (tuş kodu → iş). */
+    var keyMappings by mutableStateOf(remoteKeys.mappings)
+        private set
+
+    /** Kumanda tuşuyla istenen kilitli uygulama ya da Dosyalar; ana ekran açar, PIN gerekiyorsa sorar. */
+    var openRequest by mutableStateOf<String?>(null)
 
     /** Açılırken PIN sorulan kartların paket adları. */
     var lockedApps by mutableStateOf(prefs.locked)
@@ -407,6 +419,33 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
         }
         refreshRam()
         geniusIsHome = homeSwitch.isGeniusHome
+        // Uygulama zorla durdurulunca Android servisi listeden çıkarır; atanmış tuş varsa geri açılır.
+        // Tuş öğrenilirken launcher kapandıysa da gereksiz açık kalan servis kapanır.
+        syncKeyService()
+    }
+
+    /** Tuş öğrenilebilsin diye servis açılır; hata olursa gösterilecek metin döner. */
+    suspend fun startKeyLearning(): Int? = runCatching {
+        withContext(Dispatchers.IO) { if (!remoteKeys.serviceEnabled) remoteKeys.setServiceEnabled(adb, true) }
+    }.exceptionOrNull()?.let(::errorText)
+
+    /** Öğrenme bitti; atanmış tuş kalmadıysa servis kapanır ki tuşlar boşuna süzülmesin. */
+    fun stopKeyLearning() {
+        RemoteKeys.learner = null
+        syncKeyService()
+    }
+
+    /** [target] null ise tuş eski hâline döner. */
+    fun assignKey(code: Int, target: KeyTarget?) {
+        remoteKeys.set(code, target)
+        keyMappings = remoteKeys.mappings
+        syncKeyService()
+    }
+
+    private fun syncKeyService() {
+        val wanted = keyMappings.isNotEmpty() || RemoteKeys.learner != null
+        if (wanted == remoteKeys.serviceEnabled) return
+        viewModelScope.launch(Dispatchers.IO) { runCatching { remoteKeys.setServiceEnabled(adb, wanted) } }
     }
 
     /** Genius Launcher'a geçmeden önce Wi-Fi denetimi; hata olursa ikinci parametrede gösterilecek metin. */

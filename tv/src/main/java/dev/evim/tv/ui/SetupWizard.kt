@@ -31,6 +31,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -278,6 +279,8 @@ private fun CleanupStep(vm: LauncherViewModel, focus: FocusRequester, onNext: ()
             Actions { PillButton(stringResource(R.string.tuya_continue), Modifier.focusRequester(focus), primary = true, onClick = onNext) }
         }
         else -> {
+            // Listenin altından aşağı basınca odak en yakın düğme olan "Atla"ya değil "Kaldır"a gelsin
+            val remove = remember { FocusRequester() }
             Column(Modifier.heightIn(max = 220.dp).verticalScroll(rememberScrollState())) {
                 list.forEachIndexed { index, app ->
                     val note = when {
@@ -290,7 +293,9 @@ private fun CleanupStep(vm: LauncherViewModel, focus: FocusRequester, onNext: ()
                         note,
                         trailing = Trailing.Check(app.packageName in checked),
                         enabled = !app.ownsCurrentWifi,
-                        modifier = if (index == 0) Modifier.focusRequester(focus) else Modifier,
+                        modifier = Modifier
+                            .then(if (index == 0) Modifier.focusRequester(focus) else Modifier)
+                            .then(if (index == list.lastIndex) Modifier.focusProperties { down = remove } else Modifier),
                     ) {
                         if (app.ownsCurrentWifi) return@ListRow
                         checked = if (app.packageName in checked) checked - app.packageName else checked + app.packageName
@@ -299,7 +304,7 @@ private fun CleanupStep(vm: LauncherViewModel, focus: FocusRequester, onNext: ()
             }
             if (busy) Status(stringResource(R.string.working), EvimColors.Accent)
             Actions {
-                PillButton(stringResource(R.string.wizard_cleanup_do, checked.size), primary = true) {
+                PillButton(stringResource(R.string.wizard_cleanup_do, checked.size), Modifier.focusRequester(remove), primary = true) {
                     if (busy || checked.isEmpty()) return@PillButton
                     busy = true
                     scope.launch {

@@ -330,4 +330,23 @@
     <string name="lock_set">PIN belirle</string>
     <string name="lock_change">PIN\'i değiştir</string>
     <string name="lock_remove">Kilidi kapat</string>
+    <string name="keys_title">Kumanda tuşları</string>
+    <string name="keys_none">Atanmadı</string>
+    <string name="keys_count">%1$d tuş</string>
+    <string name="keys_body">Netflix, YouTube, Apps gibi tuşlara istediğiniz uygulamayı atayın. Tuş her uygulamada çalışır.</string>
+    <string name="keys_add">Tuş ata</string>
+    <string name="keys_add_hint">Kumandada atamak istediğiniz tuşa basın</string>
+    <string name="keys_learn_body">Kumandada yeni görev vermek istediğiniz tuşa basın. Yön, OK, Geri, Home, ses ve güç tuşları atanamaz.</string>
+    <string name="keys_listening">Tuş bekleniyor…</string>
+    <string name="keys_pick_body">Bu tuşa basınca ne açılsın?</string>
+    <string name="keys_target_home">Ana ekran</string>
+    <string name="keys_clear">Tuşu eski hâline döndür</string>
+    <string name="keys_code">%1$s tuşu</string>
+    <string name="keys_netflix">Netflix tuşu</string>
+    <string name="keys_youtube">YouTube tuşu</string>
+    <string name="keys_prime">Prime Video tuşu</string>
+    <string name="keys_tvplus">Xiaomi TV+ tuşu</string>
+    <string name="keys_apps">Apps tuşu</string>
+    <string name="keys_service_label">Genius Launcher kumanda tuşları</string>
+    <string name="keys_service_description">Kumandanın atanmış tuşlarını yakalar ve seçilen uygulamayı açar. Ekran içeriği okunmaz.</string>
 </resources>
