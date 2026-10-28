@@ -117,7 +117,8 @@
     <string name="feeder_next_meal">Sonraki öğün %1$s · %2$d porsiyon</string>
     <string name="feed_one">1 porsiyon ver</string>
     <string name="feed_two">2 porsiyon ver</string>
-    <string name="feed_started">Mama veriliyor…</string>
+    <string name="feed_sent">Mama kabı komutu aldı.</string>
+    <string name="feed_failed">Mama verilemedi: mama kabı komutu almadı. Biraz sonra yeniden deneyin.</string>
     <string name="cancel">Vazgeç</string>
     <string name="purifier_humidity">%%%d nem</string>
     <string name="purifier_turn_on">Aç</string>

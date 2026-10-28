@@ -1,5 +1,6 @@
 package dev.evim.tv.data.home
 
+import android.util.Log
 import android.content.Context
 import androidx.compose.runtime.Immutable
 import org.json.JSONArray
@@ -261,8 +262,12 @@ class SmartHome(private val context: Context) {
         }
     }
 
+    /** Komutu gönderir; cihazın cevabı ya da hata loga yazılır ki mama verilmediğinde sebebi görülebilsin. */
     fun feed(device: HomeDevice.Feeder, portions: Int) {
-        tuya.getValue(device.key).device.set(mapOf(DP_MANUAL_FEED to portions))
+        runCatching { tuya.getValue(device.key).device.set(mapOf(DP_MANUAL_FEED to portions)) }
+            .onSuccess { Log.i(TAG, "${device.name}: $portions porsiyon gönderildi, cevap $it") }
+            .onFailure { Log.w(TAG, "${device.name}: $portions porsiyon verilemedi", it) }
+            .getOrThrow()
     }
 
     fun setPurifier(device: HomeDevice.Purifier, values: Map<String, String>): HomeDevice {
@@ -293,6 +298,7 @@ class SmartHome(private val context: Context) {
     private class CameraEntry(val name: String, val camera: EufyCamera)
 
     companion object {
+        private const val TAG = "GeniusHome"
         private const val DP_RELAY = "1"
         // Uygulamadan elle besleme yapılırken dinlenerek bulundu: porsiyon sayısı yazılır
         private const val DP_MANUAL_FEED = "243"

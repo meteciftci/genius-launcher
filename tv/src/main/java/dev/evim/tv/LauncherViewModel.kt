@@ -265,8 +265,12 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setPurifier(device: HomeDevice.Purifier, values: Map<String, String>) = updateDevice { home.setPurifier(device, values) }
 
-    fun feed(device: HomeDevice.Feeder, portions: Int) {
-        viewModelScope.launch { runCatching { homeIo { home.feed(device, portions) } } }
+    /** [onResult] null ise komut cihaza ulaştı; değilse gösterilecek hata metni. */
+    fun feed(device: HomeDevice.Feeder, portions: Int, onResult: (Int?) -> Unit) {
+        viewModelScope.launch {
+            val failed = runCatching { homeIo { home.feed(device, portions) } }.isFailure
+            onResult(if (failed) R.string.feed_failed else null)
+        }
     }
 
     private fun updateDevice(action: () -> HomeDevice) {

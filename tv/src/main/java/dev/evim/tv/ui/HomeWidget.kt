@@ -169,7 +169,18 @@ fun HomeWidget(vm: LauncherViewModel, modifier: Modifier = Modifier) {
         vm.cameraStream(device)?.let { url -> CameraDialog(device.name, url, vm.cameraIp(device), onDismiss = { camera = null }) }
     }
     feeder?.let { device ->
-        FeederDialog(device, onFeed = { vm.feed(device, it); feeder = null }, onDismiss = { feeder = null })
+        val context = LocalContext.current
+        val done = stringResource(R.string.feed_sent)
+        val failed = stringResource(R.string.feed_failed)
+        FeederDialog(
+            device,
+            onFeed = { portions ->
+                // Panel hemen kapanır; sonuç cihaz cevap verince bildirilir
+                vm.feed(device, portions) { error -> Toast.makeText(context, if (error == null) done else failed, Toast.LENGTH_LONG).show() }
+                feeder = null
+            },
+            onDismiss = { feeder = null },
+        )
     }
     // Komut sonrası güncel durumu göstermek için cihaz listeden her seferinde yeniden alınır
     (vm.homeDevices.firstOrNull { it.key == purifierKey } as? HomeDevice.Purifier)?.let { device ->
@@ -481,14 +492,9 @@ private fun Meal.time() = "%02d:%02d".format(hour, minute)
 
 @Composable
 private fun FeederDialog(device: HomeDevice.Feeder, onFeed: (Int) -> Unit, onDismiss: () -> Unit) {
-    val context = LocalContext.current
-    val feeding = stringResource(R.string.feed_started)
     val first = remember { FocusRequester() }
     LaunchedEffect(Unit) { runCatching { first.requestFocus() } }
-    val feed = { portions: Int ->
-        onFeed(portions)
-        Toast.makeText(context, feeding, Toast.LENGTH_SHORT).show()
-    }
+    val feed = onFeed
 
     Dialog(onDismissRequest = onDismiss) {
         Panel {
