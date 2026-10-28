@@ -270,6 +270,17 @@ class SmartHome(private val context: Context) {
             .getOrThrow()
     }
 
+    /** Teşhis: mama kaplarının DP'lerini [seconds] boyunca loga yazar; uygulamadan elle beslemenin DP'sini bulmak için. */
+    fun watchFeeders(seconds: Int) {
+        tuya.values.filter { it.kind == TuyaKind.FEEDER }.map { entry ->
+            Thread {
+                runCatching { entry.device.watch(seconds) { Log.i(TAG, "${entry.name} DP: $it") } }
+                    .onFailure { Log.w(TAG, "${entry.name} dinlenemedi", it) }
+                Log.i(TAG, "${entry.name} dinleme bitti")
+            }.apply { start() }
+        }.forEach { it.join() }
+    }
+
     fun setPurifier(device: HomeDevice.Purifier, values: Map<String, String>): HomeDevice {
         val entry = dyson.getValue(device.key)
         return purifier(device.key, entry) { entry.device.set(values) }

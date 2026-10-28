@@ -265,6 +265,12 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setPurifier(device: HomeDevice.Purifier, values: Map<String, String>) = updateDevice { home.setPurifier(device, values) }
 
+    /** Teşhis: `am start ... --ei watch_feeders <saniye>` ile mama kaplarının DP'leri loga yazılır. */
+    fun watchFeeders(seconds: Int) {
+        if (!BuildConfig.SMART_HOME) return
+        viewModelScope.launch(Dispatchers.IO) { runCatching { home.watchFeeders(seconds.coerceIn(10, 600)) } }
+    }
+
     /** [onResult] null ise komut cihaza ulaştı; değilse gösterilecek hata metni. */
     fun feed(device: HomeDevice.Feeder, portions: Int, onResult: (Int?) -> Unit) {
         viewModelScope.launch {

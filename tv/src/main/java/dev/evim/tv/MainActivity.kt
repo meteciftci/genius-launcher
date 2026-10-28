@@ -17,6 +17,7 @@ class MainActivity : ComponentActivity() {
         CrashGuard.install(this)
         if (intent.getBooleanExtra("demo", false)) viewModel.enterDemo()
         viewModel.openRequest = intent.getStringExtra(EXTRA_OPEN)
+        watchFeeders(intent)
         setContent {
             EvimTheme {
                 HomeScreen(viewModel)
@@ -32,6 +33,13 @@ class MainActivity : ComponentActivity() {
         if (intent.hasCategory(Intent.CATEGORY_HOME)) viewModel.homePressed()
         // Kumanda tuşuyla istenen kilitli uygulama ya da Dosyalar; Home'un kapattıklarından sonra açılır
         intent.getStringExtra(EXTRA_OPEN)?.let { viewModel.openRequest = it }
+        watchFeeders(intent)
+    }
+
+    // Yalnızca ADB'den: mama kaplarının DP'lerini loga yazar (GeniusHome etiketi)
+    private fun watchFeeders(intent: Intent) {
+        val seconds = intent.getIntExtra("watch_feeders", 0)
+        if (seconds > 0) viewModel.watchFeeders(seconds)
     }
 
     companion object {
