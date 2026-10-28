@@ -224,6 +224,11 @@
     <string name="wizard_cleanup_done">Daha önce %d uygulama kaldırıldı.</string>
     <string name="wizard_cleanup_recommended">önerilir</string>
     <string name="wizard_cleanup_wifi">Wi-Fi ağınızı kaydetmiş, korunuyor</string>
+    <string name="cleanup_label_autoinstall">Otomatik uygulama kurulumu (Play iş ortakları)</string>
+    <string name="cleanup_label_partnersetup">Google iş ortağı takibi</string>
+    <string name="cleanup_label_feedback">Google geri bildirim gönderici</string>
+    <string name="cleanup_label_bugreport">Hata raporu gönderici</string>
+    <string name="cleanup_label_recommendations">Ana ekran önerileri</string>
     <string name="wizard_cleanup_do">%d uygulamayı kaldır</string>
     <string name="wizard_awake_title">Kutuyu uyanık tut</string>
     <string name="wizard_awake_body">TV kapanınca kutu çalışmaya ve ev ağında kalmaya devam eder; akıllı ev cihazları hemen cevap verir. Biraz daha fazla elektrik harcar.</string>

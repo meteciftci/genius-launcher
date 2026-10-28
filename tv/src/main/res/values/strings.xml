@@ -238,6 +238,11 @@
     <string name="wizard_cleanup_done">%d apps were removed earlier.</string>
     <string name="wizard_cleanup_recommended">recommended</string>
     <string name="wizard_cleanup_wifi">saved your Wi-Fi network, kept</string>
+    <string name="cleanup_label_autoinstall">Automatic app installs (Play partners)</string>
+    <string name="cleanup_label_partnersetup">Google partner tracking</string>
+    <string name="cleanup_label_feedback">Google feedback sender</string>
+    <string name="cleanup_label_bugreport">Bug report sender</string>
+    <string name="cleanup_label_recommendations">Home screen recommendations</string>
     <string name="wizard_cleanup_do">Remove %d apps</string>
     <string name="wizard_awake_title">Keep the box awake</string>
     <string name="wizard_awake_body">When the TV turns off the box keeps running and stays on the home network, so smart home devices answer right away. It uses a little more power.</string>

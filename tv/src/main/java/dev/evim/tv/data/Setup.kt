@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import dadb.AdbAuthException
+import dev.evim.tv.R
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -110,7 +111,8 @@ class Setup(private val context: Context) {
         write(JSONObject().apply { if (failed.isNotEmpty()) put(KEY_REMOVED, JSONArray(failed)) })
     }
 
-    private fun label(pkg: String): String = runCatching {
+    // Adı bir şey anlatmayan paketler için açıklayıcı ad ("Device configuration", "Market Feedback Agent")
+    private fun label(pkg: String): String = LABELS[pkg]?.let(context::getString) ?: runCatching {
         val pm = context.packageManager
         pm.getApplicationLabel(pm.getApplicationInfo(pkg, PackageManager.MATCH_UNINSTALLED_PACKAGES)).toString()
     }.getOrDefault(pkg)
@@ -143,15 +145,38 @@ class Setup(private val context: Context) {
             // Mi Wallpaper (Mi TV Stick): Xiaomi'nin ekran koruyucusu; seçiliyse kaldırılınca Android varsayılanına döner
             "com.mitv.dream" to false,
             "com.mitv.videoplayer" to false,
+            "com.mitv.milinkservice" to false,
+            // Mi Box S 1. nesil (Android 9)
+            "android.autoinstalls.config.xioami.mibox3" to true,
             "com.xiaomi.mitv.mediaexplorer" to false,
         )
         val COMMON = mapOf(
             "tv.alphonso.alphonso_eula" to true,
+            // Mi Box S 2. nesil (Google TV); Play'in iş ortağı uygulamalarını kendiliğinden kurmasını sağlar
+            "android.autoinstalls.config.soc.amlogic" to true,
+            "com.google.android.partnersetup" to true,
+            "com.google.android.feedback" to true,
+            "com.google.android.tv.bugreportsender" to true,
+            // Yalnızca sistemin ana ekranındaki öneri satırlarını besler
+            "com.google.android.tvrecommendations" to true,
+            "com.google.android.youtube.tvkids" to false,
+            // Google Play Müzik; hizmet 2020'de kapandı
+            "com.google.android.music" to false,
+            "com.android.printspooler" to false,
             "com.google.android.videos" to false,
             "com.netflix.ninja" to false,
             "com.google.android.youtube.tvmusic" to false,
             "com.google.android.play.games" to false,
             "com.amazon.amazonvideo.livingroom" to false,
+        )
+
+        val LABELS = mapOf(
+            "android.autoinstalls.config.xioami.mibox3" to R.string.cleanup_label_autoinstall,
+            "android.autoinstalls.config.soc.amlogic" to R.string.cleanup_label_autoinstall,
+            "com.google.android.partnersetup" to R.string.cleanup_label_partnersetup,
+            "com.google.android.feedback" to R.string.cleanup_label_feedback,
+            "com.google.android.tv.bugreportsender" to R.string.cleanup_label_bugreport,
+            "com.google.android.tvrecommendations" to R.string.cleanup_label_recommendations,
         )
 
         val AWAKE = listOf(
