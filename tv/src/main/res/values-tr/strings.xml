@@ -327,7 +327,10 @@
     <string name="lock_remove">Kilidi kapat</string>
     <string name="keys_title">Kumanda tuşları</string>
     <string name="keys_none">Atanmadı</string>
-    <string name="keys_count">%1$d tuş</string>
+    <plurals name="keys_count">
+        <item quantity="one">%1$d tuş</item>
+        <item quantity="other">%1$d tuş</item>
+    </plurals>
     <string name="keys_body">Netflix, YouTube, Apps gibi tuşlara istediğiniz uygulamayı atayın. Tuş her uygulamada çalışır.</string>
     <string name="keys_add">Tuş ata</string>
     <string name="keys_add_hint">Kumandada atamak istediğiniz tuşa basın</string>

@@ -342,7 +342,10 @@
     <string name="lock_remove">Turn off</string>
     <string name="keys_title">Remote buttons</string>
     <string name="keys_none">None set</string>
-    <string name="keys_count">%1$d buttons</string>
+    <plurals name="keys_count">
+        <item quantity="one">%1$d button</item>
+        <item quantity="other">%1$d buttons</item>
+    </plurals>
     <string name="keys_body">Give buttons like Netflix, YouTube and Apps the app you want. They work in every app.</string>
     <string name="keys_add">Assign a button</string>
     <string name="keys_add_hint">Press the button on the remote</string>

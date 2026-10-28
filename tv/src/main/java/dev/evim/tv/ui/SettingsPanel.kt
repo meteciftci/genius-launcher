@@ -44,6 +44,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -122,7 +123,7 @@ fun SettingsDialog(
                         ChoiceCard(
                             Icons.Rounded.SettingsRemote,
                             stringResource(R.string.keys_title),
-                            if (vm.keyMappings.isEmpty()) stringResource(R.string.keys_none) else stringResource(R.string.keys_count, vm.keyMappings.size),
+                            if (vm.keyMappings.isEmpty()) stringResource(R.string.keys_none) else pluralStringResource(R.plurals.keys_count, vm.keyMappings.size, vm.keyMappings.size),
                             Modifier.weight(1f),
                         ) { go(Step.KEYS) }
                         ChoiceCard(Icons.Rounded.Home, stringResource(R.string.settings_home), home, Modifier.weight(1f)) {
