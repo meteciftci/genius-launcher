@@ -14,11 +14,11 @@
     <string name="smart_home_title">Akıllı ev</string>
     <string name="smart_home_subtitle">Cihazlar buluttan değil, ev ağınızdan yönetilir.</string>
     <string name="smart_home_add">Cihaz ekle</string>
-    <string name="brand_tuya_kinds">akıllı prizler, röleler, mama kapları</string>
+    <string name="brand_tuya_kinds">akıllı prizler, röleler</string>
     <string name="brand_dyson_kinds">hava temizleyiciler (Pure Cool, Hot+Cool, Humidify+Cool)</string>
-    <string name="smart_home_add_hint">Tuya priz ve mama kapları, Dyson hava temizleyiciler ya da Eufy kameralar</string>
+    <string name="smart_home_add_hint">Tuya priz ve röleler, Dyson hava temizleyiciler ya da Eufy kameralar</string>
     <string name="smart_home_add_question">Hangi cihazı ekliyorsunuz?</string>
-    <string name="card_tuya_title">Priz, röle, mama kabı</string>
+    <string name="card_tuya_title">Priz, röle</string>
     <string name="card_dyson_title">Hava temizleyici</string>
     <string name="reconnect_hint">cihaz yeniden kurulduysa</string>
     <string name="card_camera_title">Kamera</string>
@@ -104,7 +104,6 @@
     <string name="home_other">Diğer</string>
     <string name="home_other_count">%d cihaz daha</string>
     <string name="device_move_hint">▲ ▼ ile taşı  ·  OK ile bitir</string>
-    <string name="feeder_meal">%1$s · %2$d porsiyon</string>
     <string name="purifier_target">hedef %d°</string>
     <string name="menu_rename">Yeniden adlandır</string>
     <string name="menu_reset_name">Asıl adına dön</string>
@@ -114,11 +113,6 @@
     <string name="home_unreachable">ulaşılamıyor</string>
     <string name="relay_on">Açık</string>
     <string name="relay_off">Kapalı</string>
-    <string name="feeder_next_meal">Sonraki öğün %1$s · %2$d porsiyon</string>
-    <string name="feed_one">1 porsiyon ver</string>
-    <string name="feed_two">2 porsiyon ver</string>
-    <string name="feed_sent">Mama kabı komutu aldı.</string>
-    <string name="feed_failed">Mama verilemedi: mama kabı komutu almadı. Biraz sonra yeniden deneyin.</string>
     <string name="cancel">Vazgeç</string>
     <string name="purifier_humidity">%%%d nem</string>
     <string name="purifier_turn_on">Aç</string>

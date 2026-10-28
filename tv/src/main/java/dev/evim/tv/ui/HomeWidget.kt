@@ -26,7 +26,6 @@ import androidx.compose.material.icons.rounded.LocalFireDepartment
 import androidx.compose.material.icons.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.PowerSettingsNew
 import androidx.compose.material.icons.rounded.Remove
-import androidx.compose.material.icons.rounded.Restaurant
 import androidx.compose.material.icons.rounded.SwapVert
 import androidx.compose.material.icons.rounded.Undo
 import androidx.compose.runtime.Composable
@@ -76,7 +75,6 @@ import dev.evim.tv.LauncherViewModel
 import dev.evim.tv.R
 import dev.evim.tv.data.home.AirQuality
 import dev.evim.tv.data.home.HomeDevice
-import dev.evim.tv.data.home.Meal
 import dev.evim.tv.data.home.celsiusToDyson
 
 /** Widget'ta gösterilen en fazla kart; fazlası "Diğer" kartındaki panelde. */
@@ -90,7 +88,6 @@ private val CardShape = RoundedCornerShape(12.dp)
  */
 @Composable
 fun HomeWidget(vm: LauncherViewModel, modifier: Modifier = Modifier) {
-    var feeder by remember { mutableStateOf<HomeDevice.Feeder?>(null) }
     var purifierKey by remember { mutableStateOf<String?>(null) }
     var camera by remember { mutableStateOf<HomeDevice.Camera?>(null) }
     var showAll by remember { mutableStateOf(false) }
@@ -102,7 +99,6 @@ fun HomeWidget(vm: LauncherViewModel, modifier: Modifier = Modifier) {
     val open: (HomeDevice) -> Unit = { device ->
         when (device) {
             is HomeDevice.Purifier -> purifierKey = device.key
-            is HomeDevice.Feeder -> feeder = device
             is HomeDevice.Relay -> if (device.reachable) vm.toggleRelay(device)
             is HomeDevice.Other -> Unit
             is HomeDevice.Camera -> if (device.reachable) camera = device
@@ -167,20 +163,6 @@ fun HomeWidget(vm: LauncherViewModel, modifier: Modifier = Modifier) {
     }
     camera?.let { device ->
         vm.cameraStream(device)?.let { url -> CameraDialog(device.name, url, vm.cameraIp(device), onDismiss = { camera = null }) }
-    }
-    feeder?.let { device ->
-        val context = LocalContext.current
-        val done = stringResource(R.string.feed_sent)
-        val failed = stringResource(R.string.feed_failed)
-        FeederDialog(
-            device,
-            onFeed = { portions ->
-                // Panel hemen kapanır; sonuç cihaz cevap verince bildirilir
-                vm.feed(device, portions) { error -> Toast.makeText(context, if (error == null) done else failed, Toast.LENGTH_LONG).show() }
-                feeder = null
-            },
-            onDismiss = { feeder = null },
-        )
     }
     // Komut sonrası güncel durumu göstermek için cihaz listeden her seferinde yeniden alınır
     (vm.homeDevices.firstOrNull { it.key == purifierKey } as? HomeDevice.Purifier)?.let { device ->
@@ -374,7 +356,7 @@ private fun PurifierContent(device: HomeDevice.Purifier) {
     }
 }
 
-/** Mama kabı ve röle gibi tek satırlık cihazlar. */
+/** Röle ve kamera gibi tek satırlık cihazlar. */
 @Composable
 private fun CompactContent(device: HomeDevice) {
     Row(
@@ -470,7 +452,6 @@ private fun HomeDevice.detail(): String {
     if (!reachable) return stringResource(R.string.home_unreachable)
     return when (this) {
         is HomeDevice.Relay -> stringResource(if (on) R.string.relay_on else R.string.relay_off)
-        is HomeDevice.Feeder -> nextMeal?.let { stringResource(R.string.feeder_meal, it.time(), it.portions) }.orEmpty()
         is HomeDevice.Purifier -> ""
         is HomeDevice.Other -> stringResource(R.string.home_online)
         is HomeDevice.Camera -> stringResource(R.string.camera_watch)
@@ -487,32 +468,6 @@ private val AirQuality.label: Int
         AirQuality.SEVERE -> R.string.air_severe
         AirQuality.EXTREME -> R.string.air_extreme
     }
-
-private fun Meal.time() = "%02d:%02d".format(hour, minute)
-
-@Composable
-private fun FeederDialog(device: HomeDevice.Feeder, onFeed: (Int) -> Unit, onDismiss: () -> Unit) {
-    val first = remember { FocusRequester() }
-    LaunchedEffect(Unit) { runCatching { first.requestFocus() } }
-    val feed = onFeed
-
-    Dialog(onDismissRequest = onDismiss) {
-        Panel {
-            PanelHeader(device.name, device.nextMeal?.let { stringResource(R.string.feeder_next_meal, it.time(), it.portions) }, device.icon(), device.tint())
-            if (device.reachable) {
-                CardRow {
-                    ChoiceCard(Icons.Rounded.Restaurant, stringResource(R.string.feed_one), null, Modifier.weight(1f), EvimColors.Feeder) { feed(1) }
-                    ChoiceCard(Icons.Rounded.Restaurant, stringResource(R.string.feed_two), null, Modifier.weight(1f), EvimColors.Feeder) { feed(2) }
-                }
-                // Yanlışlıkla OK'e basınca mama dökülmesin diye odak "Vazgeç"te başlar
-                PanelActions { PillButton(stringResource(R.string.cancel), Modifier.focusRequester(first), onClick = onDismiss) }
-            } else {
-                PanelNote(stringResource(R.string.home_unreachable))
-                PanelActions { PillButton(stringResource(R.string.done), Modifier.focusRequester(first), onClick = onDismiss) }
-            }
-        }
-    }
-}
 
 @Composable
 private fun PurifierDialog(device: HomeDevice.Purifier, onSet: (Map<String, String>) -> Unit, onDismiss: () -> Unit) {

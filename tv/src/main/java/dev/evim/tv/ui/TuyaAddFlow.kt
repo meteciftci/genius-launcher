@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Outlet
-import androidx.compose.material.icons.rounded.Pets
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.common.BitMatrix
 import com.google.zxing.qrcode.QRCodeWriter
@@ -158,8 +157,8 @@ private fun SelectDevices(vm: LauncherViewModel, select: TuyaStep.Select, focus:
             ListRow(
                 device.name,
                 notes,
-                if (device.kind == TuyaKind.FEEDER) Icons.Rounded.Pets else Icons.Rounded.Outlet,
-                if (device.kind == TuyaKind.FEEDER) EvimColors.Feeder else EvimColors.Tuya,
+                Icons.Rounded.Outlet,
+                EvimColors.Tuya,
                 trailing = Trailing.Check(device.id in checked),
                 modifier = if (index == 0) Modifier.focusRequester(focus) else Modifier,
             ) {
@@ -182,7 +181,7 @@ private fun SelectDevices(vm: LauncherViewModel, select: TuyaStep.Select, focus:
 
 private val TuyaKind.label: Int
     get() = when (this) {
-        TuyaKind.RELAY, TuyaKind.FEEDER -> R.string.tuya_full
+        TuyaKind.RELAY -> R.string.tuya_full
         TuyaKind.SWITCH -> R.string.tuya_switch
         TuyaKind.STATUS -> R.string.tuya_status
     }

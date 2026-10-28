@@ -30,7 +30,7 @@ data class TuyaAccountDevice(
  * Destek seviyeleri: denenmiş tiplerde tam kontrol, bilinmeyen ama anahtarı olan cihazda yalnızca aç/kapa,
  * geri kalanlarda yalnızca çevrimiçi durumu.
  */
-enum class TuyaKind { RELAY, FEEDER, SWITCH, STATUS }
+enum class TuyaKind { RELAY, SWITCH, STATUS }
 
 /** QR girişi tamamlanınca dönen oturum; yalnızca bellekte tutulur, hiçbir yere yazılmaz. */
 class TuyaSession internal constructor(
@@ -70,7 +70,9 @@ class TuyaCloud(private val clientId: String, private val schema: String) {
         val homes = request(session, "/v1.0/m/life/users/homes", null).asArray()
         return homes.objects().flatMap { home ->
             val list = request(session, "/v1.0/m/life/ha/home/devices", JSONObject().put("homeId", home.get("ownerId").toString())).asArray()
-            list.objects().map { device(session, it) }
+            // Mama kapları ev ağından mama verme komutunu uygulamıyor; listelenmez
+            list.objects().filterNot { it.optString("product_id") in FEEDER_PRODUCTS || it.optString("category") == FEEDER_CATEGORY }
+                .map { device(session, it) }
         }.distinctBy { it.id }
     }
 
@@ -82,7 +84,6 @@ class TuyaCloud(private val clientId: String, private val schema: String) {
         var switchDp: String? = null
         val kind = when {
             localKey.isEmpty() -> TuyaKind.STATUS
-            productId in VERIFIED_FEEDERS -> TuyaKind.FEEDER
             category in VERIFIED_RELAYS && item.statusCodes().contains("switch_1") -> TuyaKind.RELAY
             else -> {
                 // DP kodu → numara eşlemesi yalnızca bilinmeyen cihazlar için sorulur
@@ -164,20 +165,23 @@ class TuyaCloud(private val clientId: String, private val schema: String) {
 
     private fun Any.asArray(): JSONArray = this as? JSONArray ?: JSONArray()
 
-    private companion object {
-        const val LOGIN_HOST = "https://apigw.iotbing.com"
-        const val TIMEOUT_MS = 10_000
-        const val NONCE_CHARS = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678"
-        val random = SecureRandom()
+    companion object {
+        /** Xenon X8605: ev ağından mama verme komutunu uygulamadığı için desteklenmiyor. */
+        val FEEDER_PRODUCTS = setOf("cujblevbekyblbhz")
+        const val FEEDER_CATEGORY = "cwwsq"
 
-        // Bu launcher'da denenmiş ürünler: röle/priz kategorileri ve Xenon X8605 mama kabı
-        val VERIFIED_RELAYS = setOf("tdq", "kg", "cz", "pc")
-        val VERIFIED_FEEDERS = setOf("cujblevbekyblbhz")
-        val SWITCH_CODES = listOf("switch_1", "switch", "switch_led")
+        private const val LOGIN_HOST = "https://apigw.iotbing.com"
+        private const val TIMEOUT_MS = 10_000
+        private const val NONCE_CHARS = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678"
+        private val random = SecureRandom()
 
-        fun enc(value: String): String = URLEncoder.encode(value, "UTF-8")
-        fun b64(bytes: ByteArray): String = Base64.encodeToString(bytes, Base64.NO_WRAP)
-        fun hex(bytes: ByteArray) = bytes.joinToString("") { "%02x".format(it) }
+        // Bu launcher'da denenmiş ürünler: röle/priz kategorileri
+        private val VERIFIED_RELAYS = setOf("tdq", "kg", "cz", "pc")
+        private val SWITCH_CODES = listOf("switch_1", "switch", "switch_led")
+
+        private fun enc(value: String): String = URLEncoder.encode(value, "UTF-8")
+        private fun b64(bytes: ByteArray): String = Base64.encodeToString(bytes, Base64.NO_WRAP)
+        private fun hex(bytes: ByteArray) = bytes.joinToString("") { "%02x".format(it) }
         fun hmac(key: ByteArray, data: ByteArray): ByteArray =
             Mac.getInstance("HmacSHA256").apply { init(SecretKeySpec(key, "HmacSHA256")) }.doFinal(data)
 

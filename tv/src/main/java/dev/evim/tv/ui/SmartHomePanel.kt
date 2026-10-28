@@ -13,7 +13,6 @@ import androidx.compose.material.icons.rounded.DevicesOther
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Outlet
-import androidx.compose.material.icons.rounded.Pets
 import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material.icons.rounded.Undo
 import androidx.compose.material.icons.rounded.Videocam
@@ -190,7 +189,6 @@ private fun HomeDevice.brand() = when (this) {
 /** Cihaz türünün simgesi ve rengi; panellerde ve menülerde aynı. */
 internal fun HomeDevice.icon(): ImageVector = when (this) {
     is HomeDevice.Purifier -> Icons.Rounded.Air
-    is HomeDevice.Feeder -> Icons.Rounded.Pets
     is HomeDevice.Relay -> Icons.Rounded.Outlet
     is HomeDevice.Other -> Icons.Rounded.DevicesOther
     is HomeDevice.Camera -> Icons.Rounded.Videocam
@@ -198,7 +196,6 @@ internal fun HomeDevice.icon(): ImageVector = when (this) {
 
 internal fun HomeDevice.tint(): Color = when (this) {
     is HomeDevice.Purifier -> EvimColors.Dyson
-    is HomeDevice.Feeder -> EvimColors.Feeder
     is HomeDevice.Relay, is HomeDevice.Other -> EvimColors.Tuya
     is HomeDevice.Camera -> EvimColors.Camera
 }

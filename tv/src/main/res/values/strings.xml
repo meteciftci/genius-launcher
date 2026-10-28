@@ -18,9 +18,9 @@
     <string name="smart_home_title">Smart home</string>
     <string name="smart_home_subtitle">Devices are controlled over your home network, not the cloud.</string>
     <string name="smart_home_add">Add device</string>
-    <string name="smart_home_add_hint">Tuya plugs and feeders, Dyson purifiers or Eufy cameras</string>
+    <string name="smart_home_add_hint">Tuya plugs and relays, Dyson purifiers or Eufy cameras</string>
     <string name="smart_home_add_question">What are you adding?</string>
-    <string name="card_tuya_title">Plug, relay, pet feeder</string>
+    <string name="card_tuya_title">Plug, relay</string>
     <string name="card_dyson_title">Air purifier</string>
     <string name="reconnect_hint">if the device was set up again</string>
     <string name="brand_eufy" translatable="false">Eufy</string>
@@ -45,7 +45,7 @@
     <string name="smart_home_add_subtitle">Pick the kind of device; you\'ll sign in to its app next</string>
     <string name="brand_tuya" translatable="false">Tuya · Smart Life</string>
     <string name="brand_dyson" translatable="false">Dyson</string>
-    <string name="brand_tuya_kinds">smart plugs, relays, pet feeders</string>
+    <string name="brand_tuya_kinds">smart plugs, relays</string>
     <string name="brand_dyson_kinds">air purifiers (Pure Cool, Hot+Cool, Humidify+Cool)</string>
     <string name="menu_remove">Remove</string>
     <string name="remove_device_title">Remove %s?</string>
@@ -112,7 +112,6 @@
     <string name="home_other">Other</string>
     <string name="home_other_count">%d more</string>
     <string name="device_move_hint">▲ ▼ to move  ·  OK to finish</string>
-    <string name="feeder_meal">%1$s · %2$d portion(s)</string>
     <string name="purifier_target">target %d°</string>
     <string name="menu_rename">Rename</string>
     <string name="menu_reset_name">Use original name</string>
@@ -122,11 +121,6 @@
     <string name="home_unreachable">unreachable</string>
     <string name="relay_on">On</string>
     <string name="relay_off">Off</string>
-    <string name="feeder_next_meal">Next meal %1$s · %2$d portion(s)</string>
-    <string name="feed_one">Feed 1 portion</string>
-    <string name="feed_two">Feed 2 portions</string>
-    <string name="feed_sent">The feeder took the command.</string>
-    <string name="feed_failed">Couldn\'t feed: the feeder didn\'t take the command. Try again in a moment.</string>
     <string name="cancel">Cancel</string>
     <string name="purifier_humidity">%d%% humidity</string>
     <string name="purifier_turn_on">Turn on</string>

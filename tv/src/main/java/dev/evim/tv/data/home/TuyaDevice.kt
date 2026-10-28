@@ -41,26 +41,6 @@ class TuyaDevice(
         receiveDps(setOf(CONTROL, CONTROL_NEW, STATUS)) ?: emptyMap()
     }
 
-    /**
-     * Teşhis için: tüm DP'leri bir kez, sonra [seconds] boyunca cihazın kendiliğinden bildirdiği değişiklikleri verir.
-     * Bağlantı açık tutulduğu için bu sırada başka yerel komutlar reddedilebilir.
-     */
-    fun watch(seconds: Int, onDps: (Map<String, Any>) -> Unit) = session {
-        onDps(query())
-        val end = System.currentTimeMillis() + seconds * 1000L
-        var lastBeat = System.currentTimeMillis()
-        while (System.currentTimeMillis() < end) {
-            // Bağlantı kapanmasın diye ara ara kalp atışı; cevabı aşağıda okunup atlanır
-            if (System.currentTimeMillis() - lastBeat > HEARTBEAT_MS) {
-                send(HEART_BEAT, JSONObject())
-                lastBeat = System.currentTimeMillis()
-            }
-            runCatching { receiveDps(setOf(STATUS, CONTROL, CONTROL_NEW)) }
-                .onSuccess { dps -> if (!dps.isNullOrEmpty()) onDps(dps) }
-                .onFailure { if (it !is java.net.SocketTimeoutException) throw it }
-        }
-    }
-
     private fun <T> session(block: Session.() -> T): T =
         Socket().use { socket ->
             socket.connect(InetSocketAddress(ip, PORT), TIMEOUT_MS)
@@ -162,7 +142,6 @@ class TuyaDevice(
     private companion object {
         const val PORT = 6668
         const val TIMEOUT_MS = 5000
-        const val HEARTBEAT_MS = 10_000L
         const val PREFIX = 0x000055AA
         const val SUFFIX = 0x0000AA55
 

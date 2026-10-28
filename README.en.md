@@ -20,7 +20,7 @@ A clean, ad-free home screen for Android TV and Google TV. It also controls the 
 - **Files**: Browse, rename and delete files on internal storage and USB sticks. Videos, music and pictures open inside the launcher (even when the TV has no player app). APKs are installed after you confirm. **Receive files** shows a QR code: scan it with your phone's camera and pick files on the page that opens; they arrive in Downloads over your home network, no app needed. Files is a card like the apps, so you can hide it.
 - **App lock**: Apps locked from the card menu (**Lock**) open only with a 4-digit PIN. The PIN is set in Genius settings and protects them too. It's typed on an on-screen keypad with the remote's arrow keys. The PIN itself isn't stored, only a salted hash on the TV.
 - **Weather**: Current weather next to the clock; press it for an hourly and 7-day forecast. Data comes from [Open-Meteo](https://open-meteo.com) and the city can be changed.
-- **Smart home**: Tuya (plugs, relays, pet feeders), Dyson air purifiers and Eufy cameras appear as cards at the top right. Cards can be reordered and renamed; you choose how many are shown (3–6) and the rest go to an "Other" panel.
+- **Smart home**: Tuya (plugs, relays), Dyson air purifiers and Eufy cameras appear as cards at the top right. Cards can be reordered and renamed; you choose how many are shown (3–6) and the rest go to an "Other" panel.
 - **Camera**: Press an Eufy camera's card for a full-screen live view with sound (RTSP). Pan & Tilt cameras turn with the remote's arrow keys.
 - **Setup wizard**: Full-screen illustrated steps for the TV's ADB permission, the Home button, removing bloatware and "stay awake". Everything can be undone.
 - **Memory**: RAM use in the top bar; **Free up** closes apps running in the background.
@@ -166,7 +166,7 @@ If the launcher crashes 3 times in 5 minutes, it turns the system home screen ba
 
 ## Known limitations
 
-- **Tuya**: Versions 3.3 and 3.4 of the local protocol are supported, 3.5 isn't yet. Full control only for tried types (plugs/relays, Xenon X8605 pet feeder); unknown devices get on/off or status only.
+- **Tuya**: Versions 3.3 and 3.4 of the local protocol are supported, 3.5 isn't yet. Full control only for tried types (plugs/relays); unknown devices get on/off or status only. Pet feeders aren't supported: the Xenon X8605 we tried ignores the feed command on the home network and only feeds from the Tuya app, through the cloud.
 - **Dyson**: Tried with a heated purifier (527K); some values may be missing on other models.
 - **Eufy**: Only cameras that offer RTSP. Turning was tried with the Indoor Cam Pan & Tilt (T8410). With RTSP on, Eufy lowers the video to 1080p.
 - **App lock**: It only covers the cards in Genius; a locked app can still be opened by voice, from another app or from the TV's settings. It's meant to keep children from opening apps at random with the remote. If you forget the PIN, clear Genius's data from a computer with `adb shell pm clear dev.evim.tv`; settings and smart home devices go along with the PIN.

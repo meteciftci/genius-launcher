@@ -1,12 +1,10 @@
 package dev.evim.tv.data.home
 
-import android.util.Log
 import android.content.Context
 import androidx.compose.runtime.Immutable
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
-import java.util.Calendar
 
 /** Evim satırında gösterilen cihazlar; [reachable] false ise son denemede cevap vermedi. */
 @Immutable
@@ -16,8 +14,6 @@ sealed interface HomeDevice {
     val reachable: Boolean
 
     data class Relay(override val key: String, override val name: String, override val reachable: Boolean, val on: Boolean) : HomeDevice
-
-    data class Feeder(override val key: String, override val name: String, override val reachable: Boolean, val nextMeal: Meal?) : HomeDevice
 
     data class Purifier(override val key: String, override val name: String, override val reachable: Boolean, val state: DysonState?) : HomeDevice
 
@@ -31,13 +27,10 @@ sealed interface HomeDevice {
 /** Aynı cihazı başka bir adla döner. */
 fun HomeDevice.withName(name: String): HomeDevice = when (this) {
     is HomeDevice.Relay -> copy(name = name)
-    is HomeDevice.Feeder -> copy(name = name)
     is HomeDevice.Purifier -> copy(name = name)
     is HomeDevice.Other -> copy(name = name)
     is HomeDevice.Camera -> copy(name = name)
 }
-
-data class Meal(val hour: Int, val minute: Int, val portions: Int)
 
 /**
  * Cihaz anahtarlarını uygulamanın özel klasöründeki home.json'dan okur ve cihazlarla yerel ağda konuşur.
@@ -62,7 +55,10 @@ class SmartHome(private val context: Context) {
         cameras = emptyMap()
         if (!stored.exists()) return
         val json = JSONObject(stored.readText())
-        tuya = json.optJSONArray("tuya").objects().associate { t ->
+        // Mama kapları artık desteklenmiyor: eski dosyalardaki kayıtları atlanır, dosyadan da silinir
+        val (feeders, tuyaItems) = json.optJSONArray("tuya").objects().partition { it.isFeeder() }
+        if (feeders.isNotEmpty()) stored.writeText(json.put("tuya", JSONArray(tuyaItems)).toString())
+        tuya = tuyaItems.associate { t ->
             val category = t.optString("category")
             val entry = TuyaEntry(
                 name = t.getString("name"),
@@ -182,11 +178,10 @@ class SmartHome(private val context: Context) {
 
     private fun pollTuya(entries: Map<String, TuyaEntry>): List<HomeDevice> = entries.map { (key, entry) ->
         when (entry.kind) {
-            TuyaKind.FEEDER -> feeder(key, entry) { entry.device.status() }
             TuyaKind.RELAY, TuyaKind.SWITCH -> relay(key, entry) { entry.device.status() }
             TuyaKind.STATUS -> HomeDevice.Other(key, entry.name, reachable = runCatching { entry.device.status() }.isSuccess)
         }
-    }.sortedBy { if (it is HomeDevice.Feeder) 0 else 1 }
+    }
 
     /** Adresi değişen cihaz bulunduysa true; ağ en fazla birkaç dakikada bir dinlenir. */
     private fun rediscover(keys: Set<String>): Boolean {
@@ -262,25 +257,6 @@ class SmartHome(private val context: Context) {
         }
     }
 
-    /** Komutu gönderir; cihazın cevabı ya da hata loga yazılır ki mama verilmediğinde sebebi görülebilsin. */
-    fun feed(device: HomeDevice.Feeder, portions: Int) {
-        runCatching { tuya.getValue(device.key).device.set(mapOf(DP_MANUAL_FEED to portions)) }
-            .onSuccess { Log.i(TAG, "${device.name}: $portions porsiyon gönderildi, cevap $it") }
-            .onFailure { Log.w(TAG, "${device.name}: $portions porsiyon verilemedi", it) }
-            .getOrThrow()
-    }
-
-    /** Teşhis: mama kaplarının DP'lerini [seconds] boyunca loga yazar; uygulamadan elle beslemenin DP'sini bulmak için. */
-    fun watchFeeders(seconds: Int) {
-        tuya.values.filter { it.kind == TuyaKind.FEEDER }.map { entry ->
-            Thread {
-                runCatching { entry.device.watch(seconds) { Log.i(TAG, "${entry.name} DP: $it") } }
-                    .onFailure { Log.w(TAG, "${entry.name} dinlenemedi", it) }
-                Log.i(TAG, "${entry.name} dinleme bitti")
-            }.apply { start() }
-        }.forEach { it.join() }
-    }
-
     fun setPurifier(device: HomeDevice.Purifier, values: Map<String, String>): HomeDevice {
         val entry = dyson.getValue(device.key)
         return purifier(device.key, entry) { entry.device.set(values) }
@@ -289,12 +265,6 @@ class SmartHome(private val context: Context) {
     private fun relay(key: String, entry: TuyaEntry, read: () -> Map<String, Any>): HomeDevice.Relay {
         val dps = runCatching(read).getOrNull()
         return HomeDevice.Relay(key, entry.name, reachable = dps != null, on = dps?.get(entry.switchDp) == true)
-    }
-
-    private fun feeder(key: String, entry: TuyaEntry, read: () -> Map<String, Any>): HomeDevice.Feeder {
-        val dps = runCatching(read).getOrNull()
-        val plan = (dps?.get(DP_MEAL_PLAN) as? String)?.let(::parseMealPlan).orEmpty()
-        return HomeDevice.Feeder(key, entry.name, reachable = dps != null, nextMeal = nextMeal(plan))
     }
 
     private fun purifier(key: String, entry: DysonEntry, read: () -> DysonState): HomeDevice.Purifier {
@@ -309,37 +279,19 @@ class SmartHome(private val context: Context) {
     private class CameraEntry(val name: String, val camera: EufyCamera)
 
     companion object {
-        private const val TAG = "GeniusHome"
         private const val DP_RELAY = "1"
-        // Uygulamadan elle besleme yapılırken dinlenerek bulundu: porsiyon sayısı yazılır
-        private const val DP_MANUAL_FEED = "243"
-        private const val DP_MEAL_PLAN = "237"
         private const val RESCAN_MS = 3 * 60_000L
         private val RELAY_CATEGORIES = setOf("tdq", "kg", "cz", "pc")
-        private val FEEDER_CATEGORIES = setOf("sp", "cwwsq")
 
         private fun kindOf(category: String) = when (category) {
             in RELAY_CATEGORIES -> TuyaKind.RELAY
-            in FEEDER_CATEGORIES -> TuyaKind.FEEDER
             else -> TuyaKind.STATUS
         }
 
-        /**
-         * Öğün planı 15 karakterlik kayıtlardan oluşur: gün maskesi (2), saat (2), dakika (2),
-         * porsiyon (2), açık mı (1) ve 6 karakter dolgu. Örn. "7f0700021000000" = her gün 07:00, 2 porsiyon.
-         */
-        fun parseMealPlan(plan: String): List<Meal> = plan.chunked(15).filter { it.length == 15 && it[8] == '1' }.mapNotNull {
-            val hour = it.substring(2, 4).toIntOrNull() ?: return@mapNotNull null
-            val minute = it.substring(4, 6).toIntOrNull() ?: return@mapNotNull null
-            val portions = it.substring(6, 8).toIntOrNull(16) ?: return@mapNotNull null
-            Meal(hour, minute, portions)
-        }
-
-        fun nextMeal(plan: List<Meal>, now: Calendar = Calendar.getInstance()): Meal? {
-            val minuteOfDay = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
-            val sorted = plan.sortedBy { it.hour * 60 + it.minute }
-            return sorted.firstOrNull { it.hour * 60 + it.minute > minuteOfDay } ?: sorted.firstOrNull()
-        }
+        // Eski dosyalarda tip yok; ev ağından mama verme komutunu uygulamadıkları için kaldırıldılar
+        private fun JSONObject.isFeeder() =
+            optString("kind") == "FEEDER" || optString("category") == TuyaCloud.FEEDER_CATEGORY ||
+                optString("product_id") in TuyaCloud.FEEDER_PRODUCTS
 
         private fun JSONArray?.objects(): List<JSONObject> =
             if (this == null) emptyList() else (0 until length()).map { getJSONObject(it) }
