@@ -171,8 +171,6 @@ class Setup(private val context: Context) {
             "com.google.android.play.games" to false,
             "com.amazon.amazonvideo.livingroom" to false,
             // MiTV-AYFR0'da görüldü. com.google.android.tv.remote.service bilerek yok: kumandanın sesli komutu ona bağlı olabilir
-            "com.google.android.youtube.tv" to false,
-            "com.google.android.apps.mediashell" to false,
             "com.google.android.katniss" to false,
             "com.google.android.backdrop" to false,
             "com.google.android.syncadapters.calendar" to false,
@@ -188,7 +186,6 @@ class Setup(private val context: Context) {
             "com.google.android.tv.bugreportsender" to R.string.cleanup_label_bugreport,
             "com.google.android.tvrecommendations" to R.string.cleanup_label_recommendations,
             "com.xiaomi.wfdsinkhelperservice" to R.string.cleanup_label_miracast,
-            "com.google.android.apps.mediashell" to R.string.cleanup_label_cast,
             "com.google.android.katniss" to R.string.cleanup_label_voice,
             "com.google.android.backdrop" to R.string.cleanup_label_screensaver,
             "com.google.android.syncadapters.calendar" to R.string.cleanup_label_calendar,

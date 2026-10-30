@@ -28,6 +28,13 @@ class LocalAdb(context: Context) {
         }
     }
 
+    /** Dosyayı shell'in okuyabildiği bir yere kopyalar. */
+    fun push(file: File, remotePath: String) {
+        Dadb.create(HOST, PORT, keyPair(), connectTimeout = CONNECT_TIMEOUT_MS).use { adb ->
+            adb.push(file, remotePath, PUSH_MODE, System.currentTimeMillis())
+        }
+    }
+
     /**
      * Komutun çıktısını satır satır [onLine]'a verir; komut bitene ya da bağlantı kopana kadar döner.
      * [onOpen]'a verilen nesne kapatılınca akış sonlanır.
@@ -89,5 +96,6 @@ class LocalAdb(context: Context) {
         const val PORT = 5555
         const val CONNECT_TIMEOUT_MS = 3000
         const val PROBE_TIMEOUT_MS = 15_000
+        const val PUSH_MODE = 420 // 0644
     }
 }

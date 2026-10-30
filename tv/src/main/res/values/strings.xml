@@ -239,7 +239,6 @@
     <string name="cleanup_label_bugreport">Bug report sender</string>
     <string name="cleanup_label_recommendations">Home screen recommendations</string>
     <string name="cleanup_label_miracast">Miracast mirroring helper</string>
-    <string name="cleanup_label_cast">Chromecast (casting from a phone)</string>
     <string name="cleanup_label_voice">Google voice search and Assistant</string>
     <string name="cleanup_label_screensaver">Google screensaver</string>
     <string name="cleanup_label_calendar">Google Calendar sync</string>

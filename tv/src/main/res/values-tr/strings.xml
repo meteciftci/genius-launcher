@@ -225,7 +225,6 @@
     <string name="cleanup_label_bugreport">Hata raporu gönderici</string>
     <string name="cleanup_label_recommendations">Ana ekran önerileri</string>
     <string name="cleanup_label_miracast">Miracast yansÄ±tma yardÄ±mcÄ±sÄ±</string>
-    <string name="cleanup_label_cast">Chromecast (telefondan yayÄ±n)</string>
     <string name="cleanup_label_voice">Google sesli arama ve Asistan</string>
     <string name="cleanup_label_screensaver">Google ekran koruyucusu</string>
     <string name="cleanup_label_calendar">Google Takvim eÅitleme</string>

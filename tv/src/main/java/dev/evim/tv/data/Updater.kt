@@ -92,26 +92,27 @@ class Updater(private val context: Context) {
     }
 
     /**
-     * APK'yı ADB ile kurar ve launcher'ı yeniden açar. Kurulum bu süreci kapatacağı için komutlar ADB tarafında,
-     * bağlantı kopsa da sürecek şekilde arka planda çalışır. Kurulum başarısız olursa sonuç dosyasına bakılarak
-     * hata fırlatılır; başarılı olursa bu fonksiyon dönmeden süreç kapanır.
+     * APK'yı ADB ile kurar ve launcher'ı yeniden açar. Android 11'den beri shell uygulamanın Android/data klasörünü
+     * okuyamıyor; bu yüzden dosya önce shell'in klasörüne kopyalanır. Kurulum bu süreci kapatacağı için komutlar
+     * ADB tarafında, bağlantı kopsa da sürecek şekilde arka planda çalışır. Kurulum başarısız olursa sonuç dosyasına
+     * bakılarak hata fırlatılır; başarılı olursa bu fonksiyon dönmeden süreç kapanır.
      */
     fun install(apk: File) {
-        val result = File(apk.parentFile, "update.result").apply { delete() }
-        val script = "cat ${quote(apk.path)} | pm install -r -S ${apk.length()}; echo \$? > ${quote(result.path)};" +
+        adb.push(apk, REMOTE_APK)
+        apk.delete()
+        val script = "pm install -r $REMOTE_APK; echo \$? > $REMOTE_RESULT; rm -f $REMOTE_APK;" +
             " am start -n ${context.packageName}/.MainActivity"
-        adb.shell("setsid nohup sh -c ${quote(script)} > /dev/null 2>&1 < /dev/null &")
+        adb.shell("rm -f $REMOTE_RESULT; setsid nohup sh -c ${quote(script)} > /dev/null 2>&1 < /dev/null &")
         // Kurulum başarılıysa buraya dönülmeden süreç kapanır
         repeat(INSTALL_WAIT_S) {
             Thread.sleep(1000)
-            val code = runCatching { result.readText().trim() }.getOrNull()
-            if (code != null && code.isNotEmpty()) {
-                result.delete()
+            val code = runCatching { adb.shell("cat $REMOTE_RESULT 2>/dev/null; true").trim() }.getOrNull()
+            if (!code.isNullOrEmpty()) {
                 if (code != "0") throw UpdateException(UpdateException.Reason.CORRUPT)
                 return
             }
         }
-        throw UpdateException(UpdateException.Reason.NETWORK)
+        throw UpdateException(UpdateException.Reason.CORRUPT)
     }
 
     private fun get(url: String): String {
@@ -139,6 +140,8 @@ class Updater(private val context: Context) {
         private const val USER_AGENT = "genius-launcher"
         private const val TIMEOUT_MS = 15_000
         private const val INSTALL_WAIT_S = 90
+        private const val REMOTE_APK = "/data/local/tmp/genius-update.apk"
+        private const val REMOTE_RESULT = "/data/local/tmp/genius-update.result"
 
         /** "0.10.0" > "0.9.1"; sayı olmayan parçalar 0 sayılır. */
         fun isNewer(candidate: String, current: String): Boolean {
