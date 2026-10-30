@@ -183,18 +183,20 @@ fun SettingsDialog(
                         }
                     }
                     Spacer(Modifier.height(6.dp))
-                    ListRow(
-                        stringResource(R.string.remote_title),
-                        stringResource(if (vm.remoteEnabled) R.string.remote_on else R.string.remote_off),
-                        Icons.Rounded.PhoneAndroid,
-                        trailing = Trailing.Chevron,
-                    ) { go(Step.PHONE) }
-                    ListRow(stringResource(R.string.settings_uninstall), stringResource(R.string.settings_uninstall_hint), Icons.Rounded.DeleteForever, EvimColors.Danger, trailing = Trailing.Chevron) {
-                        go(Step.UNINSTALL)
-                    }
-                    if (setupChanged) {
-                        ListRow(stringResource(R.string.settings_undo_setup), stringResource(R.string.settings_undo_setup_hint), Icons.Rounded.Restore, trailing = Trailing.Chevron) {
-                            go(Step.UNDO_SETUP)
+                    Column(Modifier.heightIn(max = 172.dp).verticalScroll(rememberScrollState())) {
+                        ListRow(
+                            stringResource(R.string.remote_title),
+                            stringResource(if (vm.remoteEnabled) R.string.remote_on else R.string.remote_off),
+                            Icons.Rounded.PhoneAndroid,
+                            trailing = Trailing.Chevron,
+                        ) { go(Step.PHONE) }
+                        ListRow(stringResource(R.string.settings_uninstall), stringResource(R.string.settings_uninstall_hint), Icons.Rounded.DeleteForever, EvimColors.Danger, trailing = Trailing.Chevron) {
+                            go(Step.UNINSTALL)
+                        }
+                        if (setupChanged) {
+                            ListRow(stringResource(R.string.settings_undo_setup), stringResource(R.string.settings_undo_setup_hint), Icons.Rounded.Restore, trailing = Trailing.Chevron) {
+                                go(Step.UNDO_SETUP)
+                            }
                         }
                     }
                 }

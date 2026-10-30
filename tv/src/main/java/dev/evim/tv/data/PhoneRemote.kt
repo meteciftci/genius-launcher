@@ -8,6 +8,7 @@ import android.os.Looper
 import android.view.KeyEvent
 import dadb.Dadb
 import java.io.Closeable
+import java.io.DataInputStream
 import java.net.ServerSocket
 import java.net.Socket
 import java.net.SocketException
@@ -69,7 +70,7 @@ class PhoneRemote(private val context: Context, private val prefs: LauncherPrefs
             requestLine[0] == "POST" && path == "/$token/text" -> {
                 val length = headers["content-length"]?.toIntOrNull()?.takeIf { it in 1..MAX_TEXT }
                     ?: return Http.respond(out, 400, "text/plain", "bad request".toByteArray())
-                val text = String(input.readNBytes(length), Charsets.UTF_8)
+                val text = String(ByteArray(length).also { DataInputStream(input).readFully(it) }, Charsets.UTF_8)
                 Http.respond(out, if (type(text)) 200 else 500, "text/plain", ByteArray(0))
             }
             else -> Http.respond(out, 404, "text/plain", "not found".toByteArray())
