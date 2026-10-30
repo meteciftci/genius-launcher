@@ -99,12 +99,16 @@ class FileStore(private val context: Context) {
     }
 
     /**
-     * APK'yı ADB ile kurar. Paket yöneticisi /sdcard'daki dosyayı kendisi okuyamıyor; dosya shell'den
-     * boruyla verilir. Başarısız olursa hata fırlatır.
+     * APK'yı ADB ile kurar. Paket yöneticisi /sdcard'daki dosyayı kendisi okuyamıyor, shell de Android 11'den beri
+     * Android/data klasörlerini okuyamıyor; bu yüzden dosya önce shell'in klasörüne kopyalanır. Başarısız olursa hata fırlatır.
      */
     fun install(apk: File) {
-        val path = "'" + apk.path.replace("'", "'\\''") + "'"
-        adb.shell("cat $path | pm install -r -S ${apk.length()}")
+        adb.push(apk, REMOTE_APK)
+        try {
+            adb.shell("pm install -r $REMOTE_APK")
+        } finally {
+            runCatching { adb.shell("rm -f $REMOTE_APK") }
+        }
     }
 
     /** Dosyayı açabilecek gerçek uygulamalar için niyet; Google TV'nin "uygulama yok" sayfası sayılmaz. */
@@ -128,6 +132,7 @@ class FileStore(private val context: Context) {
 
     companion object {
         private const val STUBS_PACKAGE = "com.android.tv.frameworkpackagestubs"
+        private const val REMOTE_APK = "/data/local/tmp/genius-file.apk"
         private val VIDEO = setOf("mp4", "m4v", "mkv", "webm", "mov", "avi", "ts", "3gp", "mpg", "mpeg", "wmv", "flv")
         private val AUDIO = setOf("mp3", "m4a", "aac", "flac", "wav", "ogg", "oga", "opus", "wma", "amr")
         private val IMAGE = setOf("jpg", "jpeg", "png", "webp", "gif", "bmp", "heic", "heif")
