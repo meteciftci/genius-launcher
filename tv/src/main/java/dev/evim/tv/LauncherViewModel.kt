@@ -192,7 +192,9 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     suspend fun installUpdate(target: AppUpdate, onProgress: (Float) -> Unit): Int =
         runCatching {
             withContext(Dispatchers.IO) {
-                val apk = updater.download(target) { p -> viewModelScope.launch { onProgress(p) } }
+                // Denetim saatlerce önce yapılmış olabilir; bu arada çıkan daha yeni sürüm kurulsun
+                val latest = runCatching { updater.latest() }.getOrNull() ?: target
+                val apk = updater.download(latest) { p -> viewModelScope.launch { onProgress(p) } }
                 updater.install(apk)
             }
         }.exceptionOrNull().let { error ->
