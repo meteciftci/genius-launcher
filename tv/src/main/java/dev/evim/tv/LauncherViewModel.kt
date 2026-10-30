@@ -168,9 +168,18 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
 
     val appVersion: String get() = updater.currentVersion
 
-    /** Yeni sürüm varsa ayarlarda ve Genius ayarları simgesinde gösterilir. */
+    /** Yeni sürüm varsa ayarlarda ve yoksayılmadıysa ana ekrandaki kartta gösterilir. */
     var update by mutableStateOf<AppUpdate?>(null)
         private set
+    private var ignoredUpdate by mutableStateOf(prefs.ignoredUpdate)
+
+    /** Ana ekranda kartı gösterilecek sürüm. */
+    val updateNotice: AppUpdate? get() = update?.takeIf { it.version != ignoredUpdate }
+
+    fun ignoreUpdate(target: AppUpdate) {
+        prefs.ignoredUpdate = target.version
+        ignoredUpdate = target.version
+    }
 
     /** Ayarlardaki "Güncellemeleri denetle": yeni sürüm varsa onu döner, ağ hatasında hata metni. */
     suspend fun checkUpdate(): Result<AppUpdate?> =

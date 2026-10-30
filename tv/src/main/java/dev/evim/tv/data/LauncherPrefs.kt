@@ -30,6 +30,11 @@ class LauncherPrefs(context: Context) {
         get() = sp.getString(KEY_PIN, null)
         set(value) = sp.edit { if (value == null) remove(KEY_PIN) else putString(KEY_PIN, value) }
 
+    /** Ana ekrandaki kartta "Yoksay" denen sürüm; daha yenisi çıkınca kart yeniden görünür. */
+    var ignoredUpdate: String?
+        get() = sp.getString(KEY_IGNORED_UPDATE, null)
+        set(value) = sp.edit { putString(KEY_IGNORED_UPDATE, value) }
+
     fun customColor(packageName: String): Int? =
         if (sp.contains(colorKey(packageName))) sp.getInt(colorKey(packageName), 0) else null
 
@@ -88,6 +93,7 @@ class LauncherPrefs(context: Context) {
         const val KEY_HIDDEN = "hidden"
         const val KEY_LOCKED = "locked"
         const val KEY_PIN = "pin"
+        const val KEY_IGNORED_UPDATE = "ignored_update"
         const val KEY_DEVICE_ORDER = "device_order"
         const val KEY_TUYA_USER_CODE = "tuya_user_code"
         const val KEY_SETUP_SHOWN = "setup_shown"

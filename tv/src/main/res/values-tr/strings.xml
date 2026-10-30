@@ -295,6 +295,7 @@
     <string name="update_current">Şu an kurulu: %s</string>
     <string name="update_later">Sonra</string>
     <string name="update_now">Güncelle</string>
+    <string name="update_ignore">Yoksay</string>
     <string name="update_downloading">İndiriliyor… %%%d</string>
     <string name="update_installing">Kuruluyor… Launcher birazdan yeni sürümle açılacak.</string>
     <string name="update_network">GitHub\'a ulaşılamadı. İnternet bağlantısını kontrol edip yeniden deneyin.</string>

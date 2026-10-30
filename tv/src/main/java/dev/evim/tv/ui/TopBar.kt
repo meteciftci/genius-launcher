@@ -13,6 +13,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.tv.material3.Border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bluetooth
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.rounded.NetworkWifi2Bar
 import androidx.compose.material.icons.rounded.NetworkWifi3Bar
 import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.Tv
 import androidx.compose.material.icons.rounded.Wifi
@@ -158,14 +160,14 @@ private fun ShortcutsChip(vm: LauncherViewModel, onGeniusSettings: () -> Unit, o
             ) { vm.openAccessorySettings() }
             IconButton(Icons.Rounded.Tv, stringResource(R.string.shortcut_display_sound)) { vm.openSettings(Settings.ACTION_SOUND_SETTINGS) }
             IconButton(Icons.Rounded.Settings, stringResource(R.string.shortcut_settings)) { vm.openSettings(Settings.ACTION_SETTINGS) }
-            IconButton(Icons.Rounded.Tune, stringResource(R.string.settings_title), badge = vm.update != null, onClick = onGeniusSettings)
+            IconButton(Icons.Rounded.Tune, stringResource(R.string.settings_title), onClick = onGeniusSettings)
             IconButton(Icons.Rounded.RestartAlt, stringResource(R.string.power_title), onClick = onRestart)
         }
     }
 }
 
 @Composable
-private fun IconButton(icon: ImageVector, description: String, badge: Boolean = false, onClick: () -> Unit) {
+private fun IconButton(icon: ImageVector, description: String, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         modifier = Modifier.size(26.dp),
@@ -180,8 +182,6 @@ private fun IconButton(icon: ImageVector, description: String, badge: Boolean = 
     ) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Icon(icon, contentDescription = description, modifier = Modifier.size(15.dp))
-            // Yeni sürüm var
-            if (badge) Box(Modifier.align(Alignment.TopEnd).padding(top = 3.dp, end = 3.dp).size(6.dp).background(EvimColors.Online, CircleShape))
         }
     }
 }
@@ -226,6 +226,29 @@ private fun RamChip(vm: LauncherViewModel) {
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
             )
         }
+    }
+}
+
+/** RAM kutusunun altında yeni sürümü duyurur. */
+@Composable
+fun UpdateCard(version: String, onUpdate: () -> Unit, onIgnore: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .background(EvimColors.ChipSolid, RoundedCornerShape(18.dp))
+            .border(1.dp, EvimColors.ChipBorder, RoundedCornerShape(18.dp))
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+    ) {
+        Icon(Icons.Rounded.SystemUpdate, contentDescription = null, tint = EvimColors.Online, modifier = Modifier.size(20.dp))
+        Spacer(Modifier.width(10.dp))
+        Column {
+            Text(stringResource(R.string.update_available), color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.about_version, version), color = EvimColors.TextDim, fontSize = 11.sp)
+        }
+        Spacer(Modifier.width(16.dp))
+        PillButton(stringResource(R.string.update_now), primary = true, onClick = onUpdate)
+        Spacer(Modifier.width(8.dp))
+        PillButton(stringResource(R.string.update_ignore), onClick = onIgnore)
     }
 }
 

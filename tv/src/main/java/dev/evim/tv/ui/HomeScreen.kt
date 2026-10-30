@@ -75,6 +75,7 @@ fun HomeScreen(vm: LauncherViewModel) {
     var showWeather by remember { mutableStateOf(false) }
     var pickingCity by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
+    var settingsAtUpdate by remember { mutableStateOf(false) }
     var showSmartHome by remember { mutableStateOf(false) }
     var showWizard by remember { mutableStateOf(false) }
     var showFiles by remember { mutableStateOf(false) }
@@ -152,7 +153,17 @@ fun HomeScreen(vm: LauncherViewModel) {
 
         // Alt boşluk dar: uygulama kartları ekranın altına yakın dursun
         Column(Modifier.fillMaxSize().padding(start = 48.dp, end = 48.dp, top = 30.dp, bottom = 14.dp)) {
-            TopBar(vm = vm, onWeatherClick = { showWeather = true }, onSmartHome = { showSmartHome = true }, onGeniusSettings = { withPin { showSettings = true } }, onRestart = { showRestart = true })
+            TopBar(vm = vm, onWeatherClick = { showWeather = true }, onSmartHome = { showSmartHome = true }, onGeniusSettings = { withPin { settingsAtUpdate = false; showSettings = true } }, onRestart = { showRestart = true })
+            vm.updateNotice?.let { update ->
+                Spacer(Modifier.height(8.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    UpdateCard(
+                        version = update.version,
+                        onUpdate = { withPin { settingsAtUpdate = true; showSettings = true } },
+                        onIgnore = { vm.ignoreUpdate(update) },
+                    )
+                }
+            }
             Spacer(Modifier.weight(1f))
             Hero(app = current, accent = accent)
 
@@ -256,6 +267,7 @@ fun HomeScreen(vm: LauncherViewModel) {
         // Gizli uygulamalar ve şehir seçimi bu panelin üstünde açılır; kapanınca panele dönülür
         if (showSettings) {
             SettingsDialog(
+                startAtUpdate = settingsAtUpdate,
                 vm = vm,
                 onHiddenApps = { showHidden = true },
                 onCity = { cityFromSettings = true; pickingCity = true },

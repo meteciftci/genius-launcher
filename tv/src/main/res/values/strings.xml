@@ -310,6 +310,7 @@
     <string name="update_current">Installed now: %s</string>
     <string name="update_later">Later</string>
     <string name="update_now">Update</string>
+    <string name="update_ignore">Ignore</string>
     <string name="update_downloading">Downloading… %d%%</string>
     <string name="update_installing">Installing… The launcher will open with the new version in a moment.</string>
     <string name="update_network">Couldn\'t reach GitHub. Check the internet connection and try again.</string>

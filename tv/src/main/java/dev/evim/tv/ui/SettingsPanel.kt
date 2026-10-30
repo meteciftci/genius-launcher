@@ -70,12 +70,13 @@ private enum class Step { MENU, WIDGET, LOCK, KEYS, KEY_LEARN, KEY_PICK, ABOUT, 
 @Composable
 fun SettingsDialog(
     vm: LauncherViewModel,
+    startAtUpdate: Boolean = false,
     onHiddenApps: () -> Unit,
     onCity: () -> Unit,
     onWizard: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var step by remember { mutableStateOf(Step.MENU) }
+    var step by remember { mutableStateOf(if (startAtUpdate) Step.UPDATE else Step.MENU) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<Int?>(null) }
     var erasesNetworks by remember { mutableStateOf(false) }
