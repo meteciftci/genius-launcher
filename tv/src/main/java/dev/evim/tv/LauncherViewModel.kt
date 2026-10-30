@@ -32,6 +32,7 @@ import dev.evim.tv.data.LocalAdb
 import dev.evim.tv.data.PinCheck
 import dev.evim.tv.data.PinLock
 import dev.evim.tv.data.RamInfo
+import dev.evim.tv.data.PhoneRemote
 import dev.evim.tv.data.RemoteKeys
 import dev.evim.tv.data.SystemStatus
 import dev.evim.tv.data.Weather
@@ -440,6 +441,48 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     fun stopKeyLearning() {
         RemoteKeys.learner = null
         syncKeyService()
+    }
+
+    /** Telefondan kumanda sunucusu açık mı. Açıksa launcher çalıştığı sürece telefon QR'daki adresle bağlanır. */
+    var remoteEnabled by mutableStateOf(prefs.remoteEnabled)
+        private set
+
+    /** Telefonun açacağı adres; kapalıysa ya da TV ağa bağlı değilse null. */
+    var remoteUrl by mutableStateOf<String?>(null)
+        private set
+    private var phoneRemote: PhoneRemote? = null
+
+    init {
+        if (remoteEnabled) startRemote()
+    }
+
+    fun toggleRemote(on: Boolean) {
+        prefs.remoteEnabled = on
+        remoteEnabled = on
+        if (on) startRemote() else stopRemote()
+    }
+
+    /** Yeni anahtar üretir; eski adresi ve telefondaki yer imlerini geçersiz kılar. */
+    fun resetRemote() {
+        prefs.remoteToken = PhoneRemote.newToken()
+        stopRemote()
+        startRemote()
+    }
+
+    private fun startRemote() {
+        if (phoneRemote != null) return
+        viewModelScope.launch(Dispatchers.IO) {
+            // Kapı doluysa (önceki süreç kapanmamışsa) sunucu açılamaz; adres boş kalır
+            val remote = runCatching { PhoneRemote(getApplication(), prefs) }.getOrNull()
+            phoneRemote = remote
+            remoteUrl = remote?.url
+        }
+    }
+
+    private fun stopRemote() {
+        phoneRemote?.close()
+        phoneRemote = null
+        remoteUrl = null
     }
 
     /** [target] null ise tuş eski hâline döner. */

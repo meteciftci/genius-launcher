@@ -366,4 +366,13 @@
     <string name="keys_apps">Apps button</string>
     <string name="keys_service_label">Genius Launcher remote buttons</string>
     <string name="keys_service_description">Catches the remote buttons you assigned and opens the chosen app. Screen content is not read.</string>
+    <string name="remote_title">Phone remote</string>
+    <string name="remote_subtitle">Control the TV from a phone browser, no app needed</string>
+    <string name="remote_on">On</string>
+    <string name="remote_off">Off</string>
+    <string name="remote_body">Scan the QR code with your phone\'s camera on the same Wi-Fi, then bookmark the page. The address stays the same until you reset pairing.</string>
+    <string name="remote_off_body">When on, a phone on your home network that has the pairing address can use the TV\'s arrow keys, volume and keyboard. Off by default.</string>
+    <string name="remote_turn_on">Turn on</string>
+    <string name="remote_turn_off">Turn off</string>
+    <string name="remote_reset">Reset pairing</string>
 </resources>

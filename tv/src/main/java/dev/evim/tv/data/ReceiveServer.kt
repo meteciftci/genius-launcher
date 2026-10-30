@@ -6,7 +6,6 @@ import android.os.StatFs
 import java.io.Closeable
 import java.io.File
 import java.io.InputStream
-import java.io.OutputStream
 import java.net.Inet4Address
 import java.net.ServerSocket
 import java.net.Socket
@@ -52,7 +51,7 @@ class ReceiveServer(context: Context, private val folder: File, private val onCh
         socket.soTimeout = TIMEOUT_MS
         val input = socket.getInputStream()
         val out = socket.getOutputStream()
-        val head = readHead(input) ?: return
+        val head = Http.readHead(input) ?: return
         val requestLine = head.lineSequence().first().split(' ')
         if (requestLine.size < 2) return
         val method = requestLine[0]
@@ -65,17 +64,17 @@ class ReceiveServer(context: Context, private val folder: File, private val onCh
         when {
             method == "GET" && (path == "/$token/" || path == "/$token") -> {
                 val turkish = headers["accept-language"].orEmpty().lowercase().startsWith("tr")
-                respond(out, 200, "text/html; charset=utf-8", UploadPage.html(turkish).toByteArray())
+                Http.respond(out, 200, "text/html; charset=utf-8", UploadPage.html(turkish).toByteArray())
             }
             method == "POST" && path == "/$token/upload" -> {
                 val name = query.split('&').firstOrNull { it.startsWith("name=") }
                     ?.let { URLDecoder.decode(it.removePrefix("name="), "UTF-8") }
                 val length = headers["content-length"]?.toLongOrNull()
-                if (name == null || length == null) return respond(out, 400, "text/plain", "bad request".toByteArray())
+                if (name == null || length == null) return Http.respond(out, 400, "text/plain", "bad request".toByteArray())
                 val status = receive(input, cleanName(name), length)
-                respond(out, status, "application/json", """{"status":$status}""".toByteArray())
+                Http.respond(out, status, "application/json", """{"status":$status}""".toByteArray())
             }
-            else -> respond(out, 404, "text/plain", "not found".toByteArray())
+            else -> Http.respond(out, 404, "text/plain", "not found".toByteArray())
         }
     }
 
@@ -134,27 +133,6 @@ class ReceiveServer(context: Context, private val folder: File, private val onCh
         return file
     }
 
-    private fun readHead(input: InputStream): String? {
-        val bytes = java.io.ByteArrayOutputStream()
-        var match = 0
-        val end = byteArrayOf(13, 10, 13, 10)
-        while (bytes.size() < MAX_HEAD) {
-            val b = input.read()
-            if (b < 0) return null
-            bytes.write(b)
-            match = if (b.toByte() == end[match]) match + 1 else if (b == 13) 1 else 0
-            if (match == 4) return bytes.toString(Charsets.UTF_8.name())
-        }
-        return null
-    }
-
-    private fun respond(out: OutputStream, status: Int, type: String, body: ByteArray) {
-        val reason = when (status) { 200 -> "OK"; 400 -> "Bad Request"; 404 -> "Not Found"; 507 -> "Insufficient Storage"; else -> "Error" }
-        out.write("HTTP/1.1 $status $reason\r\nContent-Type: $type\r\nContent-Length: ${body.size}\r\nCache-Control: no-store\r\nConnection: close\r\n\r\n".toByteArray())
-        out.write(body)
-        out.flush()
-    }
-
     override fun close() {
         open = false
         runCatching { server.close() }
@@ -162,7 +140,6 @@ class ReceiveServer(context: Context, private val folder: File, private val onCh
 
     companion object {
         private const val TIMEOUT_MS = 30_000
-        private const val MAX_HEAD = 16 * 1024
         private const val REPORT_BYTES = 512 * 1024L
         // Dosya yazılırken TV'nin kendisine de yer kalsın
         private const val FREE_MARGIN = 200L * 1024 * 1024
@@ -176,7 +153,7 @@ class ReceiveServer(context: Context, private val folder: File, private val onCh
             return clean.ifEmpty { "dosya" }
         }
 
-        private fun localAddress(context: Context): String? {
+        fun localAddress(context: Context): String? {
             val connectivity = context.getSystemService(ConnectivityManager::class.java)
             val links = connectivity.getLinkProperties(connectivity.activeNetwork) ?: return null
             return links.linkAddresses.map { it.address }.firstOrNull { it is Inet4Address && !it.isLoopbackAddress }?.hostAddress

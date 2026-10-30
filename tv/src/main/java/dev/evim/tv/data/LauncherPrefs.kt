@@ -35,6 +35,21 @@ class LauncherPrefs(context: Context) {
         get() = sp.getString(KEY_IGNORED_UPDATE, null)
         set(value) = sp.edit { putString(KEY_IGNORED_UPDATE, value) }
 
+    /** Telefondan kumanda sunucusu açık mı; varsayılan kapalı. */
+    var remoteEnabled: Boolean
+        get() = sp.getBoolean(KEY_REMOTE_ENABLED, false)
+        set(value) = sp.edit { putBoolean(KEY_REMOTE_ENABLED, value) }
+
+    /** Telefonun adresindeki gizli anahtar; ilk kullanımda üretilir, sıfırlanana kadar aynı kalır. */
+    var remoteToken: String
+        get() = sp.getString(KEY_REMOTE_TOKEN, null) ?: PhoneRemote.newToken().also { remoteToken = it }
+        set(value) = sp.edit { putString(KEY_REMOTE_TOKEN, value) }
+
+    /** Adres yer imi olarak kalsın diye son kullanılan kapı. */
+    var remotePort: Int
+        get() = sp.getInt(KEY_REMOTE_PORT, PhoneRemote.DEFAULT_PORT)
+        set(value) = sp.edit { putInt(KEY_REMOTE_PORT, value) }
+
     fun customColor(packageName: String): Int? =
         if (sp.contains(colorKey(packageName))) sp.getInt(colorKey(packageName), 0) else null
 
@@ -93,6 +108,9 @@ class LauncherPrefs(context: Context) {
         const val KEY_HIDDEN = "hidden"
         const val KEY_LOCKED = "locked"
         const val KEY_PIN = "pin"
+        const val KEY_REMOTE_ENABLED = "remote_enabled"
+        const val KEY_REMOTE_TOKEN = "remote_token"
+        const val KEY_REMOTE_PORT = "remote_port"
         const val KEY_IGNORED_UPDATE = "ignored_update"
         const val KEY_DEVICE_ORDER = "device_order"
         const val KEY_TUYA_USER_CODE = "tuya_user_code"

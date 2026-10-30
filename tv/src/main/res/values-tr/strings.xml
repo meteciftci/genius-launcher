@@ -351,4 +351,13 @@
     <string name="keys_apps">Apps tuşu</string>
     <string name="keys_service_label">Genius Launcher kumanda tuşları</string>
     <string name="keys_service_description">Kumandanın atanmış tuşlarını yakalar ve seçilen uygulamayı açar. Ekran içeriği okunmaz.</string>
+    <string name="remote_title">Telefondan kumanda</string>
+    <string name="remote_subtitle">TV\'yi telefonun tarayıcısından yönetin, uygulama gerekmez</string>
+    <string name="remote_on">Açık</string>
+    <string name="remote_off">Kapalı</string>
+    <string name="remote_body">Aynı Wi-Fi\'deyken telefonun kamerasıyla QR kodu okutun, açılan sayfayı yer imlerine ekleyin. Eşleşmeyi sıfırlayana kadar adres aynı kalır.</string>
+    <string name="remote_off_body">Açıkken evdeki ağda eşleşme adresini bilen telefon TV\'nin yön tuşlarını, sesini ve klavyesini kullanabilir. Varsayılan olarak kapalıdır.</string>
+    <string name="remote_turn_on">Aç</string>
+    <string name="remote_turn_off">Kapat</string>
+    <string name="remote_reset">Eşleşmeyi sıfırla</string>
 </resources>

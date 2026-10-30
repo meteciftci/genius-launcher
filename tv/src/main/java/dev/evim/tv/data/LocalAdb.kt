@@ -27,6 +27,9 @@ class LocalAdb(context: Context) {
         }
     }
 
+    /** Açık tutulacak bağlantı; kapatmak çağıranın işi. Sık komut gönderen yerler her seferinde yeniden bağlanmasın diye. */
+    fun connect(): Dadb = Dadb.create(HOST, PORT, keyPair(), connectTimeout = CONNECT_TIMEOUT_MS)
+
     /** Dosyayı shell'in okuyabildiği bir yere kopyalar. */
     fun push(file: File, remotePath: String) {
         Dadb.create(HOST, PORT, keyPair(), connectTimeout = CONNECT_TIMEOUT_MS).use { adb ->

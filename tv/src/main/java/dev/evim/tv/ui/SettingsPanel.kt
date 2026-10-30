@@ -1,6 +1,10 @@
 package dev.evim.tv.ui
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.rememberScrollState
@@ -61,7 +65,7 @@ import kotlinx.coroutines.launch
 // Widget'ın sığdığı aralık: Dyson büyük kart, gerisi tek satır
 private val WIDGET_LIMITS = listOf(3, 4, 5, 6)
 
-private enum class Step { MENU, WIDGET, LOCK, KEYS, KEY_LEARN, KEY_PICK, ABOUT, UPDATE, TO_GENIUS, TO_GOOGLE, UNDO_SETUP, UNINSTALL }
+private enum class Step { MENU, WIDGET, LOCK, KEYS, KEY_LEARN, KEY_PICK, PHONE, ABOUT, UPDATE, TO_GENIUS, TO_GOOGLE, UNDO_SETUP, UNINSTALL }
 
 /**
  * Launcher'ın kendi ayarları: gizli uygulamalar, hava durumu şehri, Home tuşu, hakkında ve kaldırma.
@@ -179,6 +183,12 @@ fun SettingsDialog(
                         }
                     }
                     Spacer(Modifier.height(6.dp))
+                    ListRow(
+                        stringResource(R.string.remote_title),
+                        stringResource(if (vm.remoteEnabled) R.string.remote_on else R.string.remote_off),
+                        Icons.Rounded.PhoneAndroid,
+                        trailing = Trailing.Chevron,
+                    ) { go(Step.PHONE) }
                     ListRow(stringResource(R.string.settings_uninstall), stringResource(R.string.settings_uninstall_hint), Icons.Rounded.DeleteForever, EvimColors.Danger, trailing = Trailing.Chevron) {
                         go(Step.UNINSTALL)
                     }
@@ -226,6 +236,35 @@ fun SettingsDialog(
                             onSuccess = { pin -> vm.setPin(pin); creating = false },
                             onDismiss = { creating = false },
                         )
+                    }
+                }
+                Step.PHONE -> {
+                    PanelHeader(stringResource(R.string.remote_title), stringResource(R.string.remote_subtitle), Icons.Rounded.PhoneAndroid)
+                    val url = vm.remoteUrl
+                    if (vm.remoteEnabled) {
+                        if (url == null) {
+                            PanelNote(stringResource(R.string.receive_no_network), EvimColors.Danger)
+                        } else {
+                            Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                                QrCode(url, side = 170.dp)
+                                Spacer(Modifier.width(24.dp))
+                                Column(Modifier.weight(1f)) {
+                                    PanelText(stringResource(R.string.remote_body))
+                                    Text(url, color = EvimColors.TextDim, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp))
+                                }
+                            }
+                        }
+                    } else {
+                        PanelText(stringResource(R.string.remote_off_body))
+                    }
+                    PanelActions {
+                        PillButton(
+                            stringResource(if (vm.remoteEnabled) R.string.remote_turn_off else R.string.remote_turn_on),
+                            Modifier.focusRequester(first),
+                            primary = !vm.remoteEnabled,
+                        ) { vm.toggleRemote(!vm.remoteEnabled) }
+                        if (vm.remoteEnabled) PillButton(stringResource(R.string.remote_reset), danger = true) { vm.resetRemote() }
+                        PillButton(stringResource(R.string.done)) { go(Step.MENU) }
                     }
                 }
                 Step.KEYS -> {
