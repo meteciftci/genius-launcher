@@ -11,7 +11,7 @@ Android TV ve Google TV için reklamsız, sade bir ana ekran. Evdeki akıllı ci
 > - Xiaomi Mi Box S 1. nesil (Android TV, Android 9)
 > - Xiaomi Mi TV Stick 1080p (Android TV, Android 9)
 > - Xiaomi Mi Box 4 (Android TV, Android 9)
-> - Xiaomi MiTV-AYFR0 (Android TV, Android 11)
+> - Xiaomi Mi TV Stick 4K (Android TV, Android 11)
 >
 > Android 8.0 ve üzeri diğer Android TV cihazlarında da çalışması beklenir, ama denenmedi.
 

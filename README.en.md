@@ -11,7 +11,7 @@ A clean, ad-free home screen for Android TV and Google TV. It also controls the 
 > - Xiaomi Mi Box S 1st gen (Android TV, Android 9)
 > - Xiaomi Mi TV Stick 1080p (Android TV, Android 9)
 > - Xiaomi Mi Box 4 (Android TV, Android 9)
-> - Xiaomi MiTV-AYFR0 (Android TV, Android 11)
+> - Xiaomi Mi TV Stick 4K (Android TV, Android 11)
 >
 > It should work on other Android TV devices with Android 8.0 or later too, but they haven't been tried.
 
