@@ -2,7 +2,6 @@ package dev.evim.tv.data
 
 import android.content.Context
 import dadb.AdbKeyPair
-import dadb.AdbShellPacket
 import dadb.Dadb
 import java.io.File
 
@@ -36,27 +35,15 @@ class LocalAdb(context: Context) {
     }
 
     /**
-     * Komutun çıktısını satır satır [onLine]'a verir; komut bitene ya da bağlantı kopana kadar döner.
+     * Komutun çıktısını satır satır [onLine]'a verir; komut bitene ya da bağlantı kopana kadar döner. Terminal açılır:
+     * çıktı boruya gitse getevent gibi komutlar satırları biriktirip yığın hâlinde verir, tuş basışları gecikir.
      * [onOpen]'a verilen nesne kapatılınca akış sonlanır.
      */
     fun stream(command: String, onOpen: (AutoCloseable) -> Unit, onLine: (String) -> Unit) {
         Dadb.create(HOST, PORT, keyPair(), connectTimeout = CONNECT_TIMEOUT_MS).use { adb ->
             onOpen(adb)
-            adb.openShell(command).use { shell ->
-                val line = StringBuilder()
-                while (true) {
-                    val packet = shell.read()
-                    if (packet is AdbShellPacket.Exit) return
-                    if (packet !is AdbShellPacket.StdOut) continue
-                    for (char in String(packet.payload)) {
-                        if (char != '\n') {
-                            line.append(char)
-                        } else {
-                            onLine(line.toString())
-                            line.clear()
-                        }
-                    }
-                }
+            adb.open("shell:$command").use { shell ->
+                while (true) onLine(shell.source.readUtf8Line() ?: return)
             }
         }
     }
