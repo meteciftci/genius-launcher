@@ -78,24 +78,34 @@ class RemoteKeys(private val context: Context) {
             KeyEvent.KEYCODE_ALL_APPS to R.string.keys_apps,
         )
 
-        // Vendor_2717_Product_32b9.kl'deki Linux kodları. Android 11'li Xiaomi'lerde sistem Netflix ve Prime tuşlarını
-        // erişilebilirlik servisine vermeden işliyor; onlar yalnızca getevent ile görülebiliyor
-        private val XIAOMI_SCANCODES = mapOf(
-            416 to KeyEvent.KEYCODE_BUTTON_6, 240 to KeyEvent.KEYCODE_BUTTON_6,
-            393 to KeyEvent.KEYCODE_BUTTON_3,
-            207 to KeyEvent.KEYCODE_BUTTON_7,
-            580 to KeyEvent.KEYCODE_BUTTON_5, 150 to KeyEvent.KEYCODE_BUTTON_5,
-            216 to KeyEvent.KEYCODE_ALL_APPS,
-        )
+        // Sistem Netflix, Prime ve Apps gibi tuşları erişilebilirlik servisine vermeden işliyor; onlar yalnızca getevent ile
+        // görülebiliyor. Kodlar kutudan kutuya değiştiği için cihazın kendi tuş haritası okunur.
+        const val KEY_LAYOUT_COMMAND = "cat /vendor/usr/keylayout/Vendor_2717_Product_32b9.kl 2>/dev/null ||" +
+            " cat /system/usr/keylayout/Vendor_2717_Product_32b9.kl 2>/dev/null; true"
+        private val LAYOUT_LINE = Regex("""^\s*key\s+(\d+)\s+(\w+)""")
         private val KEY_RELEASE = Regex("""0001 ([0-9a-f]{4}) 00000000\s*$""")
 
-        /** getevent satırı bilinen bir tuşun bırakılışıysa Android tuş kodu. */
-        fun releasedKey(line: String): Int? = KEY_RELEASE.find(line)?.let { XIAOMI_SCANCODES[it.groupValues[1].toInt(16)] }
+        /** Tuş haritası metninden Linux kodu → Android tuş kodu; yön, ses gibi ayrılmış tuşlar dışarıda kalır. */
+        fun parseKeyLayout(text: String): Map<Int, Int> = text.lines().mapNotNull { line ->
+            val (scan, name) = LAYOUT_LINE.find(line)?.destructured ?: return@mapNotNull null
+            val code = KeyEvent.keyCodeFromString("KEYCODE_$name")
+            if (code == KeyEvent.KEYCODE_UNKNOWN || code in RESERVED) null else scan.toInt() to code
+        }.toMap()
+
+        /** getevent satırı [layout]'taki bir tuşun bırakılışıysa Android tuş kodu. */
+        fun releasedKey(line: String, layout: Map<Int, Int>): Int? =
+            KEY_RELEASE.find(line)?.let { layout[it.groupValues[1].toInt(16)] }
+
+        // Mi Box 4'ün kumandası (oneday): Netflix tuşu üreticiye özel 1001 kodunu üretiyor
+        private val MIBOX4_NAMES = mapOf(1001 to R.string.keys_netflix, KeyEvent.KEYCODE_BUTTON_4 to R.string.keys_prime, KeyEvent.KEYCODE_ALL_APPS to R.string.keys_apps)
 
         /** Bilinen bir tuşsa adı; değilse null ve Android'in kod adı gösterilir. */
         @StringRes
-        fun knownName(code: Int): Int? =
-            if (Build.MANUFACTURER.equals("Xiaomi", ignoreCase = true)) XIAOMI_NAMES[code] else null
+        fun knownName(code: Int): Int? = when {
+            Build.DEVICE == "oneday" -> MIBOX4_NAMES[code]
+            Build.MANUFACTURER.equals("Xiaomi", ignoreCase = true) -> XIAOMI_NAMES[code]
+            else -> null
+        }
 
         fun codeName(code: Int): String = KeyEvent.keyCodeToString(code).removePrefix("KEYCODE_")
 

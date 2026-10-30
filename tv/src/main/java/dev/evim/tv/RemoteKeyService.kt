@@ -55,8 +55,9 @@ class RemoteKeyService : AccessibilityService() {
         val adb = LocalAdb(this)
         while (watching) {
             runCatching {
+                val layout = RemoteKeys.parseKeyLayout(adb.shell(RemoteKeys.KEY_LAYOUT_COMMAND))
                 adb.stream("getevent", { rawKeys = it }) { line ->
-                    RemoteKeys.releasedKey(line)?.let { code -> main.post { onRawKey(code) } }
+                    RemoteKeys.releasedKey(line, layout)?.let { code -> main.post { onRawKey(code) } }
                 }
             }
             if (watching) Thread.sleep(RAW_RETRY_MS)
