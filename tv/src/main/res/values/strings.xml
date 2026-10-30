@@ -238,6 +238,12 @@
     <string name="cleanup_label_feedback">Google feedback sender</string>
     <string name="cleanup_label_bugreport">Bug report sender</string>
     <string name="cleanup_label_recommendations">Home screen recommendations</string>
+    <string name="cleanup_label_miracast">Miracast mirroring helper</string>
+    <string name="cleanup_label_cast">Chromecast (casting from a phone)</string>
+    <string name="cleanup_label_voice">Google voice search and Assistant</string>
+    <string name="cleanup_label_screensaver">Google screensaver</string>
+    <string name="cleanup_label_calendar">Google Calendar sync</string>
+    <string name="cleanup_label_tts">Google text-to-speech</string>
     <string name="wizard_cleanup_do">Remove %d apps</string>
     <string name="wizard_awake_title">Keep the box awake</string>
     <string name="wizard_awake_body">When the TV turns off the box keeps running and stays on the home network, so smart home devices answer right away. It uses a little more power.</string>

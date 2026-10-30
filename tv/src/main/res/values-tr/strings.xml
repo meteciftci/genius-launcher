@@ -224,6 +224,12 @@
     <string name="cleanup_label_feedback">Google geri bildirim gönderici</string>
     <string name="cleanup_label_bugreport">Hata raporu gönderici</string>
     <string name="cleanup_label_recommendations">Ana ekran önerileri</string>
+    <string name="cleanup_label_miracast">Miracast yansÄ±tma yardÄ±mcÄ±sÄ±</string>
+    <string name="cleanup_label_cast">Chromecast (telefondan yayÄ±n)</string>
+    <string name="cleanup_label_voice">Google sesli arama ve Asistan</string>
+    <string name="cleanup_label_screensaver">Google ekran koruyucusu</string>
+    <string name="cleanup_label_calendar">Google Takvim eÅitleme</string>
+    <string name="cleanup_label_tts">Google metin okuma</string>
     <string name="wizard_cleanup_do">%d uygulamayı kaldır</string>
     <string name="wizard_awake_title">Kutuyu uyanık tut</string>
     <string name="wizard_awake_body">TV kapanınca kutu çalışmaya ve ev ağında kalmaya devam eder; akıllı ev cihazları hemen cevap verir. Biraz daha fazla elektrik harcar.</string>
