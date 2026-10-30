@@ -78,6 +78,20 @@ class RemoteKeys(private val context: Context) {
             KeyEvent.KEYCODE_ALL_APPS to R.string.keys_apps,
         )
 
+        // Vendor_2717_Product_32b9.kl'deki Linux kodları. Android 11'li Xiaomi'lerde sistem Netflix ve Prime tuşlarını
+        // erişilebilirlik servisine vermeden işliyor; onlar yalnızca getevent ile görülebiliyor
+        private val XIAOMI_SCANCODES = mapOf(
+            416 to KeyEvent.KEYCODE_BUTTON_6, 240 to KeyEvent.KEYCODE_BUTTON_6,
+            393 to KeyEvent.KEYCODE_BUTTON_3,
+            207 to KeyEvent.KEYCODE_BUTTON_7,
+            580 to KeyEvent.KEYCODE_BUTTON_5, 150 to KeyEvent.KEYCODE_BUTTON_5,
+            216 to KeyEvent.KEYCODE_ALL_APPS,
+        )
+        private val KEY_RELEASE = Regex("""0001 ([0-9a-f]{4}) 00000000\s*$""")
+
+        /** getevent satırı bilinen bir tuşun bırakılışıysa Android tuş kodu. */
+        fun releasedKey(line: String): Int? = KEY_RELEASE.find(line)?.let { XIAOMI_SCANCODES[it.groupValues[1].toInt(16)] }
+
         /** Bilinen bir tuşsa adı; değilse null ve Android'in kod adı gösterilir. */
         @StringRes
         fun knownName(code: Int): Int? =
