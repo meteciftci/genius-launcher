@@ -80,6 +80,7 @@ fun HomeScreen(vm: LauncherViewModel) {
     var showWizard by remember { mutableStateOf(false) }
     var showFiles by remember { mutableStateOf(false) }
     var showRestart by remember { mutableStateOf(false) }
+    var showPhoneRemote by remember { mutableStateOf(false) }
     // PIN doğru girilince yapılacak iş; PIN yoksa önce oluşturulup sonra yapılacak iş
     var afterPin by remember { mutableStateOf<(() -> Unit)?>(null) }
     var afterNewPin by remember { mutableStateOf<(() -> Unit)?>(null) }
@@ -116,6 +117,7 @@ fun HomeScreen(vm: LauncherViewModel) {
         showWizard = false
         showFiles = false
         showRestart = false
+        showPhoneRemote = false
         afterPin = null
         afterNewPin = null
         runCatching { firstCard.requestFocus() }
@@ -153,7 +155,7 @@ fun HomeScreen(vm: LauncherViewModel) {
 
         // Alt boşluk dar: uygulama kartları ekranın altına yakın dursun
         Column(Modifier.fillMaxSize().padding(start = 48.dp, end = 48.dp, top = 30.dp, bottom = 14.dp)) {
-            TopBar(vm = vm, onWeatherClick = { showWeather = true }, onSmartHome = { showSmartHome = true }, onGeniusSettings = { withPin { settingsAtUpdate = false; showSettings = true } }, onRestart = { showRestart = true })
+            TopBar(vm = vm, onWeatherClick = { showWeather = true }, onSmartHome = { showSmartHome = true }, onGeniusSettings = { withPin { settingsAtUpdate = false; showSettings = true } }, onPhoneRemote = { withPin { showPhoneRemote = true } }, onRestart = { showRestart = true })
             vm.updateNotice?.let { update ->
                 Spacer(Modifier.height(8.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
@@ -234,6 +236,7 @@ fun HomeScreen(vm: LauncherViewModel) {
         if (showFiles) {
             FilesDialog(onInstalled = vm::refresh, onDismiss = { showFiles = false })
         }
+        if (showPhoneRemote) PhoneRemoteDialog(vm = vm, onDismiss = { showPhoneRemote = false })
         if (showRestart) {
             RestartDialog(vm = vm, onDismiss = { showRestart = false })
         }
