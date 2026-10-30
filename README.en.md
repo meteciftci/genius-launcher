@@ -10,6 +10,8 @@ A clean, ad-free home screen for Android TV and Google TV. It also controls the 
 > - Xiaomi Mi Box S 2nd gen (Google TV, Android 14)
 > - Xiaomi Mi Box S 1st gen (Android TV, Android 9)
 > - Xiaomi Mi TV Stick 1080p (Android TV, Android 9)
+> - Xiaomi Mi Box 4 (Android TV, Android 9)
+> - Xiaomi MiTV-AYFR0 (Android TV, Android 11)
 >
 > It should work on other Android TV devices with Android 8.0 or later too, but they haven't been tried.
 
@@ -19,12 +21,13 @@ A clean, ad-free home screen for Android TV and Google TV. It also controls the 
 - **Apps**: Hold OK on the remote to move, hide or recolor a card. New apps get a card on their own; hidden ones come back from Genius settings.
 - **Files**: Browse, rename and delete files on internal storage and USB sticks. Videos, music and pictures open inside the launcher (even when the TV has no player app). APKs are installed after you confirm. **Receive files** shows a QR code: scan it with your phone's camera and pick files on the page that opens; they arrive in Downloads over your home network, no app needed. Files is a card like the apps, so you can hide it.
 - **App lock**: Apps locked from the card menu (**Lock**) open only with a 4-digit PIN. The PIN is set in Genius settings and protects them too. It's typed on an on-screen keypad with the remote's arrow keys. The PIN itself isn't stored, only a salted hash on the TV.
+- **Phone remote**: The phone icon in the top bar shows a QR code; scanning it opens a page with arrow keys, OK, Back, Home, volume and play/pause buttons and a text box (no app to install). Text is pasted, Turkish letters included; for apps with their own keyboard such as YouTube, the **Keys** button sends the letters one by one. Off by default; the address stays the same until you press **Reset pairing**.
 - **Weather**: Current weather next to the clock; press it for an hourly and 7-day forecast. Data comes from [Open-Meteo](https://open-meteo.com) and the city can be changed.
 - **Smart home**: Tuya (plugs, relays), Dyson air purifiers and Eufy cameras appear as cards at the top right. Cards can be reordered and renamed; you choose how many are shown (3–6) and the rest go to an "Other" panel.
 - **Camera**: Press an Eufy camera's card for a full-screen live view with sound (RTSP). Pan & Tilt cameras turn with the remote's arrow keys.
 - **Setup wizard**: Full-screen illustrated steps for the TV's ADB permission, the Home button, removing bloatware and "stay awake". Everything can be undone.
 - **Memory**: RAM use in the top bar; **Free up** closes apps running in the background.
-- **Updates**: Since the app isn't on the Play Store, it checks GitHub for new versions three times a day and shows a dot on the Genius settings icon when there is one. Pressing **Update** downloads the APK, checks it against GitHub's SHA-256 digest and installs it over the TV's ADB; settings and devices stay.
+- **Updates**: Since the app isn't on the Play Store, it checks GitHub for new versions three times a day and shows a card on the home screen when there is one (**Update** or **Ignore**). Pressing **Update** downloads the APK, checks it against GitHub's SHA-256 digest and installs it over the TV's ADB; settings and devices stay.
 - **Screensaver**: As on Google TV, pressing Back twice on the home screen starts it.
 - English and Turkish; follows the system language.
 

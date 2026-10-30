@@ -10,6 +10,8 @@ Android TV ve Google TV için reklamsız, sade bir ana ekran. Evdeki akıllı ci
 > - Xiaomi Mi Box S 2. nesil (Google TV, Android 14)
 > - Xiaomi Mi Box S 1. nesil (Android TV, Android 9)
 > - Xiaomi Mi TV Stick 1080p (Android TV, Android 9)
+> - Xiaomi Mi Box 4 (Android TV, Android 9)
+> - Xiaomi MiTV-AYFR0 (Android TV, Android 11)
 >
 > Android 8.0 ve üzeri diğer Android TV cihazlarında da çalışması beklenir, ama denenmedi.
 
@@ -19,12 +21,13 @@ Android TV ve Google TV için reklamsız, sade bir ana ekran. Evdeki akıllı ci
 - **Uygulamalar**: Kumandada OK'e basılı tutunca açılan menüden kartlar taşınır, gizlenir ya da rengi değiştirilir. Yeni kurulan uygulamaların kartı kendiliğinden gelir; gizlenenler Genius ayarlarından geri getirilir.
 - **Dosyalar**: Dahili hafıza ve USB bellekteki dosyalar gezilir, yeniden adlandırılır ve silinir. Video, müzik ve resimler launcher'ın içinde açılır (TV'de oynatıcı uygulaması olmasa da). APK'lar onay sorulduktan sonra kurulur. **Telefondan dosya al** bir QR kod gösterir: telefonun kamerasıyla okutup açılan sayfadan dosya seçilir, dosyalar uygulama kurmadan ev ağından İndirilenler klasörüne gelir. Dosyalar da uygulamalar gibi bir karttır, istenirse gizlenir.
 - **Uygulama kilidi**: Kartın menüsünden **Kilitle** seçilen uygulamalar 4 haneli PIN ile açılır; PIN Genius ayarlarından belirlenir ve ayarları da korur. PIN kumandanın yön tuşlarıyla ekrandaki tuş takımından girilir. PIN'in kendisi saklanmaz, yalnızca tuzlu özeti TV'de durur.
+- **Telefondan kumanda**: Üst şeritteki telefon simgesi bir QR kod gösterir; telefonun kamerasıyla okutunca açılan sayfa yön tuşları, OK, Geri, Home, ses ve oynat/duraklat düğmelerini ve bir yazı kutusunu sunar (uygulama kurmadan). Yazı Türkçe harflerle yapıştırılır; YouTube gibi kendi klavyesi olan uygulamalar için **Tuşla** düğmesi harfleri tek tek gönderir. Varsayılan olarak kapalıdır; adres **Eşleşmeyi sıfırla**'ya kadar aynı kalır.
 - **Hava durumu**: Saatin yanında anlık hava durumu; basınca saatlik ve 7 günlük tahmin açılır. Veriler [Open-Meteo](https://open-meteo.com)'dan gelir, şehir seçilebilir.
 - **Akıllı ev**: Tuya (priz, röle), Dyson hava temizleyiciler ve Eufy kameralar sağ üstteki kartlarda görünür. Kartlar sıralanır ve yeniden adlandırılır; kaç kartın görüneceği seçilir (3–6), fazlası "Diğer" panelinde.
 - **Kamera**: Eufy kameranın karta basınca tam ekran, sesli canlı görüntüsü (RTSP). Pan & Tilt kameralar kumandanın yön tuşlarıyla döndürülür.
 - **Kurulum sihirbazı**: Tam ekran, görselli adımlarla TV'nin ADB izni, Home tuşu, gereksiz uygulamaların temizliği ve "uyanık tut". Hepsi geri alınabilir.
 - **Bellek**: Üst şeritte RAM kullanımı; **Boşalt** arka plandaki uygulamaları kapatır.
-- **Güncelleme**: Uygulama Play Store'da olmadığı için yeni sürümleri GitHub'dan kendisi bulur; günde üç kez bakar, yeni sürüm varsa Genius ayarları simgesinde bir nokta çıkar. **Güncelle**'ye basınca APK indirilir, GitHub'ın verdiği SHA-256 özetiyle doğrulanır ve TV'nin ADB'siyle kurulur; ayarlar ve cihazlar yerinde kalır.
+- **Güncelleme**: Uygulama Play Store'da olmadığı için yeni sürümleri GitHub'dan kendisi bulur; günde üç kez bakar, yeni sürüm varsa ana ekranda bir kart çıkar (**Güncelle** ya da **Yoksay**). **Güncelle**'ye basınca APK indirilir, GitHub'ın verdiği SHA-256 özetiyle doğrulanır ve TV'nin ADB'siyle kurulur; ayarlar ve cihazlar yerinde kalır.
 - **Ekran koruyucu**: Google TV'deki gibi ana ekranda Geri tuşuna art arda iki kez basınca başlar.
 - Türkçe ve İngilizce; sistem dilini izler.
 
