@@ -3,11 +3,11 @@ package dev.evim.tv.data
 /** Telefonda açılan kumanda sayfası. Dışarıdan hiçbir şey yüklemez; dil telefon tarayıcısının diline göre. */
 internal object RemotePage {
     private val TR = mapOf(
-        "lang" to "tr", "title" to "TV kumandası", "placeholder" to "TV'ye yazılacak metin", "send" to "Yaz",
+        "lang" to "tr", "title" to "TV kumandası", "placeholder" to "TV'ye yazılacak metin", "send" to "Yaz", "keys" to "Tuşla",
         "error" to "TV'ye ulaşılamadı. TV'nin açık ve aynı Wi-Fi'de olduğundan emin olun.",
     )
     private val EN = mapOf(
-        "lang" to "en", "title" to "TV remote", "placeholder" to "Text to type on the TV", "send" to "Type",
+        "lang" to "en", "title" to "TV remote", "placeholder" to "Text to type on the TV", "send" to "Type", "keys" to "Keys",
         "error" to "Couldn't reach the TV. Make sure it is on and on the same Wi-Fi.",
     )
 
@@ -55,6 +55,7 @@ internal object RemotePage {
   <form class="text" id="form">
     <input id="text" type="text" autocomplete="off" autocapitalize="off" placeholder="${t["placeholder"]}">
     <button type="submit">${t["send"]}</button>
+    <button type="button" id="keys" style="background:rgba(255,255,255,.12);color:#fff;padding:0 14px">${t["keys"]}</button>
   </form>
   <div class="row two" style="margin-top:8px">
     <button data-k="delete" data-hold>&#9003;</button><button data-k="enter">&#8629;</button>
@@ -79,6 +80,10 @@ document.querySelectorAll("button[data-k]").forEach(b => {
   });
   ["pointerup", "pointerleave", "pointercancel"].forEach(ev => b.addEventListener(ev, stop));
   b.addEventListener("contextmenu", e => e.preventDefault());
+});
+document.getElementById("keys").addEventListener("click", () => {
+  const input = document.getElementById("text");
+  if (input.value) post("text?mode=keys", input.value).then(ok => { if (ok) input.value = ""; });
 });
 document.getElementById("form").addEventListener("submit", e => {
   e.preventDefault();

@@ -71,7 +71,8 @@ class PhoneRemote(private val context: Context, private val prefs: LauncherPrefs
                 val length = headers["content-length"]?.toIntOrNull()?.takeIf { it in 1..MAX_TEXT }
                     ?: return Http.respond(out, 400, "text/plain", "bad request".toByteArray())
                 val text = String(ByteArray(length).also { DataInputStream(input).readFully(it) }, Charsets.UTF_8)
-                Http.respond(out, if (type(text)) 200 else 500, "text/plain", ByteArray(0))
+                val done = if (query == "mode=keys") typeKeys(text) else type(text)
+                Http.respond(out, if (done) 200 else 500, "text/plain", ByteArray(0))
             }
             else -> Http.respond(out, 404, "text/plain", "not found".toByteArray())
         }
@@ -88,6 +89,26 @@ class PhoneRemote(private val context: Context, private val prefs: LauncherPrefs
         }
         latch.await(2, java.util.concurrent.TimeUnit.SECONDS)
         return send("input keyevent ${KeyEvent.KEYCODE_PASTE}")
+    }
+
+    /**
+     * Kendi klavyesini kullanan uygulamalar (YouTube) yapıştırmayı kabul etmez; tuş vuruşları ise arama kutusuna gider.
+     * Tuşlarla yalnızca harf, rakam ve boşluk yazılabilir; Türkçe harfler ASCII karşılığıyla gönderilir.
+     */
+    private fun typeKeys(text: String): Boolean {
+        val ascii = text.map {
+            when (it) { 'ç', 'Ç' -> 'c'; 'ğ', 'Ğ' -> 'g'; 'ı', 'İ' -> 'i'; 'ö', 'Ö' -> 'o'; 'ş', 'Ş' -> 's'; 'ü', 'Ü' -> 'u'; else -> it.lowercaseChar() }
+        }
+        val codes = ascii.mapNotNull {
+            when (it) {
+                in 'a'..'z' -> KeyEvent.KEYCODE_A + (it - 'a')
+                in '0'..'9' -> KeyEvent.KEYCODE_0 + (it - '0')
+                ' ' -> KeyEvent.KEYCODE_SPACE
+                else -> null
+            }
+        }
+        if (codes.isEmpty()) return true
+        return codes.chunked(40).all { send("input keyevent ${it.joinToString(" ")}") }
     }
 
     /** Bağlantı açık tutulur; koptuysa bir kez yeniden kurulur. */
