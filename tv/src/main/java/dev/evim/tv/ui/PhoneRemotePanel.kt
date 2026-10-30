@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +30,12 @@ import dev.evim.tv.R
 fun PhoneRemoteDialog(vm: LauncherViewModel, onDismiss: () -> Unit) {
     val first = remember { FocusRequester() }
     LaunchedEffect(vm.remoteEnabled) { runCatching { first.requestFocus() } }
+    // Adres boşsa ağ gelene kadar yeniden dene
+    LaunchedEffect(vm.remoteEnabled, vm.remoteUrl) {
+        if (vm.remoteEnabled && vm.remoteUrl == null) {
+            while (true) { vm.refreshRemoteUrl(); delay(2000) }
+        }
+    }
 
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Panel(width = 720.dp) {

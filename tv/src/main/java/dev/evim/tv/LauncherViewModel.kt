@@ -479,6 +479,12 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    /** Adres açılışta ağ henüz yokken boş kalmış olabilir; pencere açıkken yenilenir. */
+    fun refreshRemoteUrl() {
+        val remote = phoneRemote ?: return
+        viewModelScope.launch(Dispatchers.IO) { remoteUrl = remote.url }
+    }
+
     private fun stopRemote() {
         phoneRemote?.close()
         phoneRemote = null
